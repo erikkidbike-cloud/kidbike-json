@@ -40,22 +40,6 @@
       border-radius:10px;padding:12px 16px;color:#1f2937}
     .intro p{margin:6px 0}
 
-    /* address strip */
-    .address{max-width:1200px;margin:8px auto 0;background:#eef6fb;border:1px solid #cfe7f6;
-      border-radius:10px;padding:8px 12px;color:#0b3552;font-size:14px;opacity:0;transition:opacity 0.3s;}
-    .address.show{opacity:1;}
-
-    /* FAQ section */
-    .faq{max-width:1200px;margin:8px auto 0;background:var(--card);border:1px solid var(--border);
-      border-radius:10px;padding:12px 16px;}
-    .faq details{margin:8px 0;}
-    .faq summary{cursor:pointer;font-weight:600;padding:4px 0;color:var(--brand);}
-    .faq p{margin:4px 0 8px 16px;color:var(--muted);font-size:14px;}
-
-    /* contact info */
-    .contact{max-width:1200px;margin:8px auto 0;background:#f0fdf4;border:1px solid #bbf7d0;
-      border-radius:10px;padding:8px 12px;color:#166534;font-size:14px;}
-
     /* calendar card */
     #calendar{max-width:1200px;margin:14px auto;background:var(--card);border:1px solid var(--border);
       border-radius:10px;padding:8px;opacity:0;transition:opacity 0.3s;}
@@ -64,7 +48,9 @@
     .fc .fc-button{background:var(--busy);border:1px solid #045983;color:#fff;min-height:44px;}
     .fc .fc-button:hover{filter:brightness(0.95)}
     .fc .fc-toolbar-title{font-weight:700}
-    .fc-timegrid-slot{min-height:32px;}
+
+    /* Compress the time grid rows ~30% */
+    .fc-timegrid-slot{min-height:22px;} /* was 32px */
 
     /* event kleur: bezet */
     .fc-event.busy{
@@ -214,7 +200,7 @@
       #calendar{ margin: 10px auto; padding: 6px; }
       .modal{ max-width: 96vw; padding: 16px; }
       .mobile-add{display:block;}
-      .fc-timegrid-slot{min-height:40px;}
+      .fc-timegrid-slot{min-height:28px;} /* was 40px */
     }
     @media (max-width: 640px){
       header { flex-direction: column; align-items: flex-start; gap: 8px; }
@@ -261,30 +247,6 @@
     <p id="introLine1"><strong>Wie funktioniert's?</strong> Wählen Sie oben Ihre Verkehrsschule. Blaue Blöcke sind bereits
       belegt. Tippen oder ziehen Sie im Kalender, um einen Zeitraum auszuwählen und eine Anfrage zu senden.</p>
     <p id="introHint" class="hint">Hinweis: Ihre Anfrage ist unverbindlich. Wir melden uns per E-Mail mit einer Bestätigung.</p>
-  </div>
-
-  <!-- Address -->
-  <div id="addressBox" class="address"></div>
-
-  <!-- Contact -->
-  <div id="contactBox" class="contact" style="display:none;">
-    <span id="contactText">Bei Fragen kontaktieren Sie uns: info@kidbike.de</span>
-  </div>
-
-  <!-- FAQ -->
-  <div class="faq" style="display:none;" id="faqBox">
-    <details>
-      <summary id="faqQ1">Wie weit im Voraus muss ich buchen?</summary>
-      <p id="faqA1">Normalerweise sollten Anfragen mindestens 7 Tage im Voraus gestellt werden, um eine rechtzeitige Bearbeitung zu gewährleisten.</p>
-    </details>
-    <details>
-      <summary id="faqQ2">Kann ich meine Buchung stornieren?</summary>
-      <p id="faqA2">Stornierungen bis 14 Tage vor dem Termin sind kostenfrei möglich. Bei späteren Stornierungen wird das Nutzungsentgelt als Entschädigung einbehalten.</p>
-    </details>
-    <details>
-      <summary id="faqQ3">Was ist im Preis enthalten?</summary>
-      <p id="faqA3">Im Grundpreis ist die Nutzung der Verkehrsschule enthalten. Fahrräder sind kostenlos, Extras wie Grill oder Tischtennisplatte kosten je 10€.</p>
-    </details>
   </div>
 
   <!-- Kalender -->
@@ -573,10 +535,6 @@
     // ===== DOM =====
     const schoolSelect = document.getElementById('schoolSelect');
     const langSelect   = document.getElementById('langSelect');
-    const addressBox   = document.getElementById('addressBox');
-    const contactBox   = document.getElementById('contactBox');
-    const contactText  = document.getElementById('contactText');
-    const faqBox       = document.getElementById('faqBox');
     const calendarEl   = document.getElementById('calendar');
     const calendarLoading = document.getElementById('calendarLoading');
     const loadingOption = document.getElementById('loadingOption');
@@ -677,7 +635,6 @@
       labelLang.textContent = L.labelLang;
       introLine1.textContent = L.intro1;
       introHint.textContent  = L.introHint;
-      contactText.textContent = L.contactText;
       document.getElementById('calendarLoading').firstChild.nodeValue = L.loadingCalendar;
 
       // modal labels
@@ -736,8 +693,7 @@
         calendar.setOption('locale', langSelect.value === 'en' ? 'en-gb' : 'de');
       }
 
-      // Address & price text refresh
-      updateAddressBox();
+      // Price text refresh
       updatePricePreview();
 
       // Tooltip text
@@ -775,22 +731,9 @@
       if(schoolSelect.options.length){
         currentKey = schoolSelect.value = schoolSelect.options[0].value;
         await loadCalendar(currentKey);
-        updateAddressBox(true);
-        contactBox.style.display = 'block';
-        faqBox.style.display = 'block';
         // kalender zichtbaar
         calendarEl.classList.add('loaded');
       }
-    }
-
-    // ===== Address box =====
-    function updateAddressBox(first=false){
-      if(!currentKey || !SCHOOLS[currentKey]) { addressBox.classList.remove('show'); addressBox.textContent=''; return; }
-      const L = I18N[langSelect.value] || I18N.de;
-      addressBox.textContent = `${L.addrPrefix} ${SCHOOLS[currentKey].address}`;
-      // fade-in
-      if(first) { requestAnimationFrame(()=> addressBox.classList.add('show')); }
-      else { addressBox.classList.add('show'); }
     }
 
     // ===== Rules / helpers =====
@@ -949,7 +892,7 @@
         initialView: desiredView(),
         firstDay: 1,
         locale: langSelect.value === 'en' ? 'en-gb' : 'de',
-        timeZone: 'local',                 // <— tijdzone-fix
+        timeZone: 'local',
         slotMinTime: '00:00:00',
         slotMaxTime: '24:00:00',
         allDaySlot: false,
@@ -1161,7 +1104,7 @@
     }
 
     // ===== Events =====
-    schoolSelect.addEventListener('change', (e)=> { loadCalendar(e.target.value); updateAddressBox(); });
+    schoolSelect.addEventListener('change', (e)=> { loadCalendar(e.target.value); });
     langSelect.addEventListener('change', applyI18n);
     mobileAdd.addEventListener('click', ()=>{
       const start = new Date(); start.setDate(start.getDate()+7); start.setHours(10,0,0,0);
