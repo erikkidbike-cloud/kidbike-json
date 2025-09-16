@@ -1,0 +1,1184 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <title>Belegung Verkehrsschulen</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- FullCalendar -->
+  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
+
+  <style>
+    :root{
+      --bg:#f7f9fb; --card:#ffffff; --border:#d8dee6; --ink:#111827;
+      --muted:#667085; --brand:#0ea5e9; --busy:#036ba7; --green:#16a34a; --warn:#b91c1c;
+      --popover:#0b3552; --popover-bg:#fff; --popover-border:#cfe7f6;
+      --warning:#f59e0b; --warning-bg:#fef3c7; --warning-border:#fcd34d;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+
+    /* header */
+    header{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:var(--card);border-bottom:1px solid var(--border)}
+    header .left{display:flex;align-items:center;gap:12px}
+    header img{height:40px;width:auto}
+    header h1{font-size:18px;margin:0}
+
+    /* controls */
+    .controls{display:flex;gap:12px;align-items:center}
+    .controls label{color:var(--muted);font-size:14px}
+    .controls select{
+      appearance:none;font-size:16px;color:var(--ink);
+      background:#fff;border:1px solid var(--border);border-radius:10px;
+      padding:10px 12px;min-width:240px;
+      box-shadow:0 1px 0 rgba(0,0,0,.02);
+    }
+
+    /* intro strip */
+    .intro{max-width:1200px;margin:16px auto 0;background:var(--card);border:1px solid var(--border);
+      border-radius:10px;padding:12px 16px;color:#1f2937}
+    .intro p{margin:6px 0}
+
+    /* address strip */
+    .address{max-width:1200px;margin:8px auto 0;background:#eef6fb;border:1px solid #cfe7f6;
+      border-radius:10px;padding:8px 12px;color:#0b3552;font-size:14px;opacity:0;transition:opacity 0.3s;}
+    .address.show{opacity:1;}
+
+    /* FAQ section */
+    .faq{max-width:1200px;margin:8px auto 0;background:var(--card);border:1px solid var(--border);
+      border-radius:10px;padding:12px 16px;}
+    .faq details{margin:8px 0;}
+    .faq summary{cursor:pointer;font-weight:600;padding:4px 0;color:var(--brand);}
+    .faq p{margin:4px 0 8px 16px;color:var(--muted);font-size:14px;}
+
+    /* contact info */
+    .contact{max-width:1200px;margin:8px auto 0;background:#f0fdf4;border:1px solid #bbf7d0;
+      border-radius:10px;padding:8px 12px;color:#166534;font-size:14px;}
+
+    /* calendar card */
+    #calendar{max-width:1200px;margin:14px auto;background:var(--card);border:1px solid var(--border);
+      border-radius:10px;padding:8px;opacity:0;transition:opacity 0.3s;}
+    #calendar.loaded{opacity:1;}
+    .fc-theme-standard .fc-scrollgrid,.fc-theme-standard td,.fc-theme-standard th{border-color:var(--border)}
+    .fc .fc-button{background:var(--busy);border:1px solid #045983;color:#fff;min-height:44px;}
+    .fc .fc-button:hover{filter:brightness(0.95)}
+    .fc .fc-toolbar-title{font-weight:700}
+    .fc-timegrid-slot{min-height:32px;}
+
+    /* event kleur: bezet */
+    .fc-event.busy{
+      background:var(--busy)!important;
+      border:1px solid #045983!important;
+      color:#fff;
+    }
+
+    /* loading state */
+    .loading{
+      display:flex;align-items:center;justify-content:center;
+      padding:40px;color:var(--muted);
+    }
+    .loading::after{
+      content:'';width:20px;height:20px;margin-left:8px;
+      border:2px solid var(--border);border-top:2px solid var(--brand);
+      border-radius:50%;animation:spin 1s linear infinite;
+    }
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    /* mobile add button */
+    .mobile-add{
+      position:fixed;bottom:20px;right:20px;z-index:40;
+      background:var(--brand);color:white;border:none;
+      border-radius:50%;width:56px;height:56px;
+      box-shadow:0 4px 12px rgba(0,0,0,0.15);
+      font-size:24px;cursor:pointer;display:none;
+    }
+    .mobile-add:hover{filter:brightness(1.1)}
+
+    /* modal / backdrop: scrollbaar */
+    .modal-backdrop{
+      position:fixed;inset:0;background:rgba(0,0,0,.4);
+      display:none;align-items:center;justify-content:center;
+      z-index:50;overflow-y:auto;padding:20px;
+    }
+    .modal{
+      width:100%;max-width:760px;background:var(--card);border-radius:12px;border:1px solid var(--border);padding:20px;
+      max-height:90vh;overflow-y:auto;margin:auto;
+      box-shadow:0 20px 60px rgba(0,0,0,0.12);
+    }
+    .modal h3{margin:0 0 12px;font-size:20px;}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .grid-1{grid-template-columns:1fr}
+    .field{margin-bottom:12px;}
+    .field label{display:block;font-size:13px;color:var(--muted);margin-bottom:4px;font-weight:500;}
+    .field input,.field textarea,.field select{
+      width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:10px;font-size:15px;
+      transition:border-color 0.2s,box-shadow 0.2s;
+    }
+    .field input:focus,.field textarea:focus,.field select:focus{
+      outline:none;border-color:var(--brand);
+      box-shadow:0 0 0 3px rgba(14,165,233,0.1);
+    }
+    .field input.error{border-color:var(--warn);}
+    .field .error-msg{font-size:12px;color:var(--warn);margin-top:4px;display:none;}
+    .field input.error + .error-msg{display:block;}
+    
+    .modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:20px}
+    .btn{
+      padding:12px 20px;border-radius:10px;border:1px solid var(--border);background:#fff;
+      font-weight:600;cursor:pointer;transition:all 0.2s;min-height:44px;
+      display:inline-flex;align-items:center;justify-content:center;
+    }
+    .btn:disabled{opacity:0.6;cursor:not-allowed;}
+    .btn.primary{background:var(--brand);border-color:var(--brand);color:#fff}
+    .btn.primary:hover:not(:disabled){filter:brightness(1.1)}
+    .btn.danger{background:#fff;border-color:#e5e7eb;color:#374151}
+    .btn.danger:hover{background:#f9fafb}
+    .btn.loading{position:relative;color:transparent;}
+    .btn.loading::after{
+      content:'';position:absolute;width:16px;height:16px;
+      border:2px solid currentColor;border-top:transparent;
+      border-radius:50%;animation:spin 1s linear infinite;
+      color:inherit;
+    }
+    
+    .hint{font-size:13px;color:var(--muted);margin-top:4px}
+    .warn{font-size:13px;color:var(--warn);margin-top:6px;display:none;
+      background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:8px 12px;
+    }
+    .warn.show{display:block;}
+    
+    /* Short-term warning */
+    .short-term-warning{
+      font-size:13px;color:var(--warning);margin-top:8px;display:none;
+      background:var(--warning-bg);border:1px solid var(--warning-border);border-radius:8px;padding:10px 12px;
+    }
+    .short-term-warning.show{display:block;}
+    
+    .price{font-size:15px;margin-top:12px;padding-top:12px;border-top:1px solid var(--border);}
+    .badge{display:inline-block;padding:4px 10px;border-radius:999px;border:1px solid var(--border);
+      font-size:12px;color:#374151;background:#f8fafc;cursor:pointer;user-select:none;
+      transition:all 0.2s;
+    }
+    .badge:hover{background:#f1f5f9;}
+    .badge input[type="checkbox"]{margin-right:6px;}
+    
+    details.summarybox{margin-top:12px;border:1px dashed var(--border);padding:12px;border-radius:10px;background:#fafbfc}
+    details.summarybox summary{cursor:pointer;font-weight:600}
+
+    /* breakdown */
+    .breakdown{margin-top:8px;font-size:14px;color:#374151}
+    .breakdown .row{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:2px 0;}
+    .breakdown .muted{color:#6b7280}
+    .breakdown .total{font-weight:700;border-top:1px dashed var(--border);padding-top:6px;margin-top:6px}
+
+    /* tooltip / popover */
+    .tooltip-wrap{position:relative;display:inline-flex;align-items:center}
+    .tooltip-icon{
+      cursor:pointer;font-weight:bold;margin-left:6px;user-select:none;
+      background:var(--brand);color:white;border-radius:50%;width:16px;height:16px;
+      display:inline-flex;align-items:center;justify-content:center;font-size:10px;
+    }
+    .tooltip-icon:hover{filter:brightness(1.1)}
+    .popover{
+      position:absolute; top:100%; left:0; transform:translateY(8px);
+      background:var(--popover-bg); color:var(--popover);
+      border:1px solid var(--popover-border); border-radius:10px;
+      padding:12px 14px; max-width:320px; box-shadow:0 8px 24px rgba(0,0,0,.08);
+      font-size:13px; line-height:1.4; z-index:60; display:none;
+    }
+    .popover.show{display:block}
+    .popover::after{
+      content:""; position:absolute; top:-6px; left:14px; width:10px; height:10px;
+      background:var(--popover-bg); transform:rotate(45deg);
+      border-left:1px solid var(--popover-border); border-top:1px solid var(--popover-border);
+    }
+
+    /* success message */
+    .success-msg{
+      position:fixed;top:20px;right:20px;z-index:70;
+      background:#dcfce7;border:1px solid #bbf7d0;color:#166534;
+      padding:12px 16px;border-radius:10px;font-size:14px;
+      box-shadow:0 4px 12px rgba(0,0,0,0.1);transform:translateX(100%);
+      transition:transform 0.3s;
+    }
+    .success-msg.show{transform:translateX(0);}
+
+    /* Responsive aanpassingen */
+    @media (max-width: 900px){
+      header { padding: 8px 12px; }
+      header h1 { font-size: 16px; }
+      .controls { gap: 8px; }
+      .controls select{ min-width: 180px; padding: 8px 10px; font-size: 15px; }
+      .intro{ margin: 10px auto 0; padding: 10px 12px; }
+      #calendar{ margin: 10px auto; padding: 6px; }
+      .modal{ max-width: 96vw; padding: 16px; }
+      .mobile-add{display:block;}
+      .fc-timegrid-slot{min-height:40px;}
+    }
+    @media (max-width: 640px){
+      header { flex-direction: column; align-items: flex-start; gap: 8px; }
+      .controls{ width: 100%; flex-wrap: wrap; }
+      .controls label{ display: none; }
+      .controls select{ min-width: 140px; flex: 1; }
+      .grid{ grid-template-columns: 1fr; }
+      .fc .fc-toolbar-title{ font-size: 14px; }
+      .fc .fc-button{ padding: 8px 12px; font-size: 12px; min-height:44px; }
+      .intro{ font-size: 14px; }
+      .modal-actions{flex-direction:column;}
+      .modal-actions .btn{width:100%;}
+    }
+  </style>
+</head>
+<body>
+  <!-- Success message -->
+  <div id="successMsg" class="success-msg">
+    <span id="successText">Anfrage erfolgreich gesendet!</span>
+  </div>
+
+  <!-- Header -->
+  <header>
+    <div class="left">
+      <img src="logo.webp" alt="Logo" style="display:none;" id="logoImg">
+      <h1 id="titleApp">Belegung Verkehrsschulen</h1>
+    </div>
+    <div class="controls">
+      <label for="schoolSelect" id="labelSchool">Standort</label>
+      <select id="schoolSelect">
+        <option value="" disabled selected id="loadingOption">Lade Standorte...</option>
+      </select>
+
+      <label for="langSelect" id="labelLang">Sprache</label>
+      <select id="langSelect">
+        <option value="de" selected>Deutsch</option>
+        <option value="en">English</option>
+      </select>
+    </div>
+  </header>
+
+  <!-- Intro -->
+  <div class="intro">
+    <p id="introLine1"><strong>Wie funktioniert's?</strong> Wählen Sie oben Ihre Verkehrsschule. Blaue Blöcke sind bereits
+      belegt. Tippen oder ziehen Sie im Kalender, um einen Zeitraum auszuwählen und eine Anfrage zu senden.</p>
+    <p id="introHint" class="hint">Hinweis: Ihre Anfrage ist unverbindlich. Wir melden uns per E-Mail mit einer Bestätigung.</p>
+  </div>
+
+  <!-- Address -->
+  <div id="addressBox" class="address"></div>
+
+  <!-- Contact -->
+  <div id="contactBox" class="contact" style="display:none;">
+    <span id="contactText">Bei Fragen kontaktieren Sie uns: info@kidbike.de</span>
+  </div>
+
+  <!-- FAQ -->
+  <div class="faq" style="display:none;" id="faqBox">
+    <details>
+      <summary id="faqQ1">Wie weit im Voraus muss ich buchen?</summary>
+      <p id="faqA1">Normalerweise sollten Anfragen mindestens 7 Tage im Voraus gestellt werden, um eine rechtzeitige Bearbeitung zu gewährleisten.</p>
+    </details>
+    <details>
+      <summary id="faqQ2">Kann ich meine Buchung stornieren?</summary>
+      <p id="faqA2">Stornierungen bis 14 Tage vor dem Termin sind kostenfrei möglich. Bei späteren Stornierungen wird das Nutzungsentgelt als Entschädigung einbehalten.</p>
+    </details>
+    <details>
+      <summary id="faqQ3">Was ist im Preis enthalten?</summary>
+      <p id="faqA3">Im Grundpreis ist die Nutzung der Verkehrsschule enthalten. Fahrräder sind kostenlos, Extras wie Grill oder Tischtennisplatte kosten je 10€.</p>
+    </details>
+  </div>
+
+  <!-- Kalender -->
+  <div id="calendarLoading" class="loading">Lade Kalender...</div>
+  <div id="calendar"></div>
+
+  <!-- Mobile Add Button -->
+  <button id="mobileAdd" class="mobile-add" title="Zeitslot hinzufügen" aria-label="Zeitslot hinzufügen">+</button>
+
+  <!-- Modal: Anfrage -->
+  <div id="modalBackdrop" class="modal-backdrop">
+    <div class="modal" role="dialog" aria-modal="true">
+      <h3 id="modalTitle">Anfrage Nutzung Verkehrsschule</h3>
+      <form id="requestForm">
+        <div class="grid">
+          <div class="field">
+            <label id="labelFormSchool">Verkehrsschule</label>
+            <input id="fSchool" name="school" type="text" readonly>
+          </div>
+          <div class="field">
+            <label id="labelPersons">Anzahl Personen</label>
+            <input id="fPersons" name="persons" type="number" min="1" step="1" placeholder="z. B. 30">
+            <div class="error-msg">Bitte geben Sie die Anzahl Personen an</div>
+          </div>
+          <div class="field">
+            <label id="labelFrom">Datum/Zeit von</label>
+            <input id="fFrom" name="from" type="datetime-local" required>
+          </div>
+          <div class="field">
+            <label id="labelTo">Datum/Zeit bis</label>
+            <input id="fTo" name="to" type="datetime-local" required>
+          </div>
+
+          <div class="field" style="grid-column:1/-1">
+            <label id="labelType">Art der Feier</label>
+            <input id="fTypeFree" name="type_free" type="text" placeholder="z. B. Kindergeburtstag, Jubiläum, …">
+          </div>
+
+          <div class="field" style="grid-column:1/-1">
+            <label id="labelBikes">Nutzung Fahrräder (kostenlos): Anzahl &amp; Größen/Alter</label>
+            <input id="fBikes" name="bikes" type="text" placeholder="z. B. 6 Räder: 2×14'', 2×16'', 2×20'' / Alter 5–9">
+          </div>
+
+          <div class="field">
+            <label id="labelName">Name *</label>
+            <input id="fName" name="name" type="text" required placeholder="Ihr Name">
+            <div class="error-msg">Name ist erforderlich</div>
+          </div>
+          <div class="field">
+            <label id="labelEmail">E-Mail *</label>
+            <input id="fEmail" name="email" type="email" required placeholder="name@example.org">
+            <div class="error-msg">Gültige E-Mail-Adresse erforderlich</div>
+          </div>
+          <div class="field">
+            <label id="labelPhone">Telefon</label>
+            <input id="fPhone" name="phone" type="tel" placeholder="+49 …">
+            <div class="error-msg">Bitte geben Sie eine gültige Telefonnummer ein</div>
+          </div>
+          <div class="field">
+            <label id="labelAddress">Anschrift</label>
+            <input id="fAddress" name="address" type="text" placeholder="Straße, Hausnummer, PLZ Ort">
+          </div>
+
+          <!-- Extras -->
+          <div class="field" style="grid-column:1/-1">
+            <label id="labelExtras">Extras (je 10,00 €)</label>
+            <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:8px;">
+              <label class="badge"><input type="checkbox" id="xParcours" name="extra_parcours"><span id="extraParcours">Fahrradparcours</span></label>
+              <label class="badge"><input type="checkbox" id="xGrill" name="extra_grill"><span id="extraGrill">Grill</span></label>
+              <label class="badge"><input type="checkbox" id="xTisch" name="extra_tischtennis"><span id="extraTisch">Tischtennisplatte</span></label>
+            </div>
+          </div>
+
+          <div class="field" style="grid-column:1/-1">
+            <label id="labelMsg">Nachricht (optional)</label>
+            <textarea id="fMsg" name="message" rows="3" placeholder="Weitere Hinweise…"></textarea>
+          </div>
+        </div>
+
+        <p id="conflictMsg" class="warn">
+          Ausgewählter Zeitraum überschneidet sich mit einer bestehenden Belegung,
+          ist kürzer als 30 Minuten oder ungültig (Ende vor Beginn).
+        </p>
+
+        <p id="shortTermMsg" class="short-term-warning">
+          <strong>Kurzfristige Anfrage:</strong> Da Ihr gewünschter Termin in weniger als 7 Tagen liegt, 
+          können wir nicht garantieren, dass wir Ihre Anfrage rechtzeitig bearbeiten können.
+        </p>
+
+        <!-- Preis-Indikation -->
+        <div id="priceBox" class="price">
+          <strong id="priceTitle">Vorläufige Preisindikation:</strong>
+          <span id="priceValue">–</span>
+          <span id="priceHint" class="hint"> (unverbindlich; endgültige Bestätigung und ggf. Anpassungen vorbehalten)</span>
+
+          <!-- Breakdown -->
+          <div id="priceBreakdown" class="breakdown" style="display:none;">
+            <div class="row">
+              <span id="bdBaseLabel" class="muted">Basis</span><span id="bdBase">–</span>
+            </div>
+            <div class="row">
+              <span id="bdPersonsLabel" class="muted">Personen-Staffel</span><span id="bdPersons">–</span>
+            </div>
+            <div class="row">
+              <span class="muted tooltip-wrap">
+                <span id="bdTimeLabel">Zeit-Zuschlag</span>
+                <span id="timeInfo" class="tooltip-icon" aria-haspopup="dialog" aria-expanded="false" tabindex="0">?</span>
+                <div id="timeInfoPopover" class="popover" role="dialog" aria-hidden="true"></div>
+              </span>
+              <span id="bdTime">–</span>
+            </div>
+            <div class="row">
+              <span id="bdExtrasLabel" class="muted">Extras</span><span id="bdExtras">–</span>
+            </div>
+            <div class="row total">
+              <span id="bdTotalLabel">Summe</span><span id="bdTotal">–</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Kurzbedingungen -->
+        <details class="summarybox">
+          <summary id="termsSummary">Wesentliche Bedingungen (Kurzfassung)</summary>
+          <ul id="termsList" style="margin:8px 0 0 16px;padding:0">
+            <li>Nutzungsentgelt vorab per Überweisung; Reservierung erst verbindlich nach Zahlungseingang.</li>
+            <li>Stornierung bis 14 Tage vor Termin: volle Erstattung; danach Einbehalt als Entschädigung.</li>
+            <li>Saubere Übergabe; Müll bitte mitnehmen. Unzureichende Reinigung kann berechnet werden.</li>
+            <li>Rücksicht auf Nachbarn: werktags &amp; So ab 20:00, Sa ab 22:00 Lautstärke reduzieren.</li>
+            <li>Rauchverbot auf dem Gelände (nur außerhalb, Aschenbecher nutzen).</li>
+            <li>Nutzung auf eigene Gefahr; empfohlen: Veranstaltungshaftpflichtversicherung.</li>
+            <li>Für verursachte Schäden haften die Nutzer*innen.</li>
+            <li>Kein exklusives Nutzungsrecht am gesamten Gelände; ggf. Parallelnutzungen ohne Konflikte.</li>
+            <li>Mo–Sa 14:00–18:00 Kinderfreizeitprojekt: Innenraum steht Ihnen exklusiv zur Verfügung.</li>
+            <li>Verspätete An-/Abmeldung kann mit 50 €/angefangene Stunde berechnet werden.</li>
+          </ul>
+        </details>
+
+        <div class="modal-actions">
+          <button type="button" class="btn danger" id="btnCancel">Abbrechen</button>
+          <button type="submit" class="btn primary" id="btnSubmit" disabled>Anfrage senden</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // ===== I18N STRINGS =====
+    const I18N = {
+      de: {
+        appTitle: "Belegung Verkehrsschulen",
+        labelSchool: "Standort",
+        labelLang: "Sprache",
+        loadingSchools: "Lade Standorte...",
+        loadingCalendar: "Lade Kalender...",
+        intro1: "Wie funktioniert's? Wählen Sie oben Ihre Verkehrsschule. Blaue Blöcke sind bereits belegt. Tippen oder ziehen Sie im Kalender, um einen Zeitraum auszuwählen und eine Anfrage zu senden.",
+        introHint: "Hinweis: Ihre Anfrage ist unverbindlich. Wir melden uns per E-Mail mit einer Bestätigung.",
+        addrPrefix: "Adresse:",
+        contactText: "Bei Fragen kontaktieren Sie uns: info@kidbike.de",
+        modalTitle: "Anfrage Nutzung Verkehrsschule",
+        formSchool: "Verkehrsschule",
+        persons: "Anzahl Personen",
+        from: "Datum/Zeit von",
+        to: "Datum/Zeit bis",
+        type: "Art der Feier",
+        bikes: "Nutzung Fahrräder (kostenlos): Anzahl & Größen/Alter",
+        name: "Name *",
+        email: "E-Mail *",
+        phone: "Telefon",
+        address: "Anschrift",
+        extras: "Extras (je 10,00 €)",
+        extraParcours: "Fahrradparcours",
+        extraGrill: "Grill",
+        extraTisch: "Tischtennisplatte",
+        message: "Nachricht (optional)",
+        conflict: "Ausgewählter Zeitraum überschneidet sich mit einer bestehenden Belegung, ist kürzer als 30 Minuten oder ungültig (Ende vor Beginn).",
+        shortTermWarning: "<strong>Kurzfristige Anfrage:</strong> Da Ihr gewünschter Termin in weniger als 7 Tagen liegt, können wir nicht garantieren, dass wir Ihre Anfrage rechtzeitig bearbeiten können.",
+        priceTitle: "Vorläufige Preisindikation:",
+        priceHint: " (unverbindlich; endgültige Bestätigung und ggf. Anpassungen vorbehalten)",
+        termsSummary: "Wesentliche Bedingungen (Kurzfassung)",
+        terms: [
+          "Nutzungsentgelt vorab per Überweisung; Reservierung erst verbindlich nach Zahlungseingang.",
+          "Stornierung bis 14 Tage vor Termin: volle Erstattung; danach Einbehalt als Entschädigung.",
+          "Saubere Übergabe; Müll bitte mitnehmen. Unzureichende Reinigung kann berechnet werden.",
+          "Rücksicht auf Nachbarn: werktags & So ab 20:00, Sa ab 22:00 Lautstärke reduzieren.",
+          "Rauchverbot auf dem Gelände (nur außerhalb, Aschenbecher nutzen).",
+          "Nutzung auf eigene Gefahr; empfohlen: Veranstaltungshaftpflichtversicherung.",
+          "Für verursachte Schäden haften die Nutzer*innen.",
+          "Kein exklusives Nutzungsrecht am gesamten Gelände; ggf. Parallelnutzungen ohne Konflikte.",
+          "Mo–Sa 14:00–18:00 Kinderfreizeitprojekt: Innenraum steht Ihnen exklusiv zur Verfügung.",
+          "Verspätete An-/Abmeldung kann mit 50 €/angefangene Stunde berechnet werden."
+        ],
+        btnCancel: "Abbrechen",
+        btnSend: "Anfrage senden",
+        phPersons: "z. B. 30",
+        phType: "z. B. Kindergeburtstag, Jubiläum, …",
+        phBikes: "z. B. 6 Räder: 2×14'', 2×16'', 2×20'' / Alter 5–9",
+        phName: "Ihr Name",
+        phEmail: "name@example.org",
+        phPhone: "+49 …",
+        phAddress: "Straße, Hausnummer, PLZ Ort",
+        phMsg: "Weitere Hinweise…",
+        // breakdown
+        bdBase: (tier)=>`Basis (bis ${tier} Std.)`,
+        bdPersons: (label)=>`Personen-Staffel (${label})`,
+        bdTime: "Zeit-Zuschlag",
+        bdExtras: "Extras",
+        bdTotal: "Summe",
+        bdNoExtras: "keine",
+        priceOnReq: "Preis nach Vereinbarung",
+        // tooltip
+        bdTimeInfo: "30 € Zuschlag, wenn Beginn UND Ende nicht zwischen 9–18 Uhr liegen oder wenn der Zeitraum (auch teilweise) am Wochenende liegt."
+      },
+      en: {
+        appTitle: "Traffic School Availability",
+        labelSchool: "Location",
+        labelLang: "Language",
+        loadingSchools: "Loading locations...",
+        loadingCalendar: "Loading calendar...",
+        intro1: "How does it work? Pick your location above. Blue blocks are already booked. Tap or drag in the calendar to select a time and send a request.",
+        introHint: "Note: Your request is non-binding. We’ll confirm by email.",
+        addrPrefix: "Address:",
+        contactText: "If you have questions, contact us: info@kidbike.de",
+        modalTitle: "Request to Use Traffic School",
+        formSchool: "Traffic school",
+        persons: "Number of people",
+        from: "Date/Time from",
+        to: "Date/Time to",
+        type: "Type of event",
+        bikes: "Use of bikes (free): quantity & sizes/ages",
+        name: "Name *",
+        email: "Email *",
+        phone: "Phone",
+        address: "Address",
+        extras: "Extras (€10 each)",
+        extraParcours: "Bike course",
+        extraGrill: "Grill",
+        extraTisch: "Table tennis",
+        message: "Message (optional)",
+        conflict: "Selected period overlaps with an existing booking, is shorter than 30 minutes, or is invalid (end before start).",
+        shortTermWarning: "<strong>Short-notice request:</strong> As your requested time is in less than 7 days, we cannot guarantee timely processing.",
+        priceTitle: "Preliminary price indication:",
+        priceHint: " (non-binding; subject to confirmation and possible adjustments)",
+        termsSummary: "Key conditions (short version)",
+        terms: [
+          "Pay in advance by bank transfer; booking becomes binding only after receipt of payment.",
+          "Cancellation up to 14 days before: full refund; after that, fee retained as compensation.",
+          "Leave the venue clean; take your rubbish with you. Extra cleaning may be charged.",
+          "Be mindful of neighbours: lower noise after 20:00 (Mon–Fri & Sun) and after 22:00 (Sat).",
+          "No smoking on the premises (outside only; use an ashtray).",
+          "Use at your own risk; event liability insurance recommended.",
+          "Users are liable for any damages caused.",
+          "No exclusive right to the entire site; parallel use may occur without conflicts.",
+          "Mon–Sat 14:00–18:00 kids’ project: indoor room is exclusively yours.",
+          "Late start/overrun may be charged at €50 per started hour."
+        ],
+        btnCancel: "Cancel",
+        btnSend: "Send request",
+        phPersons: "e.g. 30",
+        phType: "e.g. kids’ birthday, anniversary …",
+        phBikes: "e.g. 6 bikes: 2×14'', 2×16'', 2×20'' / ages 5–9",
+        phName: "Your name",
+        phEmail: "name@example.org",
+        phPhone: "+49 …",
+        phAddress: "Street, number, ZIP city",
+        phMsg: "Additional notes…",
+        // breakdown
+        bdBase: (tier)=>`Base (up to ${tier} h)`,
+        bdPersons: (label)=>`People tier (${label})`,
+        bdTime: "Time surcharge",
+        bdExtras: "Extras",
+        bdTotal: "Total",
+        bdNoExtras: "none",
+        priceOnReq: "Price on request",
+        // tooltip
+        bdTimeInfo: "€30 surcharge if start AND end are not between 9:00–18:00, or if any part of the booking falls on a weekend."
+      }
+    };
+
+    // ===== Locations (name + file + address) =====
+    const SCHOOLS = {
+      WA: { name: "Wassertorplatz", file: "events-wa.json", address: "Wassertorplatz 1, 10999 Berlin" },
+      WI: { name: "Wiener Straße",  file: "events-wi.json", address: "Wiener Str. 59c, 10999 Berlin" },
+      WE: { name: "Weinstraße",     file: "events-we.json", address: "Weinstraße 2, 10249 Berlin" }
+    };
+
+    // ===== DOM =====
+    const schoolSelect = document.getElementById('schoolSelect');
+    const langSelect   = document.getElementById('langSelect');
+    const addressBox   = document.getElementById('addressBox');
+    const contactBox   = document.getElementById('contactBox');
+    const contactText  = document.getElementById('contactText');
+    const faqBox       = document.getElementById('faqBox');
+    const calendarEl   = document.getElementById('calendar');
+    const calendarLoading = document.getElementById('calendarLoading');
+    const loadingOption = document.getElementById('loadingOption');
+    const logoImg      = document.getElementById('logoImg');
+
+    // Intro/header
+    const titleApp  = document.getElementById('titleApp');
+    const labelSchool = document.getElementById('labelSchool');
+    const labelLang = document.getElementById('labelLang');
+    const introLine1 = document.getElementById('introLine1');
+    const introHint  = document.getElementById('introHint');
+
+    // Modal + fields
+    const modalBack    = document.getElementById('modalBackdrop');
+    const modalTitle   = document.getElementById('modalTitle');
+    const form         = document.getElementById('requestForm');
+
+    const fSchool = document.getElementById('fSchool');
+    const fFrom   = document.getElementById('fFrom');
+    const fTo     = document.getElementById('fTo');
+    const fPersons = document.getElementById('fPersons');
+    const fTypeFree = document.getElementById('fTypeFree');
+    const fBikes    = document.getElementById('fBikes');
+    const fName     = document.getElementById('fName');
+    const fEmail    = document.getElementById('fEmail');
+    const fPhone    = document.getElementById('fPhone');
+    const fAddress  = document.getElementById('fAddress');
+    const fMsg      = document.getElementById('fMsg');
+
+    const labelFormSchool = document.getElementById('labelFormSchool');
+    const labelPersons = document.getElementById('labelPersons');
+    const labelFrom = document.getElementById('labelFrom');
+    const labelTo = document.getElementById('labelTo');
+    const labelType = document.getElementById('labelType');
+    const labelBikes = document.getElementById('labelBikes');
+    const labelName = document.getElementById('labelName');
+    const labelEmail = document.getElementById('labelEmail');
+    const labelPhone = document.getElementById('labelPhone');
+    const labelAddress = document.getElementById('labelAddress');
+    const labelExtras = document.getElementById('labelExtras');
+    const extraParcours = document.getElementById('extraParcours');
+    const extraGrill = document.getElementById('extraGrill');
+    const extraTisch = document.getElementById('extraTisch');
+    const labelMsg = document.getElementById('labelMsg');
+
+    const conflictMsg = document.getElementById('conflictMsg');
+    const shortTermMsg = document.getElementById('shortTermMsg');
+    const priceTitle  = document.getElementById('priceTitle');
+    const priceHint   = document.getElementById('priceHint');
+    const priceValue  = document.getElementById('priceValue');
+    const priceBreakdown = document.getElementById('priceBreakdown');
+    const bdBaseLabel = document.getElementById('bdBaseLabel');
+    const bdBase      = document.getElementById('bdBase');
+    const bdPersonsLabel = document.getElementById('bdPersonsLabel');
+    const bdPersons   = document.getElementById('bdPersons');
+    const bdTimeLabel = document.getElementById('bdTimeLabel');
+    const bdTime      = document.getElementById('bdTime');
+    const bdExtrasLabel = document.getElementById('bdExtrasLabel');
+    const bdExtras    = document.getElementById('bdExtras');
+    const bdTotalLabel= document.getElementById('bdTotalLabel');
+    const bdTotal     = document.getElementById('bdTotal');
+
+    const termsSummary = document.getElementById('termsSummary');
+    const termsList    = document.getElementById('termsList');
+
+    const btnCancel   = document.getElementById('btnCancel');
+    const btnSubmit   = document.getElementById('btnSubmit');
+
+    // Tooltip elements
+    const timeInfoIcon = document.getElementById('timeInfo');
+    const timePopover  = document.getElementById('timeInfoPopover');
+
+    // Extras
+    const xParcours = document.getElementById('xParcours');
+    const xGrill    = document.getElementById('xGrill');
+    const xTisch    = document.getElementById('xTisch');
+
+    // Success toast
+    const successMsg  = document.getElementById('successMsg');
+    const successText = document.getElementById('successText');
+
+    // Mobile add
+    const mobileAdd = document.getElementById('mobileAdd');
+
+    // Settings / state
+    const DEFAULT_TAP_MINUTES = 60;
+    let calendar = null;
+    let currentKey = null;
+    let busyEvents = [];
+
+    // ===== I18N helpers =====
+    function applyI18n(){
+      const L = I18N[langSelect.value] || I18N.de;
+
+      // header/intro
+      titleApp.textContent = L.appTitle;
+      labelSchool.textContent = L.labelSchool;
+      labelLang.textContent = L.labelLang;
+      introLine1.textContent = L.intro1;
+      introHint.textContent  = L.introHint;
+      contactText.textContent = L.contactText;
+      document.getElementById('calendarLoading').firstChild.nodeValue = L.loadingCalendar;
+
+      // modal labels
+      modalTitle.textContent = L.modalTitle;
+      labelFormSchool.textContent = L.formSchool;
+      labelPersons.textContent = L.persons;
+      labelFrom.textContent = L.from;
+      labelTo.textContent = L.to;
+      labelType.textContent = L.type;
+      labelBikes.textContent = L.bikes;
+      labelName.textContent = L.name;
+      labelEmail.textContent = L.email;
+      labelPhone.textContent = L.phone;
+      labelAddress.textContent = L.address;
+      labelExtras.textContent = L.extras;
+      extraParcours.textContent = L.extraParcours;
+      extraGrill.textContent = L.extraGrill;
+      extraTisch.textContent = L.extraTisch;
+      labelMsg.textContent = L.message;
+
+      conflictMsg.innerHTML = L.conflict;
+      shortTermMsg.innerHTML = L.shortTermWarning;
+      priceTitle.textContent = L.priceTitle;
+      priceHint.textContent = L.priceHint;
+      termsSummary.textContent = L.termsSummary;
+
+      // Rebuild terms list
+      termsList.innerHTML = "";
+      L.terms.forEach(t => {
+        const li = document.createElement('li');
+        li.textContent = t;
+        termsList.appendChild(li);
+      });
+
+      // Breakdown labels (dynamic pieces happen in updatePricePreview)
+      bdTimeLabel.textContent = L.bdTime;
+      bdExtrasLabel.textContent = L.bdExtras;
+      bdTotalLabel.textContent = L.bdTotal;
+
+      // Buttons
+      btnCancel.textContent = L.btnCancel;
+      btnSubmit.textContent = L.btnSend;
+
+      // Placeholders
+      fPersons.placeholder = L.phPersons;
+      fTypeFree.placeholder = L.phType;
+      fBikes.placeholder = L.phBikes;
+      fName.placeholder = L.phName;
+      fEmail.placeholder = L.phEmail;
+      fPhone.placeholder = L.phPhone;
+      fAddress.placeholder = L.phAddress;
+      fMsg.placeholder = L.phMsg;
+
+      // Calendar locale
+      if(calendar){
+        calendar.setOption('locale', langSelect.value === 'en' ? 'en-gb' : 'de');
+      }
+
+      // Address & price text refresh
+      updateAddressBox();
+      updatePricePreview();
+
+      // Tooltip text
+      timePopover.textContent = L.bdTimeInfo;
+    }
+
+    // ===== fetch JSON (no-cache & BOM-safe) =====
+    async function fetchJson(url){
+      const r = await fetch(url+'?v='+Date.now(), {cache:'no-store'});
+      if(!r.ok) throw new Error('HTTP '+r.status);
+      const txt = await r.text();
+      return JSON.parse(txt.replace(/^\uFEFF/, ''));
+    }
+
+    // ===== Discover available schools =====
+    async function discoverSchools(){
+      const L = I18N[langSelect.value] || I18N.de;
+      loadingOption.textContent = L.loadingSchools;
+
+      for(const key of Object.keys(SCHOOLS)){
+        try{
+          const data = await fetchJson(SCHOOLS[key].file);
+          if(Array.isArray(data)){
+            const opt = document.createElement('option');
+            opt.value = key;
+            opt.textContent = SCHOOLS[key].name;
+            opt.dataset.file = SCHOOLS[key].file;
+            schoolSelect.appendChild(opt);
+          }
+        }catch(e){ /* file missing: skip */ }
+      }
+      // verwijder "Lade Standorte..."
+      if(loadingOption) loadingOption.remove();
+
+      if(schoolSelect.options.length){
+        currentKey = schoolSelect.value = schoolSelect.options[0].value;
+        await loadCalendar(currentKey);
+        updateAddressBox(true);
+        contactBox.style.display = 'block';
+        faqBox.style.display = 'block';
+        // kalender zichtbaar
+        calendarEl.classList.add('loaded');
+      }
+    }
+
+    // ===== Address box =====
+    function updateAddressBox(first=false){
+      if(!currentKey || !SCHOOLS[currentKey]) { addressBox.classList.remove('show'); addressBox.textContent=''; return; }
+      const L = I18N[langSelect.value] || I18N.de;
+      addressBox.textContent = `${L.addrPrefix} ${SCHOOLS[currentKey].address}`;
+      // fade-in
+      if(first) { requestAnimationFrame(()=> addressBox.classList.add('show')); }
+      else { addressBox.classList.add('show'); }
+    }
+
+    // ===== Rules / helpers =====
+    function minStartDate(){
+      const d = new Date();
+      d.setDate(d.getDate() + 7);
+      d.setHours(0,0,0,0);
+      return d;
+    }
+
+    // edges may touch (no 2h buffer)
+    function overlaps(aStart, aEnd, bStart, bEnd){
+      return (aStart < bEnd) && (aEnd > bStart); // exact touching is NOT overlap
+    }
+
+    function validateTimes(){
+      const start = parseLocalDT(fFrom.value);
+      const end   = parseLocalDT(fTo.value);
+
+      let ok = true;
+      if(!(start && end)) ok = false;
+      if(ok && end <= start) ok = false;
+      if(ok && (end - start) < 30*60000) ok = false;
+
+      // Overlap check
+      if(ok){
+        for(const ev of busyEvents){
+          const bS = new Date(ev.start), bE = new Date(ev.end || ev.start);
+          if(overlaps(start, end, bS, bE)){ ok = false; break; }
+        }
+      }
+
+      conflictMsg.style.display = ok ? 'none' : 'block';
+
+      // short-term warning (informative, not blocking)
+      if(start && start < minStartDate()){
+        shortTermMsg.classList.add('show');
+      }else{
+        shortTermMsg.classList.remove('show');
+      }
+
+      btnSubmit.disabled = !ok;
+
+      updatePricePreview();
+      return ok;
+    }
+
+    function selectAllowFn(selectInfo){
+      const selStart = selectInfo.start;
+      const selEnd   = selectInfo.end;
+
+      // allow selecting any date; short-term handled in modal as warning
+      for(const ev of busyEvents){
+        const bS = new Date(ev.start), bE = new Date(ev.end || ev.start);
+        if(overlaps(selStart, selEnd, bS, bE)) return false;
+      }
+
+      if((selEnd - selStart)/60000 < 30) return false;
+
+      return true;
+    }
+
+    function desiredView(){
+      const w = calendarEl.clientWidth || window.innerWidth;
+      return (w < 700) ? 'timeGridDay' : 'timeGridWeek';
+    }
+    function applyResponsiveView(){
+      if(!calendar) return;
+      const want = desiredView();
+      if(calendar.view && calendar.view.type !== want){
+        calendar.changeView(want);
+      }
+    }
+
+    function openModal(prefill){
+      fSchool.value = prefill.school;
+      fFrom.value = toInputLocal(prefill.start);
+      fTo.value   = toInputLocal(prefill.end);
+      xParcours.checked = xGrill.checked = xTisch.checked = false;
+      conflictMsg.style.display = 'none';
+      shortTermMsg.classList.remove('show');
+      btnSubmit.disabled = true;
+      updatePricePreview();
+      modalBack.style.display = 'flex';
+      // on open, validate once to show possible short-term warning
+      validateTimes();
+    }
+    function closeModal(){
+      modalBack.style.display = 'none';
+      form.reset();
+      fSchool.value = '';
+      conflictMsg.style.display = 'none';
+      shortTermMsg.classList.remove('show');
+      btnSubmit.disabled = true;
+      priceValue.textContent = '–';
+      priceBreakdown.style.display = 'none';
+      hidePopover();
+    }
+    document.getElementById('btnCancel').addEventListener('click', closeModal);
+    modalBack.addEventListener('click', (e)=>{ if(e.target === modalBack) closeModal(); });
+
+    [fFrom,fTo,fPersons,xParcours,xGrill,xTisch].forEach(el=>{
+      el.addEventListener('change', validateTimes);
+      el.addEventListener('input', validateTimes);
+    });
+
+    form.addEventListener('submit', (e)=>{
+      e.preventDefault();
+      if(!validateTimes()) return;
+
+      const data = new FormData(form);
+      const subject = encodeURIComponent('Anfrage Verkehrsschule: ' + data.get('school'));
+      const lines = [
+        'Verkehrsschule: ' + data.get('school'),
+        'Von: ' + (data.get('from')||''),
+        'Bis: ' + (data.get('to')||''),
+        'Anzahl Personen: ' + (data.get('persons')||''),
+        'Extras: ' + [
+          data.get('extra_parcours')?'Fahrradparcours':null,
+          data.get('extra_grill')?'Grill':null,
+          data.get('extra_tischtennis')?'Tischtennisplatte':null
+        ].filter(Boolean).join(', '),
+        'Art der Feier: ' + (data.get('type_free')||''),
+        'Fahrräder (kostenlos) – Bedarf: ' + (data.get('bikes')||''),
+        'Name: ' + (data.get('name')||''),
+        'E-Mail: ' + (data.get('email')||''),
+        'Telefon: ' + (data.get('phone')||''),
+        'Anschrift: ' + (data.get('address')||''),
+        'Nachricht: ' + (data.get('message')||''),
+        'Vorläufige Preisindikation: ' + (priceValue.textContent||'–') + ' (unverbindlich)'
+      ];
+      const body = encodeURIComponent(lines.join('\n'));
+
+      // show a toast (best-effort) before handing off to mail client
+      showToast(langSelect.value==='en' ? 'Request prepared in your mail app.' : 'Anfrage im Mail-Programm vorbereitet.');
+      window.location.href = 'mailto:info@kidbike.de?subject=' + subject + '&body=' + body;
+
+      // Optionally close modal shortly after
+      setTimeout(closeModal, 400);
+    });
+
+    function showToast(text){
+      successText.textContent = text;
+      successMsg.classList.add('show');
+      setTimeout(()=> successMsg.classList.remove('show'), 3000);
+    }
+
+    async function loadCalendar(key){
+      currentKey = key;
+      calendarLoading.style.display = 'block';
+      if(calendar) calendar.destroy();
+
+      busyEvents = await fetchJson(SCHOOLS[key].file);
+
+      calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: desiredView(),
+        firstDay: 1,
+        locale: langSelect.value === 'en' ? 'en-gb' : 'de',
+        timeZone: 'local',                 // <— tijdzone-fix
+        slotMinTime: '00:00:00',
+        slotMaxTime: '24:00:00',
+        allDaySlot: false,
+        nowIndicator: true,
+        selectable: true,
+        selectMirror: true,
+        selectMinDistance: 1,
+        longPressDelay: 120,
+        selectLongPressDelay: 120,
+        unselectAuto: true,
+        // eigen overlap-check (edges mogen aansluiten)
+        selectOverlap: true,
+        height: 'auto',
+        expandRows: true,
+        selectAllow: selectAllowFn,
+        events: busyEvents.map(e => ({...e, title:'Belegt', classNames:['busy']})),
+        windowResize: () => applyResponsiveView(),
+
+        select: (info)=>{
+          openModal({
+            school: SCHOOLS[currentKey].name,
+            start: info.start,
+            end:   info.end
+          });
+          calendar.unselect();
+        },
+        dateClick: (arg)=>{
+          if(arg.allDay) return;
+          const start = arg.date; // local
+          const end = new Date(start.getTime() + DEFAULT_TAP_MINUTES*60000);
+          openModal({
+            school: SCHOOLS[currentKey].name,
+            start, end
+          });
+        }
+      });
+
+      calendar.render();
+      applyResponsiveView();
+      calendarLoading.style.display = 'none';
+      calendarEl.classList.add('loaded');
+    }
+
+    // ===== Price logic (exacte treden + breakdown) =====
+    const TIERS_MINUTES = [
+      {maxMin: 240, hoursLabel: 4,  base:100},
+      {maxMin: 360, hoursLabel: 6,  base:130},
+      {maxMin: 480, hoursLabel: 8,  base:160},
+      {maxMin: 600, hoursLabel:10,  base:190},
+      {maxMin: 720, hoursLabel:12,  base:220},
+      {maxMin: 960, hoursLabel:16,  base:280},
+    ];
+    function pickTierByMinutes(totalMin){
+      for(const t of TIERS_MINUTES){
+        if(totalMin <= t.maxMin) return t;
+      }
+      return null; // > 16h => Preis/Price on request
+    }
+    function personMultiplier(p){
+      const n = Number(p||0);
+      if(n <= 30)  return {mult:1.00, label:"≤30"};
+      if(n <= 40)  return {mult:1.25, label:"≤40"};
+      if(n <= 50)  return {mult:1.50, label:"≤50"};
+      if(n <= 75)  return {mult:1.75, label:"≤75"};
+      if(n <= 100) return {mult:2.00, label:"≤100"};
+      return {mult:null, label:">100"};
+    }
+    // 30 € Zuschlag wenn (Start UND Ende nicht zwischen 9–18) ODER irgendein Wochenend-Anteil
+    function surcharge30(start, end){
+      const between9_18 = (dt)=> {
+        const m = dt.getHours()*60 + dt.getMinutes();
+        return (m >= 9*60) && (m <= 18*60);
+      };
+      const bothOutside = !(between9_18(start) && between9_18(end));
+      function touchesWeekend(s,e){
+        const cur = new Date(s); cur.setHours(0,0,0,0);
+        const endDay = new Date(e); endDay.setHours(23,59,59,999);
+        while(cur <= endDay){
+          const dow = cur.getDay();
+          if(dow === 0 || dow === 6) return true;
+          cur.setDate(cur.getDate()+1);
+        }
+        return false;
+      }
+      const weekend = touchesWeekend(start, end);
+      return (bothOutside || weekend) ? 30 : 0;
+    }
+
+    function updatePricePreview(){
+      const L = I18N[langSelect.value] || I18N.de;
+      const start = parseLocalDT(fFrom.value);
+      const end   = parseLocalDT(fTo.value);
+      const persons = Number(fPersons.value || 0);
+
+      if(!(start && end) || end <= start){
+        priceValue.textContent = '–';
+        priceBreakdown.style.display = 'none';
+        hidePopover();
+        return;
+      }
+
+      const totalMin = Math.round((end - start) / 60000);
+      const tier = pickTierByMinutes(totalMin);
+      const {mult, label} = personMultiplier(persons);
+
+      if(!tier || mult === null){
+        priceValue.textContent = L.priceOnReq;
+        priceBreakdown.style.display = 'none';
+        hidePopover();
+        return;
+      }
+
+      const base = tier.base;
+      const basePlusPersons = base * mult;
+      const personsDelta = basePlusPersons - base;
+
+      const timeAdd = surcharge30(start, end);
+
+      const extrasCount = (xParcours.checked?1:0) + (xGrill.checked?1:0) + (xTisch.checked?1:0);
+      const extrasCost = extrasCount * 10;
+
+      const total = basePlusPersons + timeAdd + extrasCost;
+
+      priceValue.textContent = euro(total);
+
+      // Breakdown render
+      bdBaseLabel.textContent = (langSelect.value==='en' ? I18N.en.bdBase(tier.hoursLabel) : I18N.de.bdBase(tier.hoursLabel));
+      bdBase.textContent = euro(base);
+
+      bdPersonsLabel.textContent = (langSelect.value==='en' ? I18N.en.bdPersons(label) : I18N.de.bdPersons(label));
+      bdPersons.textContent = personsDelta === 0 ? (langSelect.value==='en' ? "€0.00" : "0,00 €") : euro(personsDelta);
+
+      bdTimeLabel.textContent = L.bdTime;
+      bdTime.textContent = timeAdd ? euro(timeAdd) : (langSelect.value==='en' ? "€0.00" : "0,00 €");
+
+      bdExtrasLabel.textContent = L.bdExtras;
+      bdExtras.textContent = extrasCost ? euro(extrasCost) : (L.bdNoExtras || (langSelect.value==='en' ? "none" : "keine"));
+
+      bdTotalLabel.textContent = L.bdTotal;
+      bdTotal.textContent = euro(total);
+
+      priceBreakdown.style.display = 'block';
+
+      // Tooltip content (popover text)
+      timePopover.textContent = L.bdTimeInfo;
+    }
+
+    // ===== Tooltip / Popover logic =====
+    function togglePopover(){
+      const isOpen = timePopover.classList.contains('show');
+      if(isOpen){ hidePopover(); return; }
+      showPopover();
+    }
+    function showPopover(){
+      timePopover.classList.add('show');
+      timePopover.setAttribute('aria-hidden','false');
+      timeInfoIcon.setAttribute('aria-expanded','true');
+      // Ensure popover stays within viewport horizontally
+      const rect = timePopover.getBoundingClientRect();
+      if(rect.right > window.innerWidth - 12){
+        timePopover.style.left = 'auto';
+        timePopover.style.right = '0';
+      }else{
+        timePopover.style.left = '0';
+        timePopover.style.right = 'auto';
+      }
+    }
+    function hidePopover(){
+      timePopover.classList.remove('show');
+      timePopover.setAttribute('aria-hidden','true');
+      timeInfoIcon.setAttribute('aria-expanded','false');
+    }
+    // Close on outside click / ESC
+    document.addEventListener('click', (e)=>{
+      if(!timePopover.classList.contains('show')) return;
+      const within = e.target.closest('.tooltip-wrap');
+      if(!within) hidePopover();
+    });
+    document.addEventListener('keydown', (e)=>{
+      if(e.key === 'Escape') hidePopover();
+      if((e.key === 'Enter' || e.key === ' ') && document.activeElement === timeInfoIcon){
+        e.preventDefault(); togglePopover();
+      }
+    });
+    timeInfoIcon.addEventListener('click', (e)=>{ e.stopPropagation(); togglePopover(); });
+    timeInfoIcon.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); togglePopover(); } });
+
+    // ===== Utils =====
+    function toInputLocal(date){
+      const d = (date instanceof Date) ? date : new Date(date);
+      const pad = n => String(n).padStart(2,'0');
+      const y = d.getFullYear();
+      const m = pad(d.getMonth()+1);
+      const dd = pad(d.getDate());
+      const hh = pad(d.getHours());
+      const mm = pad(d.getMinutes());
+      return `${y}-${m}-${dd}T${hh}:${mm}`;
+    }
+    function parseLocalDT(v){
+      if(!v) return null;
+      const [date, time] = v.split('T');
+      if(!date || !time) return null;
+      const [y,m,d] = date.split('-').map(Number);
+      const [hh,mm] = time.split(':').map(Number);
+      return new Date(y, (m-1), d, hh, mm, 0, 0);
+    }
+    function euro(n){
+      return new Intl.NumberFormat('de-DE',{style:'currency',currency:'EUR', maximumFractionDigits:2}).format(n);
+    }
+
+    // ===== Events =====
+    schoolSelect.addEventListener('change', (e)=> { loadCalendar(e.target.value); updateAddressBox(); });
+    langSelect.addEventListener('change', applyI18n);
+    mobileAdd.addEventListener('click', ()=>{
+      const start = new Date(); start.setDate(start.getDate()+7); start.setHours(10,0,0,0);
+      const end = new Date(start.getTime() + DEFAULT_TAP_MINUTES*60000);
+      openModal({ school: SCHOOLS[currentKey]?.name || '', start, end });
+    });
+
+    // init
+    (async function init(){
+      // show logo if available
+      logoImg.style.display = 'block';
+      // set initial loading texts
+      document.getElementById('calendarLoading').firstChild.nodeValue = (I18N[langSelect.value]||I18N.de).loadingCalendar;
+      await discoverSchools();
+      applyI18n();
+      window.addEventListener('resize', () => applyResponsiveView());
+    })();
+  </script>
+</body>
+</html>
