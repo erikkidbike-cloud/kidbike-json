@@ -3,9 +3,10 @@ name: Update JSON via dispatch
 on:
   repository_dispatch:
     types: [update-json]
+  workflow_dispatch: {}   # allows manual test from the Actions tab
 
 permissions:
-  contents: write   # let GITHUB_TOKEN push commits
+  contents: write
 
 jobs:
   update:
@@ -13,43 +14,58 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Ensure jq is available
-        run: sudo apt-get update && sudo apt-get install -y jq
-
       - name: Write files from client_payload
         shell: bash
         run: |
-          # payload format expected:
-          # {
-          #   "message": "commit message",
-          #   "files": [
-          #     {"path":"events-we.json","content_b64":"..."},
-          #     {"path":"events-wa.json","content_b64":"..."},
-          #     {"path":"events-wi.json","content_b64":"..."}
-          #   ]
-          # }
+          set -euo pipefail
+          PAYLOAD='${{ toJson(github.event.client_payload) }}'
+          echo "$PAYLOAD" > payload.json
+          echo "Payload bytes: $(wc -c < payload.json)"
+          # Expecting: { "message": "...", "files": [ {"path":"events-we.json","content_b64":"..."} ] }
 
-          echo '${{ toJson(github.event.client_payload) }}' > payload.json
+          # minimal jq in case it isn't present by default
+          if ! command -v jq >/dev/null 2>&1; then
+            sudo apt-get update && sudo apt-get install -y jq
+          fi
+
           jq -e '.files' payload.json >/dev/null
 
+          # Write each file
+          CHANGES=0
           for row in $(jq -c '.files[]' payload.json); do
             PATH_=$(echo "$row" | jq -r '.path')
             B64=$(echo "$row" | jq -r '.content_b64')
-            # create parent dir if needed
+
             mkdir -p "$(dirname "$PATH_")"
-            # write decoded content
-            echo "$B64" | base64 --decode > "$PATH_"
-            echo "Wrote $PATH_ ($(wc -c < "$PATH_") bytes)"
+            # decode to temp and normalize line endings to LF (prevents "no diff" due to CRLF)
+            TMP=$(mktemp)
+            echo "$B64" | base64 --decode > "$TMP"
+            dos2unix -q "$TMP" 2>/dev/null || true
+
+            if [ -f "$PATH_" ] && cmp -s "$TMP" "$PATH_"; then
+              echo "No content change for $PATH_"
+            else
+              mv "$TMP" "$PATH_"
+              echo "Wrote $PATH_ ($(wc -c < "$PATH_") bytes)"
+              CHANGES=1
+            fi
           done
 
-      - name: Commit and push
+          # expose CHANGES to next step
+          echo "CHANGES=$CHANGES" >> $GITHUB_ENV
+
+      - name: Commit and push (force redeploy if needed)
         run: |
+          set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
           git add -A
-          if git diff --cached --quiet; then
-            echo "No changes to commit."
-            exit 0
+          if [ "${CHANGES}" = "1" ]; then
+            git commit -m "${{ github.event.client_payload.message || 'update json via Flow' }}"
+          else
+            # no diffs? still trigger Netlify by making an empty commit
+            NOW=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+            git commit --allow-empty -m "trigger netlify redeploy ${NOW}"
           fi
-          git commit -m "${{ github.event.client_payload.message || 'update json via Flow' }}"
           git push
