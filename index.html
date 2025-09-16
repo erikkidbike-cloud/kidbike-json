@@ -49,8 +49,8 @@
     .fc .fc-button:hover{filter:brightness(0.95)}
     .fc .fc-toolbar-title{font-weight:700}
 
-    /* Compress the time grid rows ~30% */
-    .fc-timegrid-slot{min-height:22px;} /* was 32px */
+    /* compressed time grid (~30% less) */
+    .fc-timegrid-slot{min-height:22px;}
 
     /* event kleur: bezet */
     .fc-event.busy{
@@ -200,7 +200,7 @@
       #calendar{ margin: 10px auto; padding: 6px; }
       .modal{ max-width: 96vw; padding: 16px; }
       .mobile-add{display:block;}
-      .fc-timegrid-slot{min-height:28px;} /* was 40px */
+      .fc-timegrid-slot{min-height:28px;} /* compressed from 40px */
     }
     @media (max-width: 640px){
       header { flex-direction: column; align-items: flex-start; gap: 8px; }
@@ -218,7 +218,7 @@
 </head>
 <body>
   <!-- Success message -->
-  <div id="successMsg" class="success-msg">
+  <div id="successMsg" class="success-msg" role="status" aria-live="polite">
     <span id="successText">Anfrage erfolgreich gesendet!</span>
   </div>
 
@@ -260,7 +260,22 @@
   <div id="modalBackdrop" class="modal-backdrop">
     <div class="modal" role="dialog" aria-modal="true">
       <h3 id="modalTitle">Anfrage Nutzung Verkehrsschule</h3>
-      <form id="requestForm">
+
+      <!-- Netlify Forms: static presence matters -->
+      <form
+        id="requestForm"
+        name="requestForm"
+        method="POST"
+        data-netlify="true"
+        netlify-honeypot="bot-field"
+      >
+        <!-- Netlify needs the form name in the body -->
+        <input type="hidden" name="form-name" value="requestForm" />
+        <!-- Honeypot (anti-spam) -->
+        <p style="display:none;">
+          <label>Don’t fill this out if you’re human: <input name="bot-field" /></label>
+        </p>
+
         <div class="grid">
           <div class="field">
             <label id="labelFormSchool">Verkehrsschule</label>
@@ -388,6 +403,11 @@
           <button type="button" class="btn danger" id="btnCancel">Abbrechen</button>
           <button type="submit" class="btn primary" id="btnSubmit" disabled>Anfrage senden</button>
         </div>
+
+        <!-- No-JS fallback (Netlify handles POST) -->
+        <noscript>
+          <p class="hint">JavaScript ist deaktiviert. Nach dem Absenden wird das Formular neu geladen.</p>
+        </noscript>
       </form>
     </div>
   </div>
@@ -669,10 +689,10 @@
         termsList.appendChild(li);
       });
 
-      // Breakdown labels (dynamic pieces happen in updatePricePreview)
-      bdTimeLabel.textContent = L.bdTime;
-      bdExtrasLabel.textContent = L.bdExtras;
-      bdTotalLabel.textContent = L.bdTotal;
+      // Breakdown labels
+      document.getElementById('bdTimeLabel').textContent = L.bdTime;
+      document.getElementById('bdExtrasLabel').textContent = L.bdExtras;
+      document.getElementById('bdTotalLabel').textContent = L.bdTotal;
 
       // Buttons
       btnCancel.textContent = L.btnCancel;
@@ -725,13 +745,11 @@
           }
         }catch(e){ /* file missing: skip */ }
       }
-      // verwijder "Lade Standorte..."
       if(loadingOption) loadingOption.remove();
 
       if(schoolSelect.options.length){
         currentKey = schoolSelect.value = schoolSelect.options[0].value;
         await loadCalendar(currentKey);
-        // kalender zichtbaar
         calendarEl.classList.add('loaded');
       }
     }
@@ -743,10 +761,8 @@
       d.setHours(0,0,0,0);
       return d;
     }
-
-    // edges may touch (no 2h buffer)
     function overlaps(aStart, aEnd, bStart, bEnd){
-      return (aStart < bEnd) && (aEnd > bStart); // exact touching is NOT overlap
+      return (aStart < bEnd) && (aEnd > bStart);
     }
 
     function validateTimes(){
@@ -768,7 +784,7 @@
 
       conflictMsg.style.display = ok ? 'none' : 'block';
 
-      // short-term warning (informative, not blocking)
+      // short-term warning (informativ)
       if(start && start < minStartDate()){
         shortTermMsg.classList.add('show');
       }else{
@@ -785,12 +801,10 @@
       const selStart = selectInfo.start;
       const selEnd   = selectInfo.end;
 
-      // allow selecting any date; short-term handled in modal as warning
       for(const ev of busyEvents){
         const bS = new Date(ev.start), bE = new Date(ev.end || ev.start);
         if(overlaps(selStart, selEnd, bS, bE)) return false;
       }
-
       if((selEnd - selStart)/60000 < 30) return false;
 
       return true;
@@ -818,7 +832,6 @@
       btnSubmit.disabled = true;
       updatePricePreview();
       modalBack.style.display = 'flex';
-      // on open, validate once to show possible short-term warning
       validateTimes();
     }
     function closeModal(){
@@ -840,39 +853,49 @@
       el.addEventListener('input', validateTimes);
     });
 
-    form.addEventListener('submit', (e)=>{
+    // ===== Netlify AJAX submission (keeps user on page) =====
+    function encodeFormData(data){
+      return Array.from(data.entries())
+        .map(([k,v])=>encodeURIComponent(k)+'='+encodeURIComponent(v))
+        .join('&');
+    }
+
+    form.addEventListener('submit', async (e)=>{
+      // If invalid, block submission
+      if(!validateTimes()){
+        e.preventDefault();
+        return;
+      }
+
+      // Allow Netlify to capture even if JS fails:
+      // We intercept to send via fetch (no page reload).
       e.preventDefault();
-      if(!validateTimes()) return;
 
-      const data = new FormData(form);
-      const subject = encodeURIComponent('Anfrage Verkehrsschule: ' + data.get('school'));
-      const lines = [
-        'Verkehrsschule: ' + data.get('school'),
-        'Von: ' + (data.get('from')||''),
-        'Bis: ' + (data.get('to')||''),
-        'Anzahl Personen: ' + (data.get('persons')||''),
-        'Extras: ' + [
-          data.get('extra_parcours')?'Fahrradparcours':null,
-          data.get('extra_grill')?'Grill':null,
-          data.get('extra_tischtennis')?'Tischtennisplatte':null
-        ].filter(Boolean).join(', '),
-        'Art der Feier: ' + (data.get('type_free')||''),
-        'Fahrräder (kostenlos) – Bedarf: ' + (data.get('bikes')||''),
-        'Name: ' + (data.get('name')||''),
-        'E-Mail: ' + (data.get('email')||''),
-        'Telefon: ' + (data.get('phone')||''),
-        'Anschrift: ' + (data.get('address')||''),
-        'Nachricht: ' + (data.get('message')||''),
-        'Vorläufige Preisindikation: ' + (priceValue.textContent||'–') + ' (unverbindlich)'
-      ];
-      const body = encodeURIComponent(lines.join('\n'));
+      btnSubmit.classList.add('loading');
+      btnSubmit.disabled = true;
 
-      // show a toast (best-effort) before handing off to mail client
-      showToast(langSelect.value==='en' ? 'Request prepared in your mail app.' : 'Anfrage im Mail-Programm vorbereitet.');
-      window.location.href = 'mailto:info@kidbike.de?subject=' + subject + '&body=' + body;
+      try{
+        const formData = new FormData(form);
+        // Ensure form-name is present (safety in case of edits)
+        if(!formData.get('form-name')){
+          formData.append('form-name', form.getAttribute('name') || 'requestForm');
+        }
 
-      // Optionally close modal shortly after
-      setTimeout(closeModal, 400);
+        await fetch('/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: encodeFormData(formData)
+        });
+
+        showToast(langSelect.value==='en' ? 'Request submitted. We will contact you by email.' : 'Anfrage gesendet. Wir melden uns per E-Mail.');
+        closeModal();
+      }catch(err){
+        // Fallback: if fetch fails, let the browser submit normally next time
+        alert('Senden fehlgeschlagen. Bitte erneut versuchen oder JavaScript deaktivieren.');
+      }finally{
+        btnSubmit.classList.remove('loading');
+        btnSubmit.disabled = false;
+      }
     });
 
     function showToast(text){
@@ -903,7 +926,6 @@
         longPressDelay: 120,
         selectLongPressDelay: 120,
         unselectAuto: true,
-        // eigen overlap-check (edges mogen aansluiten)
         selectOverlap: true,
         height: 'auto',
         expandRows: true,
@@ -921,7 +943,7 @@
         },
         dateClick: (arg)=>{
           if(arg.allDay) return;
-          const start = arg.date; // local
+          const start = arg.date;
           const end = new Date(start.getTime() + DEFAULT_TAP_MINUTES*60000);
           openModal({
             school: SCHOOLS[currentKey].name,
@@ -936,7 +958,7 @@
       calendarEl.classList.add('loaded');
     }
 
-    // ===== Price logic (exacte treden + breakdown) =====
+    // ===== Price logic =====
     const TIERS_MINUTES = [
       {maxMin: 240, hoursLabel: 4,  base:100},
       {maxMin: 360, hoursLabel: 6,  base:130},
@@ -949,7 +971,7 @@
       for(const t of TIERS_MINUTES){
         if(totalMin <= t.maxMin) return t;
       }
-      return null; // > 16h => Preis/Price on request
+      return null;
     }
     function personMultiplier(p){
       const n = Number(p||0);
@@ -960,7 +982,6 @@
       if(n <= 100) return {mult:2.00, label:"≤100"};
       return {mult:null, label:">100"};
     }
-    // 30 € Zuschlag wenn (Start UND Ende nicht zwischen 9–18) ODER irgendein Wochenend-Anteil
     function surcharge30(start, end){
       const between9_18 = (dt)=> {
         const m = dt.getHours()*60 + dt.getMinutes();
@@ -1036,7 +1057,6 @@
 
       priceBreakdown.style.display = 'block';
 
-      // Tooltip content (popover text)
       timePopover.textContent = L.bdTimeInfo;
     }
 
@@ -1050,7 +1070,6 @@
       timePopover.classList.add('show');
       timePopover.setAttribute('aria-hidden','false');
       timeInfoIcon.setAttribute('aria-expanded','true');
-      // Ensure popover stays within viewport horizontally
       const rect = timePopover.getBoundingClientRect();
       if(rect.right > window.innerWidth - 12){
         timePopover.style.left = 'auto';
@@ -1065,7 +1084,6 @@
       timePopover.setAttribute('aria-hidden','true');
       timeInfoIcon.setAttribute('aria-expanded','false');
     }
-    // Close on outside click / ESC
     document.addEventListener('click', (e)=>{
       if(!timePopover.classList.contains('show')) return;
       const within = e.target.closest('.tooltip-wrap');
@@ -1114,9 +1132,7 @@
 
     // init
     (async function init(){
-      // show logo if available
       logoImg.style.display = 'block';
-      // set initial loading texts
       document.getElementById('calendarLoading').firstChild.nodeValue = (I18N[langSelect.value]||I18N.de).loadingCalendar;
       await discoverSchools();
       applyI18n();
