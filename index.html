@@ -180,7 +180,7 @@
       border-left:1px solid var(--popover-border); border-top:1px solid var(--popover-border);
     }
 
-    /* success message */
+    /* success toast (bestaand, blijft aanwezig maar wordt niet meer gebruikt) */
     .success-msg{
       position:fixed;top:20px;right:20px;z-index:70;
       background:#dcfce7;border:1px solid #bbf7d0;color:#166534;
@@ -189,6 +189,34 @@
       transition:transform 0.3s;
     }
     .success-msg.show{transform:translateX(0);}
+
+    /* >>> Prominent success overlay (NIEUW) <<< */
+    .success-overlay{
+      position:fixed; inset:0; z-index:120;
+      background:rgba(0,0,0,.45);
+      display:none; align-items:center; justify-content:center;
+      padding:20px;
+    }
+    .success-card{
+      width:min(720px, 96vw);
+      background:#fff; color:#0f172a;
+      border:1px solid var(--border);
+      border-radius:14px; padding:22px;
+      box-shadow:0 24px 80px rgba(0,0,0,0.18);
+    }
+    .success-card h2{ margin:0 0 10px; font-size:22px; }
+    .success-card p{ margin:6px 0; line-height:1.5; }
+    .success-summary{
+      margin:12px 0 0; padding:12px;
+      border:1px dashed var(--border); border-radius:10px; background:#f8fafc;
+      font-size:15px;
+    }
+    .success-actions{ display:flex; gap:10px; justify-content:flex-end; margin-top:16px; }
+    .success-actions .btn{ min-width:160px; }
+    @media (max-width:640px){
+      .success-actions{ flex-direction:column; }
+      .success-actions .btn{ width:100%; }
+    }
 
     /* Responsive aanpassingen */
     @media (max-width: 900px){
@@ -217,9 +245,22 @@
   </style>
 </head>
 <body>
-  <!-- Success message -->
+  <!-- Klein toast (bestaand) -->
   <div id="successMsg" class="success-msg" role="status" aria-live="polite">
     <span id="successText">Anfrage erfolgreich gesendet!</span>
+  </div>
+
+  <!-- >>> Prominent success overlay (NIEUW) <<< -->
+  <div id="successOverlay" class="success-overlay" role="dialog" aria-modal="true" aria-labelledby="successTitle">
+    <div class="success-card">
+      <h2 id="successTitle">Anfrage gesendet</h2>
+      <p id="successLead">Vielen Dank. Wir melden uns per E-Mail zur Bestätigung.</p>
+      <div class="success-summary" id="successSummary"></div>
+      <div class="success-actions">
+        <button class="btn" id="btnBackToCalendar">Zurück zum Kalender</button>
+        <button class="btn primary" id="btnNewRequest">Neue Anfrage</button>
+      </div>
+    </div>
   </div>
 
   <!-- Header -->
@@ -477,7 +518,19 @@
         bdNoExtras: "keine",
         priceOnReq: "Preis nach Vereinbarung",
         // tooltip
-        bdTimeInfo: "30 € Zuschlag, wenn Beginn UND Ende nicht zwischen 9–18 Uhr liegen oder wenn der Zeitraum (auch teilweise) am Wochenende liegt."
+        bdTimeInfo: "30 € Zuschlag, wenn Beginn UND Ende nicht zwischen 9–18 Uhr liegen oder wenn der Zeitraum (auch teilweise) am Wochenende liegt.",
+        // NEW: overlay i18n
+        successTitle: "Anfrage gesendet",
+        successLead: "Vielen Dank. Wir melden uns per E-Mail zur Bestätigung.",
+        successBack: "Zurück zum Kalender",
+        successNew: "Neue Anfrage",
+        successSummaryLabels: {
+          school: "Standort",
+          from: "Von",
+          to: "Bis",
+          persons: "Personen",
+          extras: "Extras"
+        }
       },
       en: {
         appTitle: "Traffic School Availability",
@@ -541,7 +594,19 @@
         bdNoExtras: "none",
         priceOnReq: "Price on request",
         // tooltip
-        bdTimeInfo: "€30 surcharge if start AND end are not between 9:00–18:00, or if any part of the booking falls on a weekend."
+        bdTimeInfo: "€30 surcharge if start AND end are not between 9:00–18:00, or if any part of the booking falls on a weekend.",
+        // NEW: overlay i18n
+        successTitle: "Request submitted",
+        successLead: "Thanks. We will contact you by email to confirm.",
+        successBack: "Back to calendar",
+        successNew: "New request",
+        successSummaryLabels: {
+          school: "Location",
+          from: "From",
+          to: "To",
+          persons: "People",
+          extras: "Extras"
+        }
       }
     };
 
@@ -632,9 +697,17 @@
     const xGrill    = document.getElementById('xGrill');
     const xTisch    = document.getElementById('xTisch');
 
-    // Success toast
+    // Success toast (bestaand)
     const successMsg  = document.getElementById('successMsg');
     const successText = document.getElementById('successText');
+
+    // NEW: overlay DOM refs
+    const successOverlay = document.getElementById('successOverlay');
+    const successTitle   = document.getElementById('successTitle');
+    const successLead    = document.getElementById('successLead');
+    const successSummary = document.getElementById('successSummary');
+    const btnBackToCalendar = document.getElementById('btnBackToCalendar');
+    const btnNewRequest  = document.getElementById('btnNewRequest');
 
     // Mobile add
     const mobileAdd = document.getElementById('mobileAdd');
@@ -860,15 +933,70 @@
         .join('&');
     }
 
+    // Helper for date formatting in overlay
+    function formatDT(dt, lang){
+      const d = (dt instanceof Date) ? dt : new Date(dt);
+      return d.toLocaleString(lang === 'en' ? 'en-GB' : 'de-DE', {
+        year:'numeric', month:'2-digit', day:'2-digit',
+        hour:'2-digit', minute:'2-digit'
+      });
+    }
+
+    // Overlay controls
+    function showSuccessOverlay(payload){
+      const L = I18N[langSelect.value] || I18N.de;
+      successTitle.textContent = L.successTitle;
+      successLead.textContent  = L.successLead;
+      btnBackToCalendar.textContent = L.successBack;
+      btnNewRequest.textContent     = L.successNew;
+
+      const labels = L.successSummaryLabels;
+      const extrasText = [];
+      if (xParcours.checked) extrasText.push((I18N[langSelect.value]||I18N.de).extraParcours);
+      if (xGrill.checked)    extrasText.push((I18N[langSelect.value]||I18N.de).extraGrill);
+      if (xTisch.checked)    extrasText.push((I18N[langSelect.value]||I18N.de).extraTisch);
+
+      const start = parseLocalDT(payload.from);
+      const end   = parseLocalDT(payload.to);
+
+      successSummary.innerHTML = `
+        <div><strong>${labels.school}:</strong> ${payload.school || ""}</div>
+        <div><strong>${labels.from}:</strong> ${formatDT(start, langSelect.value)}</div>
+        <div><strong>${labels.to}:</strong> ${formatDT(end,   langSelect.value)}</div>
+        ${payload.persons ? `<div><strong>${labels.persons}:</strong> ${payload.persons}</div>` : ""}
+        <div><strong>${labels.extras}:</strong> ${extrasText.length ? extrasText.join(", ") : ((I18N[langSelect.value]||I18N.de).bdNoExtras)}</div>
+      `;
+
+      successOverlay.style.display = 'flex';
+      btnBackToCalendar.focus();
+
+      const esc = (e)=>{ if(e.key === 'Escape') hideSuccessOverlay(); };
+      document.addEventListener('keydown', esc, { once:true });
+
+      btnBackToCalendar.onclick = hideSuccessOverlay;
+      btnNewRequest.onclick = ()=>{
+        hideSuccessOverlay();
+        const start = new Date(); start.setDate(start.getDate()+7); start.setHours(10,0,0,0);
+        const end = new Date(start.getTime() + DEFAULT_TAP_MINUTES*60000);
+        openModal({ school: SCHOOLS[currentKey]?.name || '', start, end });
+      };
+    }
+    function hideSuccessOverlay(){
+      successOverlay.style.display = 'none';
+    }
+
+    // (Oude kleine toast-functie blijft beschikbaar, maar wordt niet meer aangeroepen)
+    function showToast(text){
+      successText.textContent = text;
+      successMsg.classList.add('show');
+      setTimeout(()=> successMsg.classList.remove('show'), 3000);
+    }
+
     form.addEventListener('submit', async (e)=>{
-      // If invalid, block submission
       if(!validateTimes()){
         e.preventDefault();
         return;
       }
-
-      // Allow Netlify to capture even if JS fails:
-      // We intercept to send via fetch (no page reload).
       e.preventDefault();
 
       btnSubmit.classList.add('loading');
@@ -876,7 +1004,6 @@
 
       try{
         const formData = new FormData(form);
-        // Ensure form-name is present (safety in case of edits)
         if(!formData.get('form-name')){
           formData.append('form-name', form.getAttribute('name') || 'requestForm');
         }
@@ -887,10 +1014,16 @@
           body: encodeFormData(formData)
         });
 
-        showToast(langSelect.value==='en' ? 'Request submitted. We will contact you by email.' : 'Anfrage gesendet. Wir melden uns per E-Mail.');
+        // >>> Gebruik overlay in plaats van kleine toast <<<
+        showSuccessOverlay({
+          school: fSchool.value,
+          from: fFrom.value,
+          to:   fTo.value,
+          persons: fPersons.value
+        });
+
         closeModal();
       }catch(err){
-        // Fallback: if fetch fails, let the browser submit normally next time
         alert('Senden fehlgeschlagen. Bitte erneut versuchen oder JavaScript deaktivieren.');
       }finally{
         btnSubmit.classList.remove('loading');
@@ -898,11 +1031,80 @@
       }
     });
 
-    function showToast(text){
-      successText.textContent = text;
-      successMsg.classList.add('show');
-      setTimeout(()=> successMsg.classList.remove('show'), 3000);
+    function showToastLegacy(text){
+      // Niet gebruikt; placeholder om regressies te vermijden
+      showToast(text);
     }
+
+    // ===== Tooltip / Popover logic =====
+    function togglePopover(){
+      const isOpen = timePopover.classList.contains('show');
+      if(isOpen){ hidePopover(); return; }
+      showPopover();
+    }
+    function showPopover(){
+      timePopover.classList.add('show');
+      timePopover.setAttribute('aria-hidden','false');
+      timeInfoIcon.setAttribute('aria-expanded','true');
+      const rect = timePopover.getBoundingClientRect();
+      if(rect.right > window.innerWidth - 12){
+        timePopover.style.left = 'auto';
+        timePopover.style.right = '0';
+      }else{
+        timePopover.style.left = '0';
+        timePopover.style.right = 'auto';
+      }
+    }
+    function hidePopover(){
+      timePopover.classList.remove('show');
+      timePopover.setAttribute('aria-hidden','true');
+      timeInfoIcon.setAttribute('aria-expanded','false');
+    }
+    document.addEventListener('click', (e)=>{
+      if(!timePopover.classList.contains('show')) return;
+      const within = e.target.closest('.tooltip-wrap');
+      if(!within) hidePopover();
+    });
+    document.addEventListener('keydown', (e)=>{
+      if(e.key === 'Escape') hidePopover();
+      if((e.key === 'Enter' || e.key === ' ') && document.activeElement === timeInfoIcon){
+        e.preventDefault(); togglePopover();
+      }
+    });
+    timeInfoIcon.addEventListener('click', (e)=>{ e.stopPropagation(); togglePopover(); });
+    timeInfoIcon.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); togglePopover(); } });
+
+    // ===== Utils =====
+    function toInputLocal(date){
+      const d = (date instanceof Date) ? date : new Date(date);
+      const pad = n => String(n).padStart(2,'0');
+      const y = d.getFullYear();
+      const m = pad(d.getMonth()+1);
+      const dd = pad(d.getDate());
+      const hh = pad(d.getHours());
+      const mm = pad(d.getMinutes());
+      return `${y}-${m}-${dd}T${hh}:${mm}`;
+    }
+    function parseLocalDT(v){
+      if(!v) return null;
+      const [date, time] = v.split('T');
+      if(!date || !time) return null;
+      const [y,m,d] = date.split('-').map(Number);
+      const [hh,mm] = time.split(':').map(Number);
+      return new Date(y, (m-1), d, hh, mm, 0, 0);
+    }
+    function euro(n){
+      return new Intl.NumberFormat('de-DE',{style:'currency',currency:'EUR', maximumFractionDigits:2}).format(n);
+    }
+
+    // ===== Events =====
+    schoolSelect.addEventListener('change', (e)=> { loadCalendar(e.target.value); });
+    langSelect.addEventListener('change', applyI18n);
+    mobileAdd.addEventListener('click', ()=>{
+      const start = new Date(); start.setDate(start.getDate()+7); start.setHours(10,0,0,0);
+      const end = new Date(start.getTime() + DEFAULT_TAP_MINUTES*60000);
+      openModal({ school: SCHOOLS[currentKey]?.name || '', start, end });
+    });
 
     async function loadCalendar(key){
       currentKey = key;
@@ -1060,68 +1262,7 @@
       timePopover.textContent = L.bdTimeInfo;
     }
 
-    // ===== Tooltip / Popover logic =====
-    function togglePopover(){
-      const isOpen = timePopover.classList.contains('show');
-      if(isOpen){ hidePopover(); return; }
-      showPopover();
-    }
-    function showPopover(){
-      timePopover.classList.add('show');
-      timePopover.setAttribute('aria-hidden','false');
-      timeInfoIcon.setAttribute('aria-expanded','true');
-      const rect = timePopover.getBoundingClientRect();
-      if(rect.right > window.innerWidth - 12){
-        timePopover.style.left = 'auto';
-        timePopover.style.right = '0';
-      }else{
-        timePopover.style.left = '0';
-        timePopover.style.right = 'auto';
-      }
-    }
-    function hidePopover(){
-      timePopover.classList.remove('show');
-      timePopover.setAttribute('aria-hidden','true');
-      timeInfoIcon.setAttribute('aria-expanded','false');
-    }
-    document.addEventListener('click', (e)=>{
-      if(!timePopover.classList.contains('show')) return;
-      const within = e.target.closest('.tooltip-wrap');
-      if(!within) hidePopover();
-    });
-    document.addEventListener('keydown', (e)=>{
-      if(e.key === 'Escape') hidePopover();
-      if((e.key === 'Enter' || e.key === ' ') && document.activeElement === timeInfoIcon){
-        e.preventDefault(); togglePopover();
-      }
-    });
-    timeInfoIcon.addEventListener('click', (e)=>{ e.stopPropagation(); togglePopover(); });
-    timeInfoIcon.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); togglePopover(); } });
-
-    // ===== Utils =====
-    function toInputLocal(date){
-      const d = (date instanceof Date) ? date : new Date(date);
-      const pad = n => String(n).padStart(2,'0');
-      const y = d.getFullYear();
-      const m = pad(d.getMonth()+1);
-      const dd = pad(d.getDate());
-      const hh = pad(d.getHours());
-      const mm = pad(d.getMinutes());
-      return `${y}-${m}-${dd}T${hh}:${mm}`;
-    }
-    function parseLocalDT(v){
-      if(!v) return null;
-      const [date, time] = v.split('T');
-      if(!date || !time) return null;
-      const [y,m,d] = date.split('-').map(Number);
-      const [hh,mm] = time.split(':').map(Number);
-      return new Date(y, (m-1), d, hh, mm, 0, 0);
-    }
-    function euro(n){
-      return new Intl.NumberFormat('de-DE',{style:'currency',currency:'EUR', maximumFractionDigits:2}).format(n);
-    }
-
-    // ===== Events =====
+    // ===== Init =====
     schoolSelect.addEventListener('change', (e)=> { loadCalendar(e.target.value); });
     langSelect.addEventListener('change', applyI18n);
     mobileAdd.addEventListener('click', ()=>{
@@ -1130,7 +1271,6 @@
       openModal({ school: SCHOOLS[currentKey]?.name || '', start, end });
     });
 
-    // init
     (async function init(){
       logoImg.style.display = 'block';
       document.getElementById('calendarLoading').firstChild.nodeValue = (I18N[langSelect.value]||I18N.de).loadingCalendar;
@@ -1141,6 +1281,3 @@
   </script>
 </body>
 </html>
-
-
-
