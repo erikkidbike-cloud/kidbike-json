@@ -52,7 +52,7 @@
     .fc .fc-button{background:var(--busy);border:1px solid #045983;color:#fff;min-height:44px;}
     .fc .fc-button:hover{filter:brightness(0.95)}
     .fc .fc-toolbar-title{font-weight:700}
-    .fc-timegrid-slot{min-height:22px;}
+    .fc-timegrid-slot{min-height:18px;}
     .fc-event.busy{
       background:var(--busy)!important;
       border:1px solid #045983!important;
@@ -186,7 +186,7 @@
       #calendar{ margin: 10px auto; padding: 6px; }
       .modal{ max-width: 96vw; padding: 16px; }
       .mobile-add{display:block;}
-      .fc-timegrid-slot{min-height:28px;}
+      .fc-timegrid-slot{min-height:18px;}
     }
     @media (max-width: 640px){
       header { flex-direction: column; align-items: flex-start; gap: 8px; }
@@ -1162,11 +1162,12 @@
         initialView: desiredView(),
         firstDay: 1,
         locale: langSelect.value === 'en' ? 'en-gb' : 'de',
-        timeZone: 'local',
+        timeZone: 'Europe/Berlin',
+        scrollTime: '08:00:00', // startpositie van de verticale scroll
         slotMinTime: '00:00:00',
         slotMaxTime: '24:00:00',
         allDaySlot: false,
-        nowIndicator: true,
+        nowIndicator: false,
         selectable: true,
         selectMirror: true,
         selectMinDistance: 1,
@@ -1174,8 +1175,8 @@
         selectLongPressDelay: 120,
         unselectAuto: true,
         selectOverlap: true,
-        height: 'auto',
-        expandRows: true,
+        height: '640',
+        expandRows: false,    // voorkomt oprekken naar volledige kaart-hoogte
         selectAllow: selectAllowFn,
         events: busyEvents,
         windowResize: () => applyResponsiveView(),
