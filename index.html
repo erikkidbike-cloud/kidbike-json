@@ -1163,9 +1163,10 @@
         firstDay: 1,
         locale: langSelect.value === 'en' ? 'en-gb' : 'de',
         timeZone: 'Europe/Berlin',
-        scrollTime: '08:00:00', // startpositie van de verticale scroll
-        slotMinTime: '08:00:00',
+        scrollTime: '10:00:00', // startpositie van de verticale scroll
+        slotMinTime: '00:00:00',
         slotMaxTime: '24:00:00',
+        height: 640,
         allDaySlot: false,
         nowIndicator: true,
         selectable: true,
@@ -1176,7 +1177,7 @@
         unselectAuto: true,
         selectOverlap: true,
         height: 'auto',
-        expandRows: true,
+        expandRows: false,
         selectAllow: selectAllowFn,
         events: busyEvents,
         windowResize: () => applyResponsiveView(),
