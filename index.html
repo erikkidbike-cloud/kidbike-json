@@ -339,13 +339,6 @@
   </div>
 </div>
 
-<!-- Bericht -->
-<div class="field" style="grid-column:1/-1">
-  <label id="labelMsg">Nachricht (optional)</label>
-  <textarea id="fMsg" name="message" rows="3" placeholder="Weitere Hinweise…"></textarea>
-</div>
-
-
           <!-- Bericht -->
           <div class="field" style="grid-column:1/-1">
             <label id="labelMsg">Nachricht (optional)</label>
@@ -889,7 +882,9 @@
           if(overlaps(start, end, bS, bE)){ ok = false; break; }
         }
       }
-      conflictMsg.style.display = ok ? 'none' : 'block';
+      const showConflict = !ok && (wasSubmitted || (fFrom.dataset.touched==='1' && fTo.dataset.touched==='1'));
+      conflictMsg.style.display = showConflict ? 'block' : 'none';
+
 
       if(start && start < minStartDate()) shortTermMsg.classList.add('show'); else shortTermMsg.classList.remove('show');
 
