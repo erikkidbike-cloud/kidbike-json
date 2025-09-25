@@ -138,6 +138,24 @@
     .school-card.disabled{opacity:.55;filter:grayscale(0.2);background:var(--disabled-bg);}
     .school-card.disabled .status{color:#92400e;background:#fef3c7;border-color:#fde68a;}
 
+    /* --- compactere rijen --- */
+    .row{display:grid;gap:8px}
+    .row.cols-3 {grid-template-columns: 120px 1fr 1fr;} /* salutation | first | last */
+    .row.cols-3b{grid-template-columns: 1fr 120px 1fr;} /* email | country | phone */
+
+    /* small form controls */
+    .field.sm select,.field.sm input{padding:8px 10px}
+
+    /* checkbox-rij compacter en duidelijk */
+    .checkline{display:inline-flex;align-items:center;gap:8px;font-weight:600}
+    .checkline input[type="checkbox"]{margin:0}
+
+    /* foutmelding alleen tonen als .error gezet is (zie JS) */
+    .field .error-msg{display:none}
+    .field input.error + .error-msg,
+    .field select.error + .error-msg{display:block}
+
+
     @media (max-width:900px){
       .start-grid{grid-template-columns:1fr;}
       .success-actions{flex-direction:column;}
@@ -221,115 +239,112 @@
       <form id="requestForm" name="requestForm" novalidate>
         <div class="grid">
           <!-- Standort / Personen -->
-          <div class="field">
-            <label id="labelFormSchool">Verkehrsschule *</label>
-            <input id="fSchool" name="school" type="text" required readonly>
-          </div>
-          <div class="field">
-            <label id="labelPersons">Anzahl Personen *</label>
-            <input id="fPersons" name="persons" type="number" min="1" step="1" placeholder="z. B. 30" required>
-            <div class="error-msg">Bitte Anzahl eingeben</div>
-          </div>
+          <!-- Buchungsdetails -->
+<div class="field">
+  <label id="labelFormSchool">Verkehrsschule *</label>
+  <input id="fSchool" name="school" type="text" required readonly>
+</div>
+<div class="field">
+  <label id="labelPersons">Anzahl Personen *</label>
+  <input id="fPersons" name="persons" type="number" min="1" step="1" placeholder="z. B. 30" required>
+  <div class="error-msg">Bitte Anzahl eingeben</div>
+</div>
 
-          <!-- Von / Bis -->
-          <div class="field">
-            <label id="labelFrom">Datum/Zeit von *</label>
-            <input id="fFrom" name="from" type="datetime-local" required>
-          </div>
-            <div class="field">
-            <label id="labelTo">Datum/Zeit bis *</label>
-            <input id="fTo" name="to" type="datetime-local" required>
-          </div>
+<div class="field">
+  <label id="labelFrom">Datum/Zeit von *</label>
+  <input id="fFrom" name="from" type="datetime-local" required>
+</div>
+<div class="field">
+  <label id="labelTo">Datum/Zeit bis *</label>
+  <input id="fTo" name="to" type="datetime-local" required>
+</div>
 
-          <!-- Aanhef + Namen -->
-          <div class="field">
-            <label id="labelSalutation">Anrede</label>
-            <select id="fSalutation" name="salutation">
-              <option value=""></option>
-              <option value="Frau">Frau</option>
-              <option value="Herr">Herr</option>
-              <option value="Divers">Divers</option>
-              <option value="Keine Angabe">Keine Angabe</option>
-            </select>
-          </div>
-          <div class="field"></div>
+<!-- Persoonsgegevens: anrede | voornaam | achternaam -->
+<div class="row cols-3" style="grid-column:1/-1">
+  <div class="field sm">
+    <label id="labelSalutation">Anrede</label>
+    <select id="fSalutation" name="salutation">
+      <option value=""></option>
+      <option value="Frau">Frau</option>
+      <option value="Herr">Herr</option>
+      <option value="Divers">Divers</option>
+      <option value="Keine Angabe">Keine Angabe</option>
+    </select>
+  </div>
+  <div class="field">
+    <label id="labelFirstName">Vorname</label>
+    <input id="fFirstName" name="first_name" type="text" placeholder="z. B. Alex">
+  </div>
+  <div class="field">
+    <label id="labelLastName">Nachname</label>
+    <input id="fLastName" name="last_name" type="text" placeholder="z. B. Müller">
+  </div>
+</div>
 
-          <div class="field">
-            <label id="labelFirstName">Vorname</label>
-            <input id="fFirstName" name="first_name" type="text" placeholder="z. B. Alex">
-          </div>
-          <div class="field">
-            <label id="labelLastName">Nachname</label>
-            <input id="fLastName" name="last_name" type="text" placeholder="z. B. Müller">
-          </div>
+<!-- Contact: e-mail | landcode | telefoon -->
+<div class="row cols-3b" style="grid-column:1/-1">
+  <div class="field">
+    <label id="labelEmail">E-Mail *</label>
+    <input id="fEmail" name="email" type="email" required placeholder="name@example.org">
+    <div class="error-msg">Gültige E-Mail-Adresse erforderlich</div>
+  </div>
+  <div class="field sm">
+    <label id="labelPhoneCountry">Vorwahl</label>
+    <select id="fPhoneCountry" name="phone_country">
+      <option value="+49" selected>🇩🇪 +49 (DE)</option>
+      <option value="+43">🇦🇹 +43 (AT)</option>
+      <option value="+41">🇨🇭 +41 (CH)</option>
+      <option value="+31">🇳🇱 +31 (NL)</option>
+      <option value="+48">🇵🇱 +48 (PL)</option>
+    </select>
+  </div>
+  <div class="field">
+    <label id="labelPhone">Telefonnummer *</label>
+    <input id="fPhoneNat" name="phone_national" type="tel" inputmode="numeric" pattern="[0-9 ]*" placeholder="z. B. 1512345678" required>
+    <div class="error-msg">Bitte eine gültige Nummer angeben</div>
+  </div>
+</div>
 
-          <!-- E-mail -->
-          <div class="field">
-            <label id="labelEmail">E-Mail *</label>
-            <input id="fEmail" name="email" type="email" required placeholder="name@example.org">
-            <div class="error-msg">Gültige E-Mail-Adresse erforderlich</div>
-          </div>
+<!-- Adres (met suggesties) -->
+<div class="field" style="grid-column:1/-1">
+  <label id="labelAddress">Anschrift *</label>
+  <div class="row-compact">
+    <input id="fStreet" name="street" type="text" placeholder="Straße" required list="streetHints">
+    <input id="fHouse"  name="house"  type="text" placeholder="Nr." required>
+    <input id="fZipCity" name="zipcity" type="text" placeholder="PLZ Ort" required list="cityHints">
+  </div>
+  <datalist id="streetHints"></datalist>
+  <datalist id="cityHints"></datalist>
+  <input id="fAddressFull" name="address" type="hidden">
+  <div class="hint" id="addrHintHelp" style="margin-top:6px;display:none"></div>
+</div>
 
-          <!-- Telefoon met landcode -->
-          <div class="field row-phone" style="grid-column:1/-1">
-            <div>
-              <label id="labelPhoneCountry">Vorwahl</label>
-              <select id="fPhoneCountry" name="phone_country">
-                <option value="+49" selected>🇩🇪 +49 (DE)</option>
-                <option value="+43">🇦🇹 +43 (AT)</option>
-                <option value="+41">🇨🇭 +41 (CH)</option>
-                <option value="+31">🇳🇱 +31 (NL)</option>
-                <option value="+48">🇵🇱 +48 (PL)</option>
-              </select>
-            </div>
-            <div>
-              <label id="labelPhone">Telefonnummer *</label>
-              <input id="fPhoneNat" name="phone_national" type="tel" placeholder="z. B. 151 2345678" required>
-              <div class="error-msg">Bitte eine gültige Nummer angeben</div>
-            </div>
-          </div>
+<!-- Eventdetails -->
+<div class="field" style="grid-column:1/-1">
+  <label id="labelType">Art der Feier</label>
+  <input id="fTypeFree" name="type_free" type="text" placeholder="z. B. Kindergeburtstag, Jubiläum, …">
+</div>
+<div class="field" style="grid-column:1/-1">
+  <label id="labelBikes">Nutzung Fahrräder (kostenlos): Anzahl &amp; Größen/Alter</label>
+  <input id="fBikes" name="bikes" type="text" placeholder="z. B. 6 Räder: 2×14'', 2×16'', 2×20'' / Alter 5–9">
+</div>
 
-          <!-- Adres (compact) -->
-          <div class="field" style="grid-column:1/-1">
-            <label id="labelAddress">Anschrift *</label>
-            <div class="row-compact">
-              <input id="fStreet" name="street" type="text" placeholder="Straße" required list="streetHints">
-              <input id="fHouse"  name="house"  type="text" placeholder="Nr." required>
-              <input id="fZipCity" name="zipcity" type="text" placeholder="PLZ Ort" required list="cityHints">
-            </div>
-            <datalist id="streetHints">
-              <option value="Wiener Straße">
-              <option value="Weinstraße">
-              <option value="Wassertorplatz">
-            </datalist>
-            <datalist id="cityHints">
-              <option value="10999 Berlin">
-              <option value="10249 Berlin">
-              <option value="12045 Berlin">
-            </datalist>
-            <!-- wordt automatisch gevuld en meegestuurd -->
-            <input id="fAddressFull" name="address" type="hidden">
-          </div>
+<!-- Extras -->
+<div class="field" style="grid-column:1/-1">
+  <label id="labelExtras">Extras (je 10,00 €)</label>
+  <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:6px;">
+    <label class="badge"><input type="checkbox" id="xParcours" name="extra_parcours"><span id="extraParcours">Fahrradparcours</span></label>
+    <label class="badge"><input type="checkbox" id="xGrill" name="extra_grill"><span id="extraGrill">Grill</span></label>
+    <label class="badge"><input type="checkbox" id="xTisch" name="extra_tischtennis"><span id="extraTisch">Tischtennisplatte</span></label>
+  </div>
+</div>
 
-          <!-- Bikes / Eventtype -->
-          <div class="field" style="grid-column:1/-1">
-            <label id="labelType">Art der Feier</label>
-            <input id="fTypeFree" name="type_free" type="text" placeholder="z. B. Kindergeburtstag, Jubiläum, …">
-          </div>
-          <div class="field" style="grid-column:1/-1">
-            <label id="labelBikes">Nutzung Fahrräder (kostenlos): Anzahl &amp; Größen/Alter</label>
-            <input id="fBikes" name="bikes" type="text" placeholder="z. B. 6 Räder: 2×14'', 2×16'', 2×20'' / Alter 5–9">
-          </div>
+<!-- Bericht -->
+<div class="field" style="grid-column:1/-1">
+  <label id="labelMsg">Nachricht (optional)</label>
+  <textarea id="fMsg" name="message" rows="3" placeholder="Weitere Hinweise…"></textarea>
+</div>
 
-          <!-- Extras -->
-          <div class="field" style="grid-column:1/-1">
-            <label id="labelExtras">Extras (je 10,00 €)</label>
-            <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:6px;">
-              <label class="badge"><input type="checkbox" id="xParcours" name="extra_parcours"><span id="extraParcours">Fahrradparcours</span></label>
-              <label class="badge"><input type="checkbox" id="xGrill" name="extra_grill"><span id="extraGrill">Grill</span></label>
-              <label class="badge"><input type="checkbox" id="xTisch" name="extra_tischtennis"><span id="extraTisch">Tischtennisplatte</span></label>
-            </div>
-          </div>
 
           <!-- Bericht -->
           <div class="field" style="grid-column:1/-1">
@@ -389,11 +404,12 @@
 
         <!-- Terms consent -->
         <div class="field" style="margin-top:8px;">
-          <label style="display:flex;gap:8px;align-items:center;font-weight:600;">
-            <input type="checkbox" id="fAccept" required>
+         <label class="checkline">
+           <input type="checkbox" id="fAccept" required>
             <span id="labelAccept">Ich habe die wesentlichen Bedingungen gelesen und akzeptiere sie.</span>
-          </label>
+         </label>
         </div>
+
 
         <div class="modal-actions">
           <button type="button" class="btn danger" id="btnCancel">Abbrechen</button>
@@ -672,6 +688,7 @@
     let calendar = null;
     let currentKey = null;
     let busyEvents = [];
+    let wasSubmitted = false;
     const availability = {};
     let CURRENT_PRICE = null;
 
@@ -849,7 +866,13 @@
 
     [fStreet,fHouse,fZipCity].forEach(el=>{ el.addEventListener('input', ()=>{ formatAddress(); validateTimes(); }); });
 
-    function highlight(el, on){ el.classList.toggle('error', !!on); }
+    function highlight(el, on){
+     const shouldShow = on && (wasSubmitted || el.dataset.touched === '1');
+     el.classList.toggle('error', !!shouldShow);
+     const msg = el.parentElement.querySelector('.error-msg');
+     if (msg) msg.style.display = shouldShow ? 'block' : 'none';
+}
+
 
     function validateTimes(){
       const start = parseLocalDT(fFrom.value);
@@ -933,8 +956,75 @@
       el.addEventListener('change', validateTimes);
       el.addEventListener('input', validateTimes);
     });
+// toon fouten pas na blur of submit
+[fFrom,fTo,fPersons,fEmail,fPhoneNat,fStreet,fHouse,fZipCity].forEach(el=>{
+  el.addEventListener('blur', ()=>{ el.dataset.touched = '1'; validateTimes(); });
+});
 
     /* ===== Utils ===== */
+    function debounce(fn, ms=300){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a), ms); }; }
+async function nominatim(q){
+  if(!q || q.length < 3) return [];
+  const url = `https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&limit=6&countrycodes=de&q=${encodeURIComponent(q)}`;
+  const res = await fetch(url, {headers:{'Accept':'application/json'}});
+  if(!res.ok) return [];
+  return res.json();
+}
+const streetHints = document.getElementById('streetHints');
+const cityHints   = document.getElementById('cityHints');
+const addrHintHelp = document.getElementById('addrHintHelp');
+function setDatalist(listEl, items){ listEl.innerHTML = items.map(v=>`<option value="${v}">`).join(''); }
+
+const updateStreetHints = debounce(async ()=>{
+  const base = (fStreet.value||'').trim();
+  const city = (fZipCity.value||'').trim();
+  const q = city ? `${base} ${city}` : base;
+  const data = await nominatim(q);
+  const opts = [];
+  data.forEach(r=>{
+    const a = r.address||{};
+    const street = a.road || a.pedestrian || a.footway || a.path || '';
+    const plz    = a.postcode || '';
+    const town   = a.city || a.town || a.village || a.suburb || '';
+    if(street) opts.push(street);
+    if(plz && town) opts.push(`${plz} ${town}`);
+  });
+  setDatalist(streetHints, [...new Set(opts)]);
+  addrHintHelp.style.display = data.length ? 'block' : 'none';
+  addrHintHelp.textContent   = data.length ? 'Tipp: Vorschläge auswählen, Felder füllen sich automatisch.' : '';
+}, 350);
+
+const updateCityHints = debounce(async ()=>{
+  const q = (fZipCity.value||'').trim();
+  const data = await nominatim(q);
+  const opts = [];
+  data.forEach(r=>{
+    const a = r.address||{};
+    const plz  = a.postcode || '';
+    const city = a.city || a.town || a.village || a.suburb || '';
+    if(plz && city) opts.push(`${plz} ${city}`);
+  });
+  setDatalist(cityHints, [...new Set(opts)]);
+}, 350);
+
+async function tryFillFromSelection(){
+  const q = [fStreet.value, fZipCity.value].filter(Boolean).join(' ');
+  const best = (await nominatim(q))[0];
+  if(!best) return;
+  const a = best.address||{};
+  if(a.road) fStreet.value = a.road;
+  if(a.house_number && !fHouse.value) fHouse.value = a.house_number;
+  const plz  = a.postcode || '';
+  const city = a.city || a.town || a.village || a.suburb || '';
+  if(plz || city) fZipCity.value = [plz, city].filter(Boolean).join(' ');
+  formatAddress(); validateTimes();
+}
+
+fStreet.addEventListener('input', updateStreetHints);
+fZipCity.addEventListener('input', updateCityHints);
+fStreet.addEventListener('change', tryFillFromSelection);
+fZipCity.addEventListener('change', tryFillFromSelection);
+
     function formatDT(dt, lang){
       const d = (dt instanceof Date) ? dt : new Date(dt);
       return d.toLocaleString(lang === 'en' ? 'en-GB' : 'de-DE', {year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit'});
@@ -960,7 +1050,14 @@
       currentKey = key;
       loadCalendar(key);
     });
-   
+    
+     // laat alleen digits toe in nationale telefoon
+    fPhoneNat.addEventListener('input', ()=>{
+      const cur = fPhoneNat.selectionStart;
+      fPhoneNat.value = (fPhoneNat.value || '').replace(/[^\d]/g,'');
+      fPhoneNat.setSelectionRange(cur, cur);
+    });
+
     langSelect.addEventListener('change', applyI18n);
 
     mobileAdd.addEventListener('click', ()=>{
@@ -1204,8 +1301,14 @@
     const SECRET = "kidbike_0d2e1f8d3a7c4b9e5f2a1c8d7b4e3f"; // exact gelijk aan Script Property
 
     form.addEventListener('submit', async (e)=>{
-      e.preventDefault();
-      if(!validateTimes()) return;
+    e.preventDefault();
+    wasSubmitted = true;
+    if(!validateTimes()) {
+    const firstErr = [fPersons,fFrom,fTo,fEmail,fPhoneNat,fStreet,fHouse,fZipCity]
+      .find(el=>el.classList.contains('error'));
+    if(firstErr) firstErr.focus();
+     return;
+      }
 
       btnSubmit.classList.add('loading');
       btnSubmit.disabled = true;
