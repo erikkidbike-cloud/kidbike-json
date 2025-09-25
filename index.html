@@ -823,11 +823,17 @@
           priceText: priceValue.textContent     // wat de gebruiker letterlijk zag
         };
 
-        const res = await fetch(APPS_SCRIPT_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
+        // voeg de actuele prijs toe als dat er is
+if (CURRENT_PRICE) payload.price = CURRENT_PRICE;
+
+const res = await fetch(APPS_SCRIPT_URL, {
+  method: 'POST',
+  // CORS-preflight vermijden: alleen 'text/plain' en geen extra headers
+  headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+  body: JSON.stringify(payload),
+  redirect: 'follow'
+});
+
 
         if (!res.ok) {
           const txt = await res.text().catch(()=> "");
