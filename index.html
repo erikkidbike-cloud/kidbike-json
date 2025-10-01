@@ -11,6 +11,8 @@
 
 
     <style>
+    /* toon vaste + knop op touch devices */
+    .touch .mobile-add { display: block; }
     /* --- Fix horizontale scroll in embed --- */
     html, body { overflow-x: hidden; width:100%; max-width:100%; }
     header, .intro, #calendar { max-width: 100%; }
@@ -589,6 +591,10 @@
       WE: { name: "Verkehrsschule Weinstraße",        short:"Weinstraße",     file: "events-we.json", address: "Weinstraße 2, 10249 Berlin" }
     };
 
+    function isTouchDevice(){
+      return window.matchMedia('(pointer: coarse)').matches || navigator.maxTouchPoints > 0;
+    }
+
     /* ===== DOM refs ===== */
     const schoolSelect = document.getElementById('schoolSelect');
     const langSelect   = document.getElementById('langSelect');
@@ -1098,13 +1104,18 @@ fZipCity.addEventListener('change', tryFillFromSelection);
         expandRows: true,    // benut alle rijen i.p.v. intern scrollen
         allDaySlot: false,
         nowIndicator: false,
-        selectable: true,
         selectMirror: true,
-        selectMinDistance: 1,
         longPressDelay: 120,
-        selectLongPressDelay: 120,
         unselectAuto: true,
         selectOverlap: true,
+        
+        // *** BELANGRIJK: op touch geen drag-selectie ***
+        selectable: !isTouchDevice(),
+        // maak drag-selectie moeilijker als het (desktop) wel aan staat
+        selectMinDistance: 8,
+        longPressDelay: 300,
+        selectLongPressDelay: 300,
+
         selectAllow: selectAllowFn,
         events: busyEvents,
         windowResize: () => applyResponsiveView(),
@@ -1121,6 +1132,7 @@ fZipCity.addEventListener('change', tryFillFromSelection);
       });
 
       calendar.render();
+      mobileAdd.style.display = isTouchDevice() ? 'block' : 'none';
       applyResponsiveView();
       calendarLoading.style.display = 'none';
       calendarEl.classList.add('loaded');
@@ -1391,12 +1403,16 @@ fZipCity.addEventListener('change', tryFillFromSelection);
     });
 
     /* ===== Init ===== */
+    
     (async function init(){
       logoImg.style.display = 'block';
       document.getElementById('calendarLoading').firstChild.nodeValue = (I18N[langSelect.value]||I18N.de).loadingCalendar;
       await discoverSchools();
       applyI18n();
       window.addEventListener('resize', () => applyResponsiveView());
+      // toggle body class voor CSS en later gedrag
+      document.body.classList.toggle('touch', isTouchDevice());
+
     })();
 
   </script>
