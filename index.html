@@ -1075,10 +1075,10 @@ fZipCity.addEventListener('change', tryFillFromSelection);
         firstDay: 1,
         locale: langSelect.value === 'en' ? 'en-gb' : 'de',
         timeZone: 'local',
-        scrollTime: '10:00:00',
-        slotMinTime: '00:00:00',
+        slotMinTime: '08:00:00',
         slotMaxTime: '24:00:00',
-        height: 640,
+        height: 'auto',      // laat FC meegroeien → geen interne scroll
+        expandRows: true,    // benut alle rijen i.p.v. intern scrollen
         allDaySlot: false,
         nowIndicator: false,
         selectable: true,
@@ -1088,7 +1088,6 @@ fZipCity.addEventListener('change', tryFillFromSelection);
         selectLongPressDelay: 120,
         unselectAuto: true,
         selectOverlap: true,
-        expandRows: false,
         selectAllow: selectAllowFn,
         events: busyEvents,
         windowResize: () => applyResponsiveView(),
