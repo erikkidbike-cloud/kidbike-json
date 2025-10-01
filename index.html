@@ -8,40 +8,25 @@
   <!-- FullCalendar -->
   <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
-/* --- Fix horizontale scroll in embed --- */
-html, body {
-  overflow-x: hidden;
-}
 
-header, .intro, #calendar {
-  max-width: 100%;
-}
 
-/* FullCalendar netjes binnen viewport */
-.fc, .fc-scrollgrid {
-  max-width: 100% !important;
-}
-.fc .fc-scroller {
-  overflow-x: hidden !important;
-}
-.fc .fc-scrollgrid table,
-.fc .fc-timegrid-body table {
-  width: 100% !important;
-  table-layout: fixed;
-}
+    <style>
+    /* --- Fix horizontale scroll in embed --- */
+    html, body { overflow-x: hidden; width:100%; max-width:100%; }
+    header, .intro, #calendar { max-width: 100%; }
 
-/* Dropdowns en knoppen responsief op smal scherm */
-@media (max-width: 480px) {
-  .controls {
-    align-items: stretch;
-  }
-  .controls select {
-    min-width: 0;
-    width: 100%;
-  }
-}
+    /* FullCalendar binnen viewport houden */
+    .fc, .fc-scrollgrid { max-width: 100% !important; }
+    .fc .fc-scroller { overflow-x: hidden !important; }
+    .fc .fc-scrollgrid table,
+    .fc .fc-timegrid-body table { width: 100% !important; table-layout: fixed; }
+    .fc .fc-toolbar { flex-wrap: wrap; }
 
-  <style>
+    @media (max-width: 480px) {
+      .controls { align-items: stretch; }
+      .controls select { min-width: 0; width: 100%; }
+    }
+
     :root{
       --bg:#f7f9fb; --card:#ffffff; --border:#d8dee6; --ink:#111827;
       --muted:#667085; --brand:#0ea5e9; --busy:#036ba7; --green:#16a34a; --warn:#b91c1c;
