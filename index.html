@@ -1384,5 +1384,29 @@ fZipCity.addEventListener('change', tryFillFromSelection);
     })();
 
   </script>
+  <script>
+  (function () {
+    function sendHeight() {
+      var doc = document.documentElement;
+      var body = document.body;
+      var h = Math.max(
+        body.scrollHeight, body.offsetHeight,
+        doc.clientHeight, doc.scrollHeight, doc.offsetHeight
+      );
+      // Stuur hoogte naar de ouder (je kunt hier i.p.v. '*' de exacte ouder-URL invullen)
+      parent.postMessage({ type: 'embed-size', height: h }, '*');
+    }
+
+    // Stuur op load, resize en wanneer de layout verandert
+    window.addEventListener('load', sendHeight);
+    window.addEventListener('resize', sendHeight);
+
+    // Reageer ook op DOM-mutaties (inhoud die later laadt)
+    var ro = new ResizeObserver(sendHeight);
+    ro.observe(document.body);
+  })();
+</script>
+
 </body>
 </html>
+
