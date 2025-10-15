@@ -704,7 +704,7 @@
     const btnNewRequest = document.getElementById('btnNewRequest');
     const mobileAdd = document.getElementById('mobileAdd');
 
-    const DEFAULT_TAP_MINUTES = 60;
+    const DEFAULT_TAP_MINUTES = 120;
     const MAX_EVENT_HOURS   = 24;
     const FALLBACK_MINUTES  = 120;
 
@@ -1105,8 +1105,8 @@ fZipCity.addEventListener('change', tryFillFromSelection);
         firstDay: 1,
         locale: langSelect.value === 'en' ? 'en-gb' : 'de',
         timeZone: 'local',
-        slotMinTime: '08:00:00',
-        slotMaxTime: '24:00:00',
+        slotMinTime: '12:00:00',
+        slotMaxTime: '22:00:00',
         height: 'auto',      // laat FC meegroeien → geen interne scroll
         expandRows: true,    // benut alle rijen i.p.v. intern scrollen
         allDaySlot: false,
