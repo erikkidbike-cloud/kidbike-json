@@ -46,8 +46,9 @@
     .badge .price{opacity:.8;font-weight:600;font-size:11px}
 
     /* prijs "pill" + toggle details */
-    .price{display:flex;align-items:center;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid var(--border)}
+    .price{display:flex;align-items:center;gap:8px}
     .price .pill{padding:6px 10px;border-radius:999px;background:#0ea5e91a;border:1px solid #bae6fd}
+    .price .toggle{cursor:pointer;font-size:12px;text-decoration:underline}
 
     /* sticky submit-balk */
     .sticky-bar{position:sticky;bottom:0;z-index:5;background:#fff;border-top:1px solid var(--border);
@@ -126,9 +127,9 @@
       max-height:92vh;overflow-y:auto;margin:auto;box-shadow:0 20px 60px rgba(0,0,0,0.12);}
     .modal h3{margin:0 0 10px;font-size:18px;}
 
-    .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
     .grid-1{grid-template-columns:1fr}
-    .field{margin-bottom:8px;}
+    .field{margin-bottom:10px;}
     .field label{display:block;font-size:12px;color:var(--muted);margin-bottom:4px;font-weight:600;letter-spacing:.2px}
     .row-compact{display:grid;grid-template-columns:1fr 110px;gap:8px} 
     .row-compact > div{display:grid;grid-template-columns:90px 1fr;gap:8px}
@@ -160,8 +161,8 @@
     details.summarybox{margin-top:10px;border:1px dashed var(--border);padding:10px;border-radius:10px;background:#fafbfc}
     details.summarybox summary{cursor:pointer;font-weight:700;font-size:14px}
 
-    .breakdown{margin-top:8px;font-size:13px;color:#374141;display:block}
-    .breakdown .row{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:2px 0;}
+    .breakdown{margin-top:6px;font-size:13px;color:#374141;display:none}
+    .breakdown .row{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:1px 0;}
     .breakdown .muted{color:#6b7280}
     .breakdown .total{font-weight:800;border-top:1px dashed var(--border);padding-top:6px;margin-top:6px}
 
@@ -327,30 +328,23 @@
           <!-- Extras: voeg +€10 badge toe in labels -->
           <div class="field" style="grid-column:1/-1">
             <label id="labelExtras">Extras (je 10,00 €)</label>
-            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;">
-              <label class="badge">
-                <input type="checkbox" id="xParcours" name="extra_parcours">
-                <span id="extraParcours">Fahrradparcours</span>
-                <span class="price">+10€</span>
-              </label>
-              <label class="badge">
-                <input type="checkbox" id="xGrill" name="extra_grill">
-                <span id="extraGrill">Grill</span>
-                <span class="price">+10€</span>
-              </label>
-              <label class="badge">
-                <input type="checkbox" id="xTisch" name="extra_tischtennis">
-                <span id="extraTisch">Tischtennisplatte</span>
-                <span class="price">+10€</span>
-              </label>
+            <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:6px;">
+              <label class="badge"><input type="checkbox" id="xParcours" name="extra_parcours">
+                <span id="extraParcours">Fahrradparcours</span><span class="price">+10€</span></label>
+              <label class="badge"><input type="checkbox" id="xGrill" name="extra_grill">
+                <span id="extraGrill">Grill</span><span class="price">+10€</span></label>
+              <label class="badge"><input type="checkbox" id="xTisch" name="extra_tischtennis">
+                <span id="extraTisch">Tischtennisplatte</span><span class="price">+10€</span></label>
             </div>
+            <div class="hint" id="extrasRunning" style="margin-top:4px">Extras: 0€</div>
           </div>
 
-          <!-- Prijs: compact, altijd zichtbare details -->
+          <!-- Prijs: compact, met toggle -->
           <div id="priceBox" class="price" aria-live="polite">
             <span class="pill"><strong id="priceTitle">Vorläufige Preisindikation:</strong> <span id="priceValue">–</span></span>
+            <span id="priceToggle" class="toggle">Details</span>
           </div>
-          <div id="priceHint" class="hint" style="margin-top:4px">(unverbindlich; endgültige Bestätigung und ggf. Anpassungen vorbehalten)</div>
+          <div id="priceHint" class="hint">(unverbindlich; endgültige Bestätigung und ggf. Anpassungen vorbehalten)</div>
           <div id="priceBreakdown" class="breakdown">
             <div class="row"><span id="bdBaseLabel" class="muted">Basis</span><span id="bdBase">–</span></div>
             <div class="row"><span id="bdPersonsLabel" class="muted">Personen-Staffel</span><span id="bdPersons">–</span></div>
@@ -436,12 +430,12 @@
               <div class="hint" id="addrHintHelp" style="margin-top:6px;display:none"></div>
             </div>
 
-            <!-- Eventdetails - side by side -->
-            <div class="field">
+            <!-- Eventdetails -->
+            <div class="field" style="grid-column:1/-1">
               <label id="labelType">Art der Feier</label>
               <input id="fTypeFree" name="type_free" type="text" placeholder="z. B. Kindergeburtstag, Jubiläum, …">
             </div>
-            <div class="field">
+            <div class="field" style="grid-column:1/-1">
               <label id="labelBikes">Nutzung Fahrräder (kostenlos): Anzahl &amp; Größen/Alter</label>
               <input id="fBikes" name="bikes" type="text" placeholder="z. B. 6 Räder: 2×14'', 2×16'', 2×20'' / Alter 5–9">
             </div>
@@ -454,7 +448,7 @@
           </div>
 
           <!-- Wesentliche Bedingungen -->
-          <details class="summarybox" style="margin-top:8px">
+          <details class="summarybox">
             <summary id="termsSummary">Wesentliche Bedingungen (Kurzfassung)</summary>
             <ul id="termsList" style="margin:8px 0 0 16px;padding:0">
               <li>Nutzungsentgelt vorab per Überweisung; Reservierung erst verbindlich nach Zahlungseingang.</li>
@@ -475,8 +469,8 @@
           </div>
         </div>
 
-        <!-- Sticky verzendbalk - alleen in step 2 zichtbaar -->
-        <div class="sticky-bar" id="stickyBar" style="display:none">
+        <!-- Sticky verzendbalk -->
+        <div class="sticky-bar" id="stickyBar">
           <div class="sum" id="stickySum">
             <b id="stickyPrice">–</b> · <span id="stickyWhen">–</span> · <span id="stickyPersons">–</span>
           </div>
@@ -728,6 +722,10 @@
     const stickyPrice = document.getElementById('stickyPrice');
     const stickyWhen = document.getElementById('stickyWhen');
     const stickyPersons = document.getElementById('stickyPersons');
+
+    const priceTitle  = document.getElementById('priceTitle');
+    const priceHint   = document.getElementById('priceHint');
+    const priceValue  = document.getElementById('priceValue');
     const priceToggle = document.getElementById('priceToggle');
     const priceBreakdown = document.getElementById('priceBreakdown');
     const bdBaseLabel = document.getElementById('bdBaseLabel');
@@ -738,12 +736,18 @@
     const bdTime      = document.getElementById('bdTime');
     const bdExtrasLabel = document.getElementById('bdExtrasLabel');
     const bdExtras    = document.getElementById('bdExtras');
-    const bdExtrasLabel = document.getElementById('bdExtrasLabel');
-    const bdExtras    = document.getElementById('bdExtras');
     const bdTotalLabel= document.getElementById('bdTotalLabel');
     const bdTotal     = document.getElementById('bdTotal');
+    const extrasRunning = document.getElementById('extrasRunning');
 
     const btnSubmit   = document.getElementById('btnSubmit');
+
+    const timeInfoIcon = document.getElementById('timeInfo');
+    const timePopover  = document.getElementById('timeInfoPopover');
+
+    const xParcours = document.getElementById('xParcours');
+    const xGrill    = document.getElementById('xGrill');
+    const xTisch    = document.getElementById('xTisch');
 
     const successMsg  = document.getElementById('successMsg');
     const successText = document.getElementById('successText');
@@ -1003,15 +1007,8 @@
 
     /* ===== Wizard & sticky bar ===== */
     function goStep(n){
-      if(n===1){ 
-        step1.style.display='block'; 
-        step2.style.display='none'; 
-        stickyBar.style.display='none';
-      } else { 
-        step1.style.display='none'; 
-        step2.style.display='block'; 
-        stickyBar.style.display='flex';
-      }
+      if(n===1){ step1.style.display='block'; step2.style.display='none'; }
+      else { step1.style.display='none'; step2.style.display='block'; }
       sendHeightThrottled();
     }
 
@@ -1066,7 +1063,15 @@
     btnBackStep1.addEventListener('click', ()=> goStep(1));
     btnCloseX.addEventListener('click', closeModal);
 
-    [xParcours,xGrill,xTisch].forEach(el=> el.addEventListener('change', updatePricePreview));
+    priceToggle.addEventListener('click', ()=>{
+      priceBreakdown.style.display = priceBreakdown.style.display==='none' ? 'block':'none';
+      sendHeightThrottled();
+    });
+
+    [xParcours,xGrill,xTisch].forEach(el=> el.addEventListener('change', ()=>{
+      const count = (xParcours.checked?1:0)+(xGrill.checked?1:0)+(xTisch.checked?1:0);
+      extrasRunning.textContent = `Extras: ${count*10}€`;
+    }));
 
     /* ===== Focus trap ===== */
     function trapFocus(container){
@@ -1325,7 +1330,7 @@
 
       if(!(start && end) || end <= start){
         priceValue.textContent = '–';
-        priceBreakdown.innerHTML = '';
+        priceBreakdown.style.display = 'none';
         hidePopover();
         updateSticky();
         return;
@@ -1337,7 +1342,7 @@
 
       if(!tier || mult === null){
         priceValue.textContent = L.priceOnReq;
-        priceBreakdown.innerHTML = '';
+        priceBreakdown.style.display = 'none';
         hidePopover();
         updateSticky();
         return;
@@ -1353,29 +1358,22 @@
 
       priceValue.textContent = euro(total);
 
-      // Build breakdown HTML
-      priceBreakdown.innerHTML = `
-        <div class="row"><span class="muted">${langSelect.value==='en' ? I18N.en.bdBase(tier.hoursLabel) : I18N.de.bdBase(tier.hoursLabel)}</span><span>${euro(base)}</span></div>
-        <div class="row"><span class="muted">${langSelect.value==='en' ? I18N.en.bdPersons(label) : I18N.de.bdPersons(label)}</span><span>${personsDelta === 0 ? (langSelect.value==='en' ? "€0.00" : "0,00 €") : euro(personsDelta)}</span></div>
-        <div class="row">
-          <span class="muted tooltip-wrap">
-            <span>${L.bdTime}</span>
-            <span id="timeInfo" class="tooltip-icon" aria-haspopup="dialog" aria-expanded="false" tabindex="0">?</span>
-            <div id="timeInfoPopover" class="popover" role="dialog" aria-hidden="true">${L.bdTimeInfo}</div>
-          </span>
-          <span>${timeAdd ? euro(timeAdd) : (langSelect.value==='en' ? "€0.00" : "0,00 €")}</span>
-        </div>
-        <div class="row"><span class="muted">${L.bdExtras}</span><span>${extrasCost ? euro(extrasCost) : (L.bdNoExtras || (langSelect.value==='en' ? "none" : "keine"))}</span></div>
-        <div class="row total"><span>${L.bdTotal}</span><span>${euro(total)}</span></div>
-      `;
+      bdBaseLabel.textContent = (langSelect.value==='en' ? I18N.en.bdBase(tier.hoursLabel) : I18N.de.bdBase(tier.hoursLabel));
+      bdBase.textContent = euro(base);
 
-      // Re-attach popover handlers
-      const newTimeInfo = document.getElementById('timeInfo');
-      const newTimePopover = document.getElementById('timeInfoPopover');
-      if(newTimeInfo && newTimePopover) {
-        newTimeInfo.addEventListener('click', (e)=>{ e.stopPropagation(); togglePopoverNew(newTimePopover, newTimeInfo); });
-        newTimeInfo.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); togglePopoverNew(newTimePopover, newTimeInfo); } });
-      }
+      bdPersonsLabel.textContent = (langSelect.value==='en' ? I18N.en.bdPersons(label) : I18N.de.bdPersons(label));
+      bdPersons.textContent = personsDelta === 0 ? (langSelect.value==='en' ? "€0.00" : "0,00 €") : euro(personsDelta);
+
+      bdTimeLabel.textContent = L.bdTime;
+      bdTime.textContent = timeAdd ? euro(timeAdd) : (langSelect.value==='en' ? "€0.00" : "0,00 €");
+
+      bdExtrasLabel.textContent = L.bdExtras;
+      bdExtras.textContent = extrasCost ? euro(extrasCost) : (L.bdNoExtras || (langSelect.value==='en' ? "none" : "keine"));
+
+      bdTotalLabel.textContent = L.bdTotal;
+      bdTotal.textContent = euro(total);
+
+      timePopover.textContent = L.bdTimeInfo;
 
       const extrasSelected = [];
       if (xParcours.checked) extrasSelected.push((I18N[langSelect.value]||I18N.de).extraParcours);
@@ -1400,80 +1398,20 @@
     }
 
     /* ===== Popover help ===== */
-    function togglePopoverNew(popover, icon){ 
-      const isOpen = popover.classList.contains('show'); 
-      if(isOpen){ hidePopoverNew(popover, icon); return; } 
-      showPopoverNew(popover, icon); 
-    }
-    function showPopoverNew(popover, icon){
-      popover.classList.add('show'); 
-      popover.setAttribute('aria-hidden','false'); 
-      icon.setAttribute('aria-expanded','true');
-      const rect = popover.getBoundingClientRect();
-      if(rect.right > window.innerWidth - 12){ 
-        popover.style.left = 'auto'; 
-        popover.style.right = '0'; 
-      } else { 
-        popover.style.left = '0'; 
-        popover.style.right = 'auto'; 
-      }
-    }
-    function hidePopoverNew(popover, icon){
-      popover.classList.remove('show'); 
-      popover.setAttribute('aria-hidden','true'); 
-      icon.setAttribute('aria-expanded','false');
-    }
-    
-    function togglePopover(){ 
-      if(!timeInfoIcon || !timePopover) return;
-      const isOpen = timePopover.classList.contains('show'); 
-      if(isOpen){ hidePopover(); return; } 
-      showPopover(); 
-    }
+    function togglePopover(){ const isOpen = timePopover.classList.contains('show'); if(isOpen){ hidePopover(); return; } showPopover(); }
     function showPopover(){
-      if(!timeInfoIcon || !timePopover) return;
-      timePopover.classList.add('show'); 
-      timePopover.setAttribute('aria-hidden','false'); 
-      timeInfoIcon.setAttribute('aria-expanded','true');
+      timePopover.classList.add('show'); timePopover.setAttribute('aria-hidden','false'); timeInfoIcon.setAttribute('aria-expanded','true');
       const rect = timePopover.getBoundingClientRect();
-      if(rect.right > window.innerWidth - 12){ 
-        timePopover.style.left = 'auto'; 
-        timePopover.style.right = '0'; 
-      } else { 
-        timePopover.style.left = '0'; 
-        timePopover.style.right = 'auto'; 
-      }
+      if(rect.right > window.innerWidth - 12){ timePopover.style.left = 'auto'; timePopover.style.right = '0'; }
+      else { timePopover.style.left = '0'; timePopover.style.right = 'auto'; }
     }
     function hidePopover(){
-      if(!timePopover || !timeInfoIcon) return;
-      timePopover.classList.remove('show'); 
-      timePopover.setAttribute('aria-hidden','true'); 
-      timeInfoIcon.setAttribute('aria-expanded','false');
+      timePopover.classList.remove('show'); timePopover.setAttribute('aria-hidden','true'); timeInfoIcon.setAttribute('aria-expanded','false');
     }
-    
-    document.addEventListener('click', (e)=>{ 
-      // Close all popovers when clicking outside
-      document.querySelectorAll('.popover.show').forEach(pop => {
-        const within = e.target.closest('.tooltip-wrap');
-        if(!within) {
-          pop.classList.remove('show');
-          pop.setAttribute('aria-hidden','true');
-          const icon = pop.previousElementSibling;
-          if(icon) icon.setAttribute('aria-expanded','false');
-        }
-      });
-    });
-    
-    document.addEventListener('keydown', (e)=>{ 
-      if(e.key === 'Escape') {
-        document.querySelectorAll('.popover.show').forEach(pop => {
-          pop.classList.remove('show');
-          pop.setAttribute('aria-hidden','true');
-          const icon = pop.previousElementSibling;
-          if(icon) icon.setAttribute('aria-expanded','false');
-        });
-      }
-    });
+    document.addEventListener('click', (e)=>{ if(!timePopover.classList.contains('show')) return; const within = e.target.closest('.tooltip-wrap'); if(!within) hidePopover(); });
+    document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') hidePopover(); if((e.key === 'Enter' || e.key === ' ') && document.activeElement === timeInfoIcon){ e.preventDefault(); togglePopover(); } });
+    timeInfoIcon.addEventListener('click', (e)=>{ e.stopPropagation(); togglePopover(); });
+    timeInfoIcon.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); togglePopover(); } });
 
     /* ===== Success overlay ===== */
     function showSuccessOverlay(payload){
