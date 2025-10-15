@@ -9,17 +9,13 @@
   <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
 
-
-    <style>
-<<<<<<< HEAD
-      /* Toast volledig uitschakelen */
-    #successMsg { display: none !important; }
-=======
+  <style>
     /* Toast volledig uitschakelen */
     #successMsg { display: none !important; }
->>>>>>> 1491b77f550a42be216d58059d9635f2f374791f
+    
     /* toon vaste + knop op touch devices */
     .touch .mobile-add { display: block; }
+    
     /* --- Fix horizontale scroll in embed --- */
     html, body { overflow-x: hidden; width:100%; max-width:100%; }
     header, .intro, #calendar { max-width: 100%; }
@@ -35,6 +31,49 @@
       .controls { align-items: stretch; }
       .controls select { min-width: 0; width: 100%; }
     }
+
+    /* compacter: inputs/padding */
+    .field input,.field textarea,.field select{padding:8px 10px;min-height:42px}
+    .btn{min-height:42px}
+
+    /* waarschuwingen direct onder titel */
+    .alert{margin:6px 0 10px;padding:8px 10px;border-radius:8px;font-size:13px}
+    .alert.warn{background:#fef2f2;border:1px solid #fecaca;color:#991b1b}
+    .alert.note{background:#fef9c3;border:1px solid #fde68a;color:#92400e}
+
+    /* extras chips met prijsbadge en ≥44px touch */
+    .badge{min-height:44px}
+    .badge .price{margin-left:6px;opacity:.8;font-weight:600}
+
+    /* prijs "pill" + toggle details */
+    .price{display:flex;align-items:center;gap:8px}
+    .price .pill{padding:6px 10px;border-radius:999px;background:#0ea5e91a;border:1px solid #bae6fd}
+    .price .toggle{cursor:pointer;font-size:12px;text-decoration:underline}
+
+    /* sticky submit-balk */
+    .sticky-bar{position:sticky;bottom:0;z-index:5;background:#fff;border-top:1px solid var(--border);
+      display:flex;gap:10px;align-items:center;justify-content:space-between;padding:10px 12px;border-radius:0 0 12px 12px}
+    .sticky-bar .sum{font-size:13px}
+    .sticky-bar .sum b{font-weight:800}
+
+    /* modal: fullscreen sheet op mobiel + body lock */
+    @media (max-width:720px){
+      .modal{width:100vw;max-width:100vw;height:100vh;max-height:100vh;border-radius:0;padding:14px}
+      .modal h3{font-size:16px}
+    }
+
+    /* "X"-sluitknop in header */
+    .modal .close-x{position:absolute;top:10px;right:12px;border:0;background:transparent;font-size:22px;line-height:1;cursor:pointer}
+
+    /* submit loading: spinner links en label zichtbaar */
+    .btn.loading{color:#fff}
+    .btn.loading::before{
+      content:"";display:inline-block;width:16px;height:16px;margin-right:8px;
+      border:2px solid currentColor;border-top-color:transparent;border-radius:50%;animation:spin 1s linear infinite
+    }
+
+    /* focus trap hint (niet zichtbaar) */
+    .visually-hidden{position:absolute!important;height:1px;width:1px;overflow:hidden;clip:rect(1px,1px,1px,1px)}
 
     :root{
       --bg:#f7f9fb; --card:#ffffff; --border:#d8dee6; --ink:#111827;
@@ -84,7 +123,7 @@
     .mobile-add:hover{filter:brightness(1.1)}
 
     .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.4);display:none;align-items:center;justify-content:center;z-index:50;overflow-y:auto;padding:16px;}
-    .modal{width:100%;max-width:760px;background:var(--card);border-radius:12px;border:1px solid var(--border);padding:16px;
+    .modal{width:100%;max-width:760px;background:var(--card);border-radius:12px;border:1px solid var(--border);padding:16px;position:relative;
       max-height:92vh;overflow-y:auto;margin:auto;box-shadow:0 20px 60px rgba(0,0,0,0.12);}
     .modal h3{margin:0 0 10px;font-size:18px;}
 
@@ -92,26 +131,22 @@
     .grid-1{grid-template-columns:1fr}
     .field{margin-bottom:10px;}
     .field label{display:block;font-size:12px;color:var(--muted);margin-bottom:4px;font-weight:600;letter-spacing:.2px}
-    .row-compact{display:grid;grid-template-columns:1fr 110px 140px;gap:8px} /* Straße | Nr | PLZ/Ort */
+    .row-compact{display:grid;grid-template-columns:1fr 110px;gap:8px} 
+    .row-compact > div{display:grid;grid-template-columns:90px 1fr;gap:8px}
     .row-phone{display:grid;grid-template-columns:140px 1fr;gap:8px}
 
-    .field input,.field textarea,.field select{
-      width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:10px;font-size:14px;transition:border-color 0.2s,box-shadow 0.2s;
-    }
     .field input:focus,.field textarea:focus,.field select:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 3px rgba(14,165,233,0.1);}
     .field input.error,.field select.error{border-color:var(--warn);}
     .field .error-msg{font-size:12px;color:var(--warn);margin-top:4px;display:none;}
     .field input.error + .error-msg, .field select.error + .error-msg{display:block;}
 
     .modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
-    .btn{padding:11px 16px;border-radius:10px;border:1px solid var(--border);background:#fff;font-weight:700;cursor:pointer;transition:all 0.2s;min-height:40px;display:inline-flex;align-items:center;justify-content:center;font-size:14px}
+    .btn{padding:11px 16px;border-radius:10px;border:1px solid var(--border);background:#fff;font-weight:700;cursor:pointer;transition:all 0.2s;display:inline-flex;align-items:center;justify-content:center;font-size:14px}
     .btn:disabled{opacity:0.6;cursor:not-allowed;}
     .btn.primary{background:var(--brand);border-color:var(--brand);color:#fff}
     .btn.primary:hover:not(:disabled){filter:brightness(1.1)}
     .btn.danger{background:#fff;border-color:#e5e7eb;color:#374151}
     .btn.danger:hover{background:#f9fafb}
-    .btn.loading{position:relative;color:transparent;}
-    .btn.loading::after{content:'';position:absolute;width:16px;height:16px;border:2px solid currentColor;border-top:transparent;border-radius:50%;animation:spin 1s linear infinite;color:inherit;}
 
     .hint{font-size:12px;color:var(--muted);margin-top:4px}
     .warn{font-size:13px;color:var(--warn);margin-top:6px;display:none;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:8px 12px;}
@@ -119,7 +154,6 @@
     .short-term-warning{font-size:12px;color:var(--warning);margin-top:8px;display:none;background:var(--warning-bg);border:1px solid var(--warning-border);border-radius:8px;padding:8px 10px;}
     .short-term-warning.show{display:block;}
 
-    .price{font-size:14px;margin-top:8px;padding-top:10px;border-top:1px solid var(--border);}
     .badge{display:inline-block;padding:4px 10px;border-radius:999px;border:1px solid var(--border);font-size:12px;color:#374151;background:#f8fafc;cursor:pointer;user-select:none;transition:all 0.2s;}
     .badge:hover{background:#f1f5f9;}
     .badge input[type="checkbox"]{margin-right:6px;}
@@ -127,7 +161,7 @@
     details.summarybox{margin-top:10px;border:1px dashed var(--border);padding:10px;border-radius:10px;background:#fafbfc}
     details.summarybox summary{cursor:pointer;font-weight:700;font-size:14px}
 
-    .breakdown{margin-top:6px;font-size:13px;color:#374151}
+    .breakdown{margin-top:6px;font-size:13px;color:#374141;display:none}
     .breakdown .row{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:1px 0;}
     .breakdown .muted{color:#6b7280}
     .breakdown .total{font-weight:800;border-top:1px dashed var(--border);padding-top:6px;margin-top:6px}
@@ -166,8 +200,8 @@
 
     /* --- compactere rijen --- */
     .row{display:grid;gap:8px}
-    .row.cols-3 {grid-template-columns: 120px 1fr 1fr;} /* salutation | first | last */
-    .row.cols-3b{grid-template-columns: 1fr 120px 1fr;} /* email | country | phone */
+    .row.cols-3 {grid-template-columns: 120px 1fr 1fr;} 
+    .row.cols-3b{grid-template-columns: 1fr 120px 1fr;} 
 
     /* small form controls */
     .field.sm select,.field.sm input{padding:8px 10px}
@@ -181,7 +215,6 @@
     .field input.error + .error-msg,
     .field select.error + .error-msg{display:block}
 
-
     @media (max-width:900px){
       .start-grid{grid-template-columns:1fr;}
       .success-actions{flex-direction:column;}
@@ -189,7 +222,8 @@
     }
     @media (max-width: 720px){
       .grid{grid-template-columns:1fr}
-      .row-compact{grid-template-columns:1fr 100px 1fr}
+      .row-compact{grid-template-columns:1fr 100px}
+      .row-compact > div{grid-template-columns:90px 1fr}
       .row-phone{grid-template-columns:140px 1fr}
       .fc .fc-toolbar-title{ font-size: 14px; }
       .fc .fc-button{ min-height:40px; }
@@ -261,134 +295,57 @@
   <div id="modalBackdrop" class="modal-backdrop">
     <div class="modal" role="dialog" aria-modal="true">
       <h3 id="modalTitle">Anfrage Nutzung Verkehrsschule</h3>
+      <button type="button" class="close-x" id="btnCloseX" aria-label="Schließen">×</button>
+
+      <div class="alert warn" id="alertConflict" style="display:none;"></div>
+      <div class="alert note" id="alertShort" style="display:none;"></div>
 
       <form id="requestForm" name="requestForm" novalidate>
-        <div class="grid">
-          <!-- Standort / Personen -->
-          <!-- Buchungsdetails -->
-<div class="field">
-  <label id="labelFormSchool">Verkehrsschule *</label>
-  <input id="fSchool" name="school" type="text" required readonly>
-</div>
-<div class="field">
-  <label id="labelPersons">Anzahl Personen *</label>
-  <input id="fPersons" name="persons" type="number" min="1" step="1" placeholder="z. B. 30" required>
-  <div class="error-msg">Bitte Anzahl eingeben</div>
-</div>
+        
+        <!-- STAP 1 -->
+        <div id="step1">
+          <div class="grid">
+            <div class="field">
+              <label id="labelFormSchool">Verkehrsschule *</label>
+              <input id="fSchool" name="school" type="text" required readonly>
+            </div>
+            <div class="field">
+              <label id="labelPersons">Anzahl Personen *</label>
+              <input id="fPersons" name="persons" type="number" min="1" step="1" placeholder="z. B. 30" required>
+              <div class="error-msg">Bitte Anzahl eingeben</div>
+            </div>
 
-<div class="field">
-  <label id="labelFrom">Datum/Zeit von *</label>
-  <input id="fFrom" name="from" type="datetime-local" required>
-</div>
-<div class="field">
-  <label id="labelTo">Datum/Zeit bis *</label>
-  <input id="fTo" name="to" type="datetime-local" required>
-</div>
-
-<!-- Persoonsgegevens: anrede | voornaam | achternaam -->
-<div class="row cols-3" style="grid-column:1/-1">
-  <div class="field sm">
-    <label id="labelSalutation">Anrede</label>
-    <select id="fSalutation" name="salutation">
-      <option value=""></option>
-      <option value="Frau">Frau</option>
-      <option value="Herr">Herr</option>
-      <option value="Divers">Divers</option>
-      <option value="Keine Angabe">Keine Angabe</option>
-    </select>
-  </div>
-  <div class="field">
-    <label id="labelFirstName">Vorname</label>
-    <input id="fFirstName" name="first_name" type="text" placeholder="z. B. Alex">
-  </div>
-  <div class="field">
-    <label id="labelLastName">Nachname</label>
-    <input id="fLastName" name="last_name" type="text" placeholder="z. B. Müller">
-  </div>
-</div>
-
-<!-- Contact: e-mail | landcode | telefoon -->
-<div class="row cols-3b" style="grid-column:1/-1">
-  <div class="field">
-    <label id="labelEmail">E-Mail *</label>
-    <input id="fEmail" name="email" type="email" required placeholder="name@example.org">
-    <div class="error-msg">Gültige E-Mail-Adresse erforderlich</div>
-  </div>
-  <div class="field sm">
-    <label id="labelPhoneCountry">Vorwahl</label>
-    <select id="fPhoneCountry" name="phone_country">
-      <option value="+49" selected>🇩🇪 +49 (DE)</option>
-      <option value="+43">🇦🇹 +43 (AT)</option>
-      <option value="+41">🇨🇭 +41 (CH)</option>
-      <option value="+31">🇳🇱 +31 (NL)</option>
-      <option value="+48">🇵🇱 +48 (PL)</option>
-    </select>
-  </div>
-  <div class="field">
-    <label id="labelPhone">Telefonnummer *</label>
-    <input id="fPhoneNat" name="phone_national" type="tel" inputmode="numeric" pattern="[0-9 ]*" placeholder="z. B. 1512345678" required>
-    <div class="error-msg">Bitte eine gültige Nummer angeben</div>
-  </div>
-</div>
-
-<!-- Adres (met suggesties) -->
-<div class="field" style="grid-column:1/-1">
-  <label id="labelAddress">Anschrift *</label>
-  <div class="row-compact">
-    <input id="fStreet" name="street" type="text" placeholder="Straße" required list="streetHints">
-    <input id="fHouse"  name="house"  type="text" placeholder="Nr." required>
-    <input id="fZipCity" name="zipcity" type="text" placeholder="PLZ Ort" required list="cityHints">
-  </div>
-  <datalist id="streetHints"></datalist>
-  <datalist id="cityHints"></datalist>
-  <input id="fAddressFull" name="address" type="hidden">
-  <div class="hint" id="addrHintHelp" style="margin-top:6px;display:none"></div>
-</div>
-
-<!-- Eventdetails -->
-<div class="field" style="grid-column:1/-1">
-  <label id="labelType">Art der Feier</label>
-  <input id="fTypeFree" name="type_free" type="text" placeholder="z. B. Kindergeburtstag, Jubiläum, …">
-</div>
-<div class="field" style="grid-column:1/-1">
-  <label id="labelBikes">Nutzung Fahrräder (kostenlos): Anzahl &amp; Größen/Alter</label>
-  <input id="fBikes" name="bikes" type="text" placeholder="z. B. 6 Räder: 2×14'', 2×16'', 2×20'' / Alter 5–9">
-</div>
-
-<!-- Extras -->
-<div class="field" style="grid-column:1/-1">
-  <label id="labelExtras">Extras (je 10,00 €)</label>
-  <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:6px;">
-    <label class="badge"><input type="checkbox" id="xParcours" name="extra_parcours"><span id="extraParcours">Fahrradparcours</span></label>
-    <label class="badge"><input type="checkbox" id="xGrill" name="extra_grill"><span id="extraGrill">Grill</span></label>
-    <label class="badge"><input type="checkbox" id="xTisch" name="extra_tischtennis"><span id="extraTisch">Tischtennisplatte</span></label>
-  </div>
-</div>
-
-          <!-- Bericht -->
-          <div class="field" style="grid-column:1/-1">
-            <label id="labelMsg">Nachricht (optional)</label>
-            <textarea id="fMsg" name="message" rows="3" placeholder="Weitere Hinweise…"></textarea>
+            <div class="field">
+              <label id="labelFrom">Datum von *</label>
+              <input id="fFrom" name="from" type="datetime-local" required>
+            </div>
+            <div class="field">
+              <label id="labelTo">Datum bis *</label>
+              <input id="fTo" name="to" type="datetime-local" required>
+            </div>
           </div>
-        </div>
 
-        <p id="conflictMsg" class="warn">
-          Ausgewählter Zeitraum überschneidet sich mit einer bestehenden Belegung,
-          ist kürzer als 30 Minuten oder ungültig (Ende vor Beginn).
-        </p>
+          <!-- Extras: voeg +€10 badge toe in labels -->
+          <div class="field" style="grid-column:1/-1">
+            <label id="labelExtras">Extras (je 10,00 €)</label>
+            <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:6px;">
+              <label class="badge"><input type="checkbox" id="xParcours" name="extra_parcours">
+                <span id="extraParcours">Fahrradparcours</span><span class="price">+10€</span></label>
+              <label class="badge"><input type="checkbox" id="xGrill" name="extra_grill">
+                <span id="extraGrill">Grill</span><span class="price">+10€</span></label>
+              <label class="badge"><input type="checkbox" id="xTisch" name="extra_tischtennis">
+                <span id="extraTisch">Tischtennisplatte</span><span class="price">+10€</span></label>
+            </div>
+            <div class="hint" id="extrasRunning" style="margin-top:4px">Extras: 0€</div>
+          </div>
 
-        <p id="shortTermMsg" class="short-term-warning">
-          <strong>Kurzfristige Anfrage:</strong> Da Ihr gewünschter Termin in weniger als 7 Tagen liegt, 
-          können wir nicht garantieren, dass wir Ihre Anfrage rechtzeitig bearbeiten können.
-        </p>
-
-        <!-- Preis-Indikation -->
-        <div id="priceBox" class="price">
-          <strong id="priceTitle">Vorläufige Preisindikation:</strong>
-          <span id="priceValue">–</span>
-          <span id="priceHint" class="hint"> (unverbindlich; endgültige Bestätigung und ggf. Anpassungen vorbehalten)</span>
-
-          <div id="priceBreakdown" class="breakdown" style="display:none;">
+          <!-- Prijs: compact, met toggle -->
+          <div id="priceBox" class="price" aria-live="polite">
+            <span class="pill"><strong id="priceTitle">Vorläufige Preisindikation:</strong> <span id="priceValue">–</span></span>
+            <span id="priceToggle" class="toggle">Details</span>
+          </div>
+          <div id="priceHint" class="hint">(unverbindlich; endgültige Bestätigung und ggf. Anpassungen vorbehalten)</div>
+          <div id="priceBreakdown" class="breakdown">
             <div class="row"><span id="bdBaseLabel" class="muted">Basis</span><span id="bdBase">–</span></div>
             <div class="row"><span id="bdPersonsLabel" class="muted">Personen-Staffel</span><span id="bdPersons">–</span></div>
             <div class="row">
@@ -402,36 +359,124 @@
             <div class="row"><span id="bdExtrasLabel" class="muted">Extras</span><span id="bdExtras">–</span></div>
             <div class="row total"><span id="bdTotalLabel">Summe</span><span id="bdTotal">–</span></div>
           </div>
+
+          <div class="modal-actions">
+            <button type="button" class="btn primary" id="btnToStep2">Weiter</button>
+          </div>
         </div>
 
-        <!-- Wesentliche Bedingungen -->
-        <details class="summarybox">
-          <summary id="termsSummary">Wesentliche Bedingungen (Kurzfassung)</summary>
-          <ul id="termsList" style="margin:8px 0 0 16px;padding:0">
-            <li>Nutzungsentgelt vorab per Überweisung; Reservierung erst verbindlich nach Zahlungseingang.</li>
-            <li>Stornierung bis 14 Tage vor Termin: volle Erstattung; danach Einbehalt als Entschädigung.</li>
-            <li>Saubere Übergabe; Müll bitte mitnehmen. Unzureichende Reinigung kann berechnet werden.</li>
-            <li>Rücksicht auf Nachbarn: werktags &amp; So ab 20:00, Sa ab 22:00 Lautstärke reduzieren.</li>
-            <li>Rauchverbot auf dem Gelände (nur außerhalb, Aschenbecher nutzen).</li>
-            <li>Nutzung auf eigene Gefahr; empfohlen: Veranstaltungshaftpflichtversicherung.</li>
-            <li>Für verursachte Schäden haften die Nutzer*innen.</li>
-            <li>Kein exklusives Nutzungsrecht am gesamten Gelände; ggf. Parallelnutzungen ohne Konflikte.</li>
-            <li>Mo–Sa 14:00–18:00 Kinderfreizeitprojekt: Innenraum steht Ihnen exklusiv zur Verfügung.</li>
-            <li>Verspätete An-/Abmeldung kann mit 50 €/angefangene Stunde berechnet werden.</li>
-          </ul>
-        </details>
+        <!-- STAP 2 -->
+        <div id="step2" style="display:none">
+          <div class="grid">
+            <!-- Persoonsgegevens: anrede | voornaam | achternaam -->
+            <div class="row cols-3" style="grid-column:1/-1">
+              <div class="field sm">
+                <label id="labelSalutation">Anrede</label>
+                <select id="fSalutation" name="salutation">
+                  <option value=""></option>
+                  <option value="Frau">Frau</option>
+                  <option value="Herr">Herr</option>
+                  <option value="Divers">Divers</option>
+                  <option value="Keine Angabe">Keine Angabe</option>
+                </select>
+              </div>
+              <div class="field">
+                <label id="labelFirstName">Vorname</label>
+                <input id="fFirstName" name="first_name" type="text" placeholder="z. B. Alex" autocomplete="given-name">
+              </div>
+              <div class="field">
+                <label id="labelLastName">Nachname</label>
+                <input id="fLastName" name="last_name" type="text" placeholder="z. B. Müller" autocomplete="family-name">
+              </div>
+            </div>
 
-        <!-- Terms consent -->
-        <div class="field" style="margin-top:8px;">
-         <label class="checkline">
-           <input type="checkbox" id="fAccept" required>
-            <span id="labelAccept">Ich habe die wesentlichen Bedingungen gelesen und akzeptiere sie.</span>
-         </label>
+            <!-- Contact: e-mail | landcode | telefoon -->
+            <div class="row cols-3b" style="grid-column:1/-1">
+              <div class="field">
+                <label id="labelEmail">E-Mail *</label>
+                <input id="fEmail" name="email" type="email" required placeholder="name@example.org" autocomplete="email">
+                <div class="error-msg">Gültige E-Mail-Adresse erforderlich</div>
+              </div>
+              <div class="field sm">
+                <label id="labelPhoneCountry">Vorwahl</label>
+                <select id="fPhoneCountry" name="phone_country">
+                  <option value="+49" selected>🇩🇪 +49 (DE)</option>
+                  <option value="+43">🇦🇹 +43 (AT)</option>
+                  <option value="+41">🇨🇭 +41 (CH)</option>
+                  <option value="+31">🇳🇱 +31 (NL)</option>
+                  <option value="+48">🇵🇱 +48 (PL)</option>
+                </select>
+              </div>
+              <div class="field">
+                <label id="labelPhone">Telefon *</label>
+                <input id="fPhoneNat" name="phone_national" type="tel" inputmode="tel" placeholder="z. B. 1512345678" required autocomplete="tel-national">
+                <div class="error-msg">Bitte eine gültige Nummer angeben</div>
+              </div>
+            </div>
+
+            <!-- Adres (met suggesties) - SPLITS PLZ/Ort -->
+            <div class="field" style="grid-column:1/-1">
+              <label id="labelAddress">Anschrift *</label>
+              <div class="row-compact">
+                <input id="fStreet" name="street" type="text" placeholder="Straße" required autocomplete="address-line1">
+                <input id="fHouse"  name="house"  type="text" placeholder="Nr." required autocomplete="on">
+                <div style="display:grid;grid-template-columns:90px 1fr;gap:8px">
+                  <input id="fZip"   type="text" placeholder="PLZ" required inputmode="numeric" pattern="[0-9]*" autocomplete="postal-code">
+                  <input id="fCity"  type="text" placeholder="Ort" required autocomplete="address-level2">
+                </div>
+              </div>
+              <input id="fZipCity" name="zipcity" type="hidden">
+              <input id="fAddressFull" name="address" type="hidden">
+              <div class="hint" id="addrHintHelp" style="margin-top:6px;display:none"></div>
+            </div>
+
+            <!-- Eventdetails -->
+            <div class="field" style="grid-column:1/-1">
+              <label id="labelType">Art der Feier</label>
+              <input id="fTypeFree" name="type_free" type="text" placeholder="z. B. Kindergeburtstag, Jubiläum, …">
+            </div>
+            <div class="field" style="grid-column:1/-1">
+              <label id="labelBikes">Nutzung Fahrräder (kostenlos): Anzahl &amp; Größen/Alter</label>
+              <input id="fBikes" name="bikes" type="text" placeholder="z. B. 6 Räder: 2×14'', 2×16'', 2×20'' / Alter 5–9">
+            </div>
+
+            <!-- Bericht -->
+            <div class="field" style="grid-column:1/-1">
+              <label id="labelMsg">Nachricht (optional)</label>
+              <textarea id="fMsg" name="message" rows="3" placeholder="Weitere Hinweise…"></textarea>
+            </div>
+          </div>
+
+          <!-- Wesentliche Bedingungen -->
+          <details class="summarybox">
+            <summary id="termsSummary">Wesentliche Bedingungen (Kurzfassung)</summary>
+            <ul id="termsList" style="margin:8px 0 0 16px;padding:0">
+              <li>Nutzungsentgelt vorab per Überweisung; Reservierung erst verbindlich nach Zahlungseingang.</li>
+              <li>Stornierung bis 14 Tage vor Termin: volle Erstattung; danach Einbehalt als Entschädigung.</li>
+              <li>Saubere Übergabe; Müll bitte mitnehmen. Unzureichende Reinigung kann berechnet werden.</li>
+              <li>Rücksicht auf Nachbarn: werktags &amp; So ab 20:00, Sa ab 22:00 Lautstärke reduzieren.</li>
+              <li>Rauchverbot auf dem Gelände (nur außerhalb, Aschenbecher nutzen).</li>
+              <li>Nutzung auf eigene Gefahr; empfohlen: Veranstaltungshaftpflichtversicherung.</li>
+              <li>Für verursachte Schäden haften die Nutzer*innen.</li>
+              <li>Kein exklusives Nutzungsrecht am gesamten Gelände; ggf. Parallelnutzungen ohne Konflikte.</li>
+              <li>Mo–Sa 14:00–18:00 Kinderfreizeitprojekt: Innenraum steht Ihnen exklusiv zur Verfügung.</li>
+              <li>Verspätete An-/Abmeldung kann mit 50 €/angefangene Stunde berechnet werden.</li>
+            </ul>
+          </details>
+
+          <div class="modal-actions" style="justify-content:space-between">
+            <button type="button" class="btn" id="btnBackStep1">Zurück</button>
+          </div>
         </div>
 
-
-        <div class="modal-actions">
-          <button type="button" class="btn danger" id="btnCancel">Abbrechen</button>
+        <!-- Sticky verzendbalk -->
+        <div class="sticky-bar" id="stickyBar">
+          <div class="sum" id="stickySum">
+            <b id="stickyPrice">–</b> · <span id="stickyWhen">–</span> · <span id="stickyPersons">–</span>
+          </div>
+          <label class="checkline" style="margin-left:auto;margin-right:6px">
+            <input type="checkbox" id="fAccept"> <span id="labelAccept">Ich habe die wesentlichen Bedingungen gelesen und akzeptiere sie.</span>
+          </label>
           <button type="submit" class="btn primary" id="btnSubmit" disabled>Anfrage senden</button>
         </div>
 
@@ -444,7 +489,7 @@
 
   <script>
     /* ================================
-       I18N (toegevoegd: salutation/naam/telefoon/adres/accept)
+       I18N
        ================================ */
     const I18N = {
       de: {
@@ -458,14 +503,14 @@
         modalTitle: "Anfrage Nutzung Verkehrsschule",
         formSchool: "Verkehrsschule *",
         persons: "Anzahl Personen *",
-        from: "Datum/Zeit von *",
-        to: "Datum/Zeit bis *",
+        from: "Datum von *",
+        to: "Datum bis *",
         salutation: "Anrede",
         firstName: "Vorname",
         lastName: "Nachname",
         email: "E-Mail *",
         phoneCountry: "Vorwahl",
-        phone: "Telefonnummer *",
+        phone: "Telefon *",
         address: "Anschrift *",
         type: "Art der Feier",
         bikes: "Nutzung Fahrräder (kostenlos): Anzahl & Größen/Alter",
@@ -505,13 +550,11 @@
         bdNoExtras: "keine",
         priceOnReq: "Preis nach Vereinbarung",
         bdTimeInfo: "30 € Zuschlag, wenn Beginn UND Ende nicht zwischen 9–18 Uhr liegen oder wenn der Zeitraum (auch teilweise) am Wochenende liegt.",
-        // Success overlay
         successTitle: "Anfrage gesendet",
         successLead: "Vielen Dank. Wir melden uns per E-Mail zur Bestätigung.",
         successBack: "Zurück zum Kalender",
         successNew: "Neue Anfrage",
         successSummaryLabels: { school: "Standort", from: "Von", to: "Bis", persons: "Personen", extras: "Extras" },
-        // Start overlay
         startTitle: "Bitte wählen Sie Ihre Verkehrsschule",
         startLead: "Einige Standorte sind ggf. noch nicht online buchbar.",
         startHint: "Sie können den Standort später oben im Auswahlfeld wechseln.",
@@ -526,7 +569,7 @@
         loadingSchools: "Loading locations...",
         loadingCalendar: "Loading calendar...",
         intro1: "Pick your location above. Blue blocks are already booked. Tap or drag in the calendar to select a time and send a request.",
-        introHint: "Note: Your request is non-binding. We’ll confirm by email.",
+        introHint: "Note: Your request is non-binding. We'll confirm by email.",
         modalTitle: "Request to Use Traffic School",
         formSchool: "Traffic school *",
         persons: "Number of people *",
@@ -561,13 +604,13 @@
           "Use at your own risk; event liability insurance recommended.",
           "Users are liable for any damages caused.",
           "No exclusive right to the entire site; parallel use may occur without conflicts.",
-          "Mon–Sat 14:00–18:00 kids’ project: indoor room is exclusively yours.",
+          "Mon–Sat 14:00–18:00 kids' project: indoor room is exclusively yours.",
           "Late start/overrun may be charged at €50 per started hour."
         ],
         btnCancel: "Cancel",
         btnSend: "Send request",
         phPersons: "e.g. 30",
-        phType: "e.g. kids’ birthday, anniversary …",
+        phType: "e.g. kids' birthday, anniversary …",
         phBikes: "e.g. 6 bikes: 2×14'', 2×16'', 2×20'' / ages 5–9",
         bdBase: (tier)=>`Base (up to ${tier} h)`,
         bdPersons: (label)=>`People tier (${label})`,
@@ -591,7 +634,7 @@
       }
     };
 
-    /* ===== Locations (ongewijzigd) ===== */
+    /* ===== Locations ===== */
     const SCHOOLS = {
       WA: { name: "Verkehrsschule am Wassertorplatz", short:"Wassertorplatz", file: "events-wa.json", address: "Wassertorplatz 1, 10999 Berlin" },
       WI: { name: "Verkehrsschule Wiener Straße",     short:"Wiener Straße",  file: "events-wi.json", address: "Wiener Str. 59c, 10999 Berlin" },
@@ -615,17 +658,24 @@
     const introLine1 = document.getElementById('introLine1');
     const introHint  = document.getElementById('introHint');
 
-    // Start overlay
     const startOverlay = document.getElementById('startOverlay');
     const startTitle = document.getElementById('startTitle');
     const startLead = document.getElementById('startLead');
     const startHintBelow = document.getElementById('startHintBelow');
     const startGrid = startOverlay.querySelector('.start-grid');
 
-    // Form & fields
     const modalBack    = document.getElementById('modalBackdrop');
     const modalTitle   = document.getElementById('modalTitle');
     const form         = document.getElementById('requestForm');
+
+    const step1 = document.getElementById('step1');
+    const step2 = document.getElementById('step2');
+    const btnToStep2 = document.getElementById('btnToStep2');
+    const btnBackStep1 = document.getElementById('btnBackStep1');
+    const btnCloseX = document.getElementById('btnCloseX');
+
+    const alertConflict = document.getElementById('alertConflict');
+    const alertShort = document.getElementById('alertShort');
 
     const fSchool = document.getElementById('fSchool');
     const fFrom   = document.getElementById('fFrom');
@@ -642,6 +692,8 @@
 
     const fStreet = document.getElementById('fStreet');
     const fHouse  = document.getElementById('fHouse');
+    const fZip = document.getElementById('fZip');
+    const fCity = document.getElementById('fCity');
     const fZipCity= document.getElementById('fZipCity');
     const fAddressFull = document.getElementById('fAddressFull');
 
@@ -666,12 +718,15 @@
     const labelAccept = document.getElementById('labelAccept');
     const fAccept = document.getElementById('fAccept');
 
-    const conflictMsg = document.getElementById('conflictMsg');
-    const shortTermMsg = document.getElementById('shortTermMsg');
+    const stickyBar = document.getElementById('stickyBar');
+    const stickyPrice = document.getElementById('stickyPrice');
+    const stickyWhen = document.getElementById('stickyWhen');
+    const stickyPersons = document.getElementById('stickyPersons');
 
     const priceTitle  = document.getElementById('priceTitle');
     const priceHint   = document.getElementById('priceHint');
     const priceValue  = document.getElementById('priceValue');
+    const priceToggle = document.getElementById('priceToggle');
     const priceBreakdown = document.getElementById('priceBreakdown');
     const bdBaseLabel = document.getElementById('bdBaseLabel');
     const bdBase      = document.getElementById('bdBase');
@@ -683,8 +738,8 @@
     const bdExtras    = document.getElementById('bdExtras');
     const bdTotalLabel= document.getElementById('bdTotalLabel');
     const bdTotal     = document.getElementById('bdTotal');
+    const extrasRunning = document.getElementById('extrasRunning');
 
-    const btnCancel   = document.getElementById('btnCancel');
     const btnSubmit   = document.getElementById('btnSubmit');
 
     const timeInfoIcon = document.getElementById('timeInfo');
@@ -704,6 +759,8 @@
     const btnNewRequest = document.getElementById('btnNewRequest');
     const mobileAdd = document.getElementById('mobileAdd');
 
+    const addrHintHelp = document.getElementById('addrHintHelp');
+
     const DEFAULT_TAP_MINUTES = 120;
     const MAX_EVENT_HOURS   = 24;
     const FALLBACK_MINUTES  = 120;
@@ -714,6 +771,7 @@
     let wasSubmitted = false;
     const availability = {};
     let CURRENT_PRICE = null;
+    let untrap = null;
 
     /* ===== I18N apply ===== */
     function applyI18n(){
@@ -728,12 +786,12 @@
       modalTitle.textContent = L.modalTitle;
       labelFormSchool.textContent = L.formSchool;
       labelPersons.textContent = L.persons;
-      labelFrom.textContent = L.from;
-      labelTo.textContent = L.to;
+      labelFrom.textContent = (langSelect.value==='en'?'Date/Time from *':'Datum von *');
+      labelTo.textContent   = (langSelect.value==='en'?'Date/Time to *':'Datum bis *');
       labelType.textContent = L.type;
       labelBikes.textContent = L.bikes;
       labelEmail.textContent = L.email;
-      labelPhone.textContent = L.phone;
+      labelPhone.textContent = (langSelect.value==='en'?'Phone number *':'Telefon *');
       labelPhoneCountry.textContent = L.phoneCountry;
       labelAddress.textContent = L.address;
       labelSalutation.textContent = L.salutation;
@@ -742,8 +800,6 @@
       labelMsg.textContent = L.message;
       labelAccept.textContent = L.accept;
 
-      conflictMsg.innerHTML = L.conflict;
-      shortTermMsg.innerHTML = L.shortTermWarning;
       priceTitle.textContent = L.priceTitle;
       priceHint.textContent = L.priceHint;
       document.getElementById('termsSummary').textContent = L.termsSummary;
@@ -756,7 +812,6 @@
       document.getElementById('bdExtrasLabel').textContent = L.bdExtras;
       document.getElementById('bdTotalLabel').textContent = L.bdTotal;
 
-      btnCancel.textContent = L.btnCancel;
       btnSubmit.textContent = L.btnSend;
 
       fPersons.placeholder = L.phPersons;
@@ -879,23 +934,22 @@
     function overlaps(aStart,aEnd,bStart,bEnd){ return (aStart < bEnd) && (aEnd > bStart); }
 
     function formatAddress(){
-      const street = (fStreet.value||'').trim();
-      const house  = (fHouse.value||'').trim();
-      const zipCity= (fZipCity.value||'').trim();
-      const full = [street, house].filter(Boolean).join(' ') + (zipCity?(', '+zipCity):'');
+      const street=(fStreet.value||'').trim();
+      const house=(fHouse.value||'').trim();
+      const zip=(fZip.value||'').trim();
+      const city=(fCity.value||'').trim();
+      const full = [street, house].filter(Boolean).join(' ') + ((zip||city)?(', '+[zip,city].filter(Boolean).join(' ')):'');
       fAddressFull.value = full.trim();
+      fZipCity.value = [zip, city].filter(Boolean).join(' ').trim();
       return fAddressFull.value;
     }
 
-    [fStreet,fHouse,fZipCity].forEach(el=>{ el.addEventListener('input', ()=>{ formatAddress(); validateTimes(); }); });
-
     function highlight(el, on){
-     const shouldShow = on && (wasSubmitted || el.dataset.touched === '1');
-     el.classList.toggle('error', !!shouldShow);
-     const msg = el.parentElement.querySelector('.error-msg');
-     if (msg) msg.style.display = shouldShow ? 'block' : 'none';
-}
-
+      const shouldShow = on && (wasSubmitted || el.dataset.touched === '1');
+      el.classList.toggle('error', !!shouldShow);
+      const msg = el.parentElement.querySelector('.error-msg');
+      if (msg) msg.style.display = shouldShow ? 'block' : 'none';
+    }
 
     function validateTimes(){
       const start = parseLocalDT(fFrom.value);
@@ -912,26 +966,29 @@
           if(overlaps(start, end, bS, bE)){ ok = false; break; }
         }
       }
+      
       const showConflict = !ok && (wasSubmitted || (fFrom.dataset.touched==='1' && fTo.dataset.touched==='1'));
-      conflictMsg.style.display = showConflict ? 'block' : 'none';
+      alertConflict.style.display = showConflict ? 'block':'none';
+      alertConflict.textContent = (I18N[langSelect.value]||I18N.de).conflict;
 
+      if(start && start < minStartDate()) { alertShort.style.display='block'; alertShort.innerHTML = (I18N[langSelect.value]||I18N.de).shortTermWarning; }
+      else { alertShort.style.display='none'; }
 
-      if(start && start < minStartDate()) shortTermMsg.classList.add('show'); else shortTermMsg.classList.remove('show');
-
-      // veld-validatie (compact)
       const phoneOk = (fPhoneNat.value||'').replace(/[^\d]/g,'').length >= 6;
       const addrOk  = !!formatAddress();
+
       highlight(fPersons, !fPersons.value);
       highlight(fEmail, !fEmail.validity.valid);
       highlight(fPhoneNat, !phoneOk);
       highlight(fStreet, !(fStreet.value||'').trim());
       highlight(fHouse,  !(fHouse.value||'').trim());
-      highlight(fZipCity,!(fZipCity.value||'').trim());
+      highlight(fZip,    !(fZip.value||'').trim());
+      highlight(fCity,   !(fCity.value||'').trim());
 
       const requiredOk = fSchool.value && fPersons.value && start && end && phoneOk && addrOk && fEmail.validity.valid && fAccept.checked;
       btnSubmit.disabled = !(ok && requiredOk);
-
-      updatePricePreview();
+      updatePricePreview(); 
+      updateSticky();
       return ok && requiredOk;
     }
 
@@ -948,117 +1005,156 @@
     function desiredView(){ const w = calendarEl.clientWidth || window.innerWidth; return (w < 700) ? 'timeGridDay' : 'timeGridWeek'; }
     function applyResponsiveView(){ if(!calendar) return; const want = desiredView(); if(calendar.view && calendar.view.type !== want) calendar.changeView(want); }
 
+    /* ===== Wizard & sticky bar ===== */
+    function goStep(n){
+      if(n===1){ step1.style.display='block'; step2.style.display='none'; }
+      else { step1.style.display='none'; step2.style.display='block'; }
+      sendHeightThrottled();
+    }
+
+    function updateSticky(){
+      stickyPrice.textContent = priceValue.textContent || '–';
+      const s = parseLocalDT(fFrom.value), e = parseLocalDT(fTo.value);
+      stickyWhen.textContent = (s&&e)? `${formatDT(s, langSelect.value)} – ${formatDT(e, langSelect.value)}` : '–';
+      stickyPersons.textContent = fPersons.value ? `${fPersons.value} Pers.` : '';
+    }
+
+    btnToStep2.addEventListener('click', ()=>{ if(validateTimes()) goStep(2); });
+    btnBackStep1.addEventListener('click', ()=> goStep(1));
+    btnCloseX.addEventListener('click', closeModal);
+
+    priceToggle.addEventListener('click', ()=>{
+      priceBreakdown.style.display = priceBreakdown.style.display==='none' ? 'block':'none';
+      sendHeightThrottled();
+    });
+
+    [xParcours,xGrill,xTisch].forEach(el=> el.addEventListener('change', ()=>{
+      const count = (xParcours.checked?1:0)+(xGrill.checked?1:0)+(xTisch.checked?1:0);
+      extrasRunning.textContent = `Extras: ${count*10}€`;
+    }));
+
+    /* ===== Focus trap ===== */
+    function trapFocus(container){
+      const FOCUS = 'a,button,input,select,textarea,[tabindex]:not([tabindex="-1"])';
+      const nodes=()=>Array.from(container.querySelectorAll(FOCUS)).filter(el=>!el.disabled && el.offsetParent!==null);
+      function onKey(e){
+        if(e.key!=='Tab') return;
+        const a = nodes(); if(!a.length) return;
+        const first=a[0], last=a[a.length-1];
+        if(e.shiftKey && document.activeElement===first){ e.preventDefault(); last.focus(); }
+        else if(!e.shiftKey && document.activeElement===last){ e.preventDefault(); first.focus(); }
+      }
+      container.addEventListener('keydown', onKey);
+      return ()=>container.removeEventListener('keydown', onKey);
+    }
+
     function openModal(prefill){
       fSchool.value = prefill.school;
       fFrom.value = toInputLocal(prefill.start);
       fTo.value   = toInputLocal(prefill.end);
       xParcours.checked = xGrill.checked = xTisch.checked = false;
-      conflictMsg.style.display = 'none';
-      shortTermMsg.classList.remove('show');
+      alertConflict.style.display = 'none';
+      alertShort.style.display = 'none';
       fAccept.checked = false;
       btnSubmit.disabled = true;
       formatAddress();
       updatePricePreview();
+      goStep(1);
       modalBack.style.display = 'flex';
       validateTimes();
+      if(untrap) untrap(); 
+      untrap = trapFocus(modalBack);
     }
+
     function closeModal(){
       modalBack.style.display = 'none';
       form.reset();
       fSchool.value = '';
-      conflictMsg.style.display = 'none';
-      shortTermMsg.classList.remove('show');
+      alertConflict.style.display = 'none';
+      alertShort.style.display = 'none';
       btnSubmit.disabled = true;
       priceValue.textContent = '–';
       priceBreakdown.style.display = 'none';
       hidePopover();
+      if(untrap) untrap();
     }
 
-    document.getElementById('btnCancel').addEventListener('click', closeModal);
-    modalBack.addEventListener('click', (e)=>{ if(e.target === modalBack) closeModal(); });
+    /* ===== Utils ===== */
+    function debounce(fn, ms=300){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a), ms); }; }
+
+    async function nominatim(q){
+      if(!q || q.length < 3) return [];
+      const url = `https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&limit=6&countrycodes=de&q=${encodeURIComponent(q)}`;
+      const res = await fetch(url, {headers:{'Accept':'application/json'}});
+      if(!res.ok) return [];
+      return res.json();
+    }
+
+    const updateStreetHints = debounce(async ()=>{
+      const base=(fStreet.value||'').trim();
+      const city=(fCity.value||'').trim();
+      const q = (base+' '+city).trim();
+      if(q.replace(/\s+/g,' ').length < 3) return;
+      
+      const data = await nominatim(q);
+      const hints = new Set();
+      data.forEach(r=>{
+        const a = r.address||{};
+        const street = a.road || a.pedestrian || a.footway || a.path || '';
+        if(street) hints.add(street);
+      });
+      addrHintHelp.style.display = hints.size ? 'block' : 'none';
+      addrHintHelp.textContent = hints.size ? 'Tipp: Vorschläge nutzen' : '';
+    }, 450);
+
+    const updateCityHints = debounce(async ()=>{
+      const q=(fCity.value||'').trim();
+      if(q.length<3) return;
+      
+      const data = await nominatim(q);
+      const hints = new Set();
+      data.forEach(r=>{
+        const a = r.address||{};
+        const plz  = a.postcode || '';
+        const city = a.city || a.town || a.village || a.suburb || '';
+        if(plz && city) hints.add(`${plz} ${city}`);
+      });
+    }, 450);
+
+    fStreet.addEventListener('input', updateStreetHints);
+    fCity.addEventListener('input', updateCityHints);
+
+    [fZip,fCity].forEach(el=>{ 
+      el.addEventListener('input', ()=>{ formatAddress(); validateTimes(); }); 
+      el.addEventListener('blur', ()=>{ el.dataset.touched='1'; validateTimes(); }); 
+    });
 
     [fFrom,fTo,fPersons,xParcours,xGrill,xTisch,fEmail,fPhoneNat,fAccept].forEach(el=>{
       el.addEventListener('change', validateTimes);
       el.addEventListener('input', validateTimes);
     });
-// toon fouten pas na blur of submit
-[fFrom,fTo,fPersons,fEmail,fPhoneNat,fStreet,fHouse,fZipCity].forEach(el=>{
-  el.addEventListener('blur', ()=>{ el.dataset.touched = '1'; validateTimes(); });
-});
 
-    /* ===== Utils ===== */
-    function debounce(fn, ms=300){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a), ms); }; }
-async function nominatim(q){
-  if(!q || q.length < 3) return [];
-  const url = `https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&limit=6&countrycodes=de&q=${encodeURIComponent(q)}`;
-  const res = await fetch(url, {headers:{'Accept':'application/json'}});
-  if(!res.ok) return [];
-  return res.json();
-}
-const streetHints = document.getElementById('streetHints');
-const cityHints   = document.getElementById('cityHints');
-const addrHintHelp = document.getElementById('addrHintHelp');
-function setDatalist(listEl, items){ listEl.innerHTML = items.map(v=>`<option value="${v}">`).join(''); }
+    [fFrom,fTo,fPersons,fEmail,fPhoneNat,fStreet,fHouse,fZip,fCity].forEach(el=>{
+      el.addEventListener('blur', ()=>{ el.dataset.touched = '1'; validateTimes(); });
+    });
 
-const updateStreetHints = debounce(async ()=>{
-  const base = (fStreet.value||'').trim();
-  const city = (fZipCity.value||'').trim();
-  const q = city ? `${base} ${city}` : base;
-  const data = await nominatim(q);
-  const opts = [];
-  data.forEach(r=>{
-    const a = r.address||{};
-    const street = a.road || a.pedestrian || a.footway || a.path || '';
-    const plz    = a.postcode || '';
-    const town   = a.city || a.town || a.village || a.suburb || '';
-    if(street) opts.push(street);
-    if(plz && town) opts.push(`${plz} ${town}`);
-  });
-  setDatalist(streetHints, [...new Set(opts)]);
-  addrHintHelp.style.display = data.length ? 'block' : 'none';
-  addrHintHelp.textContent   = data.length ? 'Tipp: Vorschläge auswählen, Felder füllen sich automatisch.' : '';
-}, 350);
-
-const updateCityHints = debounce(async ()=>{
-  const q = (fZipCity.value||'').trim();
-  const data = await nominatim(q);
-  const opts = [];
-  data.forEach(r=>{
-    const a = r.address||{};
-    const plz  = a.postcode || '';
-    const city = a.city || a.town || a.village || a.suburb || '';
-    if(plz && city) opts.push(`${plz} ${city}`);
-  });
-  setDatalist(cityHints, [...new Set(opts)]);
-}, 350);
-
-async function tryFillFromSelection(){
-  const q = [fStreet.value, fZipCity.value].filter(Boolean).join(' ');
-  const best = (await nominatim(q))[0];
-  if(!best) return;
-  const a = best.address||{};
-  if(a.road) fStreet.value = a.road;
-  if(a.house_number && !fHouse.value) fHouse.value = a.house_number;
-  const plz  = a.postcode || '';
-  const city = a.city || a.town || a.village || a.suburb || '';
-  if(plz || city) fZipCity.value = [plz, city].filter(Boolean).join(' ');
-  formatAddress(); validateTimes();
-}
-
-fStreet.addEventListener('input', updateStreetHints);
-fZipCity.addEventListener('input', updateCityHints);
-fStreet.addEventListener('change', tryFillFromSelection);
-fZipCity.addEventListener('change', tryFillFromSelection);
+    fPhoneNat.addEventListener('input', ()=>{
+      const cur = fPhoneNat.selectionStart;
+      fPhoneNat.value = (fPhoneNat.value || '').replace(/[^\d]/g,'');
+      fPhoneNat.setSelectionRange(cur, cur);
+    });
 
     function formatDT(dt, lang){
       const d = (dt instanceof Date) ? dt : new Date(dt);
       return d.toLocaleString(lang === 'en' ? 'en-GB' : 'de-DE', {year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit'});
     }
+
     function toInputLocal(date){
       const d = (date instanceof Date) ? date : new Date(date);
       const pad = n => String(n).padStart(2,'0');
       return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
     }
+
     function parseLocalDT(v){
       if(!v) return null;
       const [date, time] = v.split('T'); if(!date || !time) return null;
@@ -1066,6 +1162,7 @@ fZipCity.addEventListener('change', tryFillFromSelection);
       const [hh,mm] = time.split(':').map(Number);
       return new Date(y, (m-1), d, hh, mm, 0, 0);
     }
+
     function euro(n){ return new Intl.NumberFormat('de-DE',{style:'currency',currency:'EUR', maximumFractionDigits:2}).format(n); }
 
     /* ===== Calendar loading ===== */
@@ -1074,13 +1171,6 @@ fZipCity.addEventListener('change', tryFillFromSelection);
       if(!availability[key]?.ok) return;
       currentKey = key;
       loadCalendar(key);
-    });
-    
-     // laat alleen digits toe in nationale telefoon
-    fPhoneNat.addEventListener('input', ()=>{
-      const cur = fPhoneNat.selectionStart;
-      fPhoneNat.value = (fPhoneNat.value || '').replace(/[^\d]/g,'');
-      fPhoneNat.setSelectionRange(cur, cur);
     });
 
     langSelect.addEventListener('change', applyI18n);
@@ -1107,8 +1197,8 @@ fZipCity.addEventListener('change', tryFillFromSelection);
         timeZone: 'local',
         slotMinTime: '12:00:00',
         slotMaxTime: '22:00:00',
-        height: 'auto',      // laat FC meegroeien → geen interne scroll
-        expandRows: true,    // benut alle rijen i.p.v. intern scrollen
+        height: 'auto',
+        expandRows: true,
         allDaySlot: false,
         nowIndicator: false,
         selectMirror: true,
@@ -1116,9 +1206,7 @@ fZipCity.addEventListener('change', tryFillFromSelection);
         unselectAuto: true,
         selectOverlap: true,
         
-        // *** BELANGRIJK: op touch geen drag-selectie ***
         selectable: !isTouchDevice(),
-        // maak drag-selectie moeilijker als het (desktop) wel aan staat
         selectMinDistance: 8,
         longPressDelay: 300,
         selectLongPressDelay: 300,
@@ -1156,10 +1244,12 @@ fZipCity.addEventListener('change', tryFillFromSelection);
       {maxMin: 960, hoursLabel:16,  base:280},
       {maxMin: 1440, hoursLabel:24, base:360},
     ];
+
     function pickTierByMinutes(totalMin){
       for(const t of TIERS_MINUTES){ if(totalMin <= t.maxMin) return t; }
       return null;
     }
+
     function personMultiplier(p){
       const n = Number(p||0);
       if(n <= 30)  return {mult:1.00, label:"≤30"};
@@ -1169,6 +1259,7 @@ fZipCity.addEventListener('change', tryFillFromSelection);
       if(n <= 100) return {mult:2.00, label:"≤100"};
       return {mult:null, label:">100"};
     }
+
     function surcharge30(start, end){
       const between9_18 = (dt)=> {
         const m = dt.getHours()*60 + dt.getMinutes();
@@ -1201,6 +1292,7 @@ fZipCity.addEventListener('change', tryFillFromSelection);
         priceValue.textContent = '–';
         priceBreakdown.style.display = 'none';
         hidePopover();
+        updateSticky();
         return;
       }
 
@@ -1212,6 +1304,7 @@ fZipCity.addEventListener('change', tryFillFromSelection);
         priceValue.textContent = L.priceOnReq;
         priceBreakdown.style.display = 'none';
         hidePopover();
+        updateSticky();
         return;
       }
 
@@ -1240,7 +1333,6 @@ fZipCity.addEventListener('change', tryFillFromSelection);
       bdTotalLabel.textContent = L.bdTotal;
       bdTotal.textContent = euro(total);
 
-      priceBreakdown.style.display = 'block';
       timePopover.textContent = L.bdTimeInfo;
 
       const extrasSelected = [];
@@ -1261,6 +1353,8 @@ fZipCity.addEventListener('change', tryFillFromSelection);
         total: Number(total),
         extrasSelected
       };
+      
+      updateSticky();
     }
 
     /* ===== Popover help ===== */
@@ -1318,6 +1412,7 @@ fZipCity.addEventListener('change', tryFillFromSelection);
         openModal({ school: SCHOOLS[currentKey]?.name || '', start, end });
       };
     }
+
     function hideSuccessOverlay(){ successOverlay.style.display = 'none'; }
 
     function showToast(text){
@@ -1327,21 +1422,22 @@ fZipCity.addEventListener('change', tryFillFromSelection);
     }
 
     /* ===== Submit naar Apps Script ===== */
-    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxZQjkpuT-W74YbqFf31nEPmxYQd_5diE7yhfUk3JLegLxqa44L8ngcR_EBib4YSMdS/exec";  // jouw Web App URL
-    const SECRET = "kidbike_0d2e1f8d3a7c4b9e5f2a1c8d7b4e3f"; // exact gelijk aan Script Property
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxZQjkpuT-W74YbqFf31nEPmxYQd_5diE7yhfUk3JLegLxqa44L8ngcR_EBib4YSMdS/exec";
+    const SECRET = "kidbike_0d2e1f8d3a7c4b9e5f2a1c8d7b4e3f";
 
     form.addEventListener('submit', async (e)=>{
-    e.preventDefault();
-    wasSubmitted = true;
-    if(!validateTimes()) {
-    const firstErr = [fPersons,fFrom,fTo,fEmail,fPhoneNat,fStreet,fHouse,fZipCity]
-      .find(el=>el.classList.contains('error'));
-    if(firstErr) firstErr.focus();
-     return;
+      e.preventDefault();
+      wasSubmitted = true;
+      if(!validateTimes()) {
+        const firstErr = [fPersons,fFrom,fTo,fEmail,fPhoneNat,fStreet,fHouse,fZip,fCity]
+          .find(el=>el.classList.contains('error'));
+        if(firstErr) firstErr.focus();
+        return;
       }
 
       btnSubmit.classList.add('loading');
       btnSubmit.disabled = true;
+      btnSubmit.textContent = (langSelect.value==='en'?'Sending…':'Senden…');
 
       try{
         const nameCombined = [fSalutation.value, fFirstName.value, fLastName.value].filter(Boolean).join(' ').trim();
@@ -1355,7 +1451,6 @@ fZipCity.addEventListener('change', tryFillFromSelection);
           persons: fPersons.value,
           type_free: fTypeFree.value,
           bikes:   fBikes.value,
-          // nieuwe velden (backend gebruikt alleen 'name','phone','address', extra keys zijn oké)
           salutation: fSalutation.value,
           first_name: fFirstName.value,
           last_name:  fLastName.value,
@@ -1366,6 +1461,8 @@ fZipCity.addEventListener('change', tryFillFromSelection);
           phone:   phoneCombined,
           street:  fStreet.value,
           house:   fHouse.value,
+          zip:     fZip.value,
+          city:    fCity.value,
           zipcity: fZipCity.value,
           address: formatAddress(),
           message: fMsg.value,
@@ -1382,7 +1479,7 @@ fZipCity.addEventListener('change', tryFillFromSelection);
 
         const res = await fetch(APPS_SCRIPT_URL, {
           method: 'POST',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // houdt preflight simpel
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
           body: JSON.stringify(payload),
           redirect: 'follow'
         });
@@ -1406,47 +1503,32 @@ fZipCity.addEventListener('change', tryFillFromSelection);
       }finally{
         btnSubmit.classList.remove('loading');
         btnSubmit.disabled = false;
+        btnSubmit.textContent = (I18N[langSelect.value]||I18N.de).btnSend || 'Anfrage senden';
       }
     });
 
+    /* ===== embed-size throttle ===== */
+    function _sendHeight(){
+      var doc=document.documentElement, body=document.body;
+      var h=Math.max(body.scrollHeight, body.offsetHeight, doc.clientHeight, doc.scrollHeight, doc.offsetHeight);
+      parent.postMessage({ type:'embed-size', height:h }, '*');
+    }
+    const sendHeightThrottled = debounce(_sendHeight, 120);
+    window.addEventListener('load', sendHeightThrottled);
+    window.addEventListener('resize', sendHeightThrottled);
+    var ro = new ResizeObserver(()=>sendHeightThrottled());
+    ro.observe(document.body);
+
     /* ===== Init ===== */
-    
     (async function init(){
       logoImg.style.display = 'block';
       document.getElementById('calendarLoading').firstChild.nodeValue = (I18N[langSelect.value]||I18N.de).loadingCalendar;
       await discoverSchools();
       applyI18n();
       window.addEventListener('resize', () => applyResponsiveView());
-      // toggle body class voor CSS en later gedrag
       document.body.classList.toggle('touch', isTouchDevice());
-
     })();
 
   </script>
-  <script>
-  (function () {
-    function sendHeight() {
-      var doc = document.documentElement;
-      var body = document.body;
-      var h = Math.max(
-        body.scrollHeight, body.offsetHeight,
-        doc.clientHeight, doc.scrollHeight, doc.offsetHeight
-      );
-      // Stuur hoogte naar de ouder (je kunt hier i.p.v. '*' de exacte ouder-URL invullen)
-      parent.postMessage({ type: 'embed-size', height: h }, '*');
-    }
-
-    // Stuur op load, resize en wanneer de layout verandert
-    window.addEventListener('load', sendHeight);
-    window.addEventListener('resize', sendHeight);
-
-    // Reageer ook op DOM-mutaties (inhoud die later laadt)
-    var ro = new ResizeObserver(sendHeight);
-    ro.observe(document.body);
-  })();
-</script>
-
 </body>
 </html>
-
-
