@@ -1019,7 +1019,47 @@
       stickyPersons.textContent = fPersons.value ? `${fPersons.value} Pers.` : '';
     }
 
-    btnToStep2.addEventListener('click', ()=>{ if(validateTimes()) goStep(2); });
+    btnToStep2.addEventListener('click', ()=>{ 
+      // Valideer alleen stap 1 velden
+      const start = parseLocalDT(fFrom.value);
+      const end   = parseLocalDT(fTo.value);
+      
+      let ok = true;
+      if(!(start && end)) ok = false;
+      if(ok && end <= start) ok = false;
+      if(ok && (end - start) < 30*60000) ok = false;
+      
+      if(ok){
+        for(const ev of busyEvents){
+          const bS = new Date(ev.start), bE = new Date(ev.end || ev.start);
+          if(overlaps(start, end, bS, bE)){ ok = false; break; }
+        }
+      }
+      
+      const showConflict = !ok && (fFrom.dataset.touched==='1' && fTo.dataset.touched==='1');
+      alertConflict.style.display = showConflict ? 'block':'none';
+      alertConflict.textContent = (I18N[langSelect.value]||I18N.de).conflict;
+      
+      if(start && start < minStartDate()) { 
+        alertShort.style.display='block'; 
+        alertShort.innerHTML = (I18N[langSelect.value]||I18N.de).shortTermWarning; 
+      } else { 
+        alertShort.style.display='none'; 
+      }
+      
+      // Check alleen personen voor stap 1
+      highlight(fPersons, !fPersons.value);
+      
+      if(ok && fPersons.value) {
+        goStep(2);
+      } else {
+        // Zet touched op true zodat errors zichtbaar worden
+        fFrom.dataset.touched = '1';
+        fTo.dataset.touched = '1';
+        fPersons.dataset.touched = '1';
+        validateTimes();
+      }
+    });
     btnBackStep1.addEventListener('click', ()=> goStep(1));
     btnCloseX.addEventListener('click', closeModal);
 
