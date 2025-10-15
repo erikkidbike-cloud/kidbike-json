@@ -42,13 +42,12 @@
     .alert.note{background:#fef9c3;border:1px solid #fde68a;color:#92400e}
 
     /* extras chips met prijsbadge en ≥44px touch */
-    .badge{min-height:44px}
-    .badge .price{margin-left:6px;opacity:.8;font-weight:600}
+    .badge{min-height:44px;padding:8px 12px;display:inline-flex;align-items:center;gap:6px}
+    .badge .price{opacity:.8;font-weight:600;font-size:11px}
 
     /* prijs "pill" + toggle details */
-    .price{display:flex;align-items:center;gap:8px}
+    .price{display:flex;align-items:center;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid var(--border)}
     .price .pill{padding:6px 10px;border-radius:999px;background:#0ea5e91a;border:1px solid #bae6fd}
-    .price .toggle{cursor:pointer;font-size:12px;text-decoration:underline}
 
     /* sticky submit-balk */
     .sticky-bar{position:sticky;bottom:0;z-index:5;background:#fff;border-top:1px solid var(--border);
@@ -127,9 +126,9 @@
       max-height:92vh;overflow-y:auto;margin:auto;box-shadow:0 20px 60px rgba(0,0,0,0.12);}
     .modal h3{margin:0 0 10px;font-size:18px;}
 
-    .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
     .grid-1{grid-template-columns:1fr}
-    .field{margin-bottom:10px;}
+    .field{margin-bottom:8px;}
     .field label{display:block;font-size:12px;color:var(--muted);margin-bottom:4px;font-weight:600;letter-spacing:.2px}
     .row-compact{display:grid;grid-template-columns:1fr 110px;gap:8px} 
     .row-compact > div{display:grid;grid-template-columns:90px 1fr;gap:8px}
@@ -161,8 +160,8 @@
     details.summarybox{margin-top:10px;border:1px dashed var(--border);padding:10px;border-radius:10px;background:#fafbfc}
     details.summarybox summary{cursor:pointer;font-weight:700;font-size:14px}
 
-    .breakdown{margin-top:6px;font-size:13px;color:#374141;display:none}
-    .breakdown .row{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:1px 0;}
+    .breakdown{margin-top:8px;font-size:13px;color:#374141;display:block}
+    .breakdown .row{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:2px 0;}
     .breakdown .muted{color:#6b7280}
     .breakdown .total{font-weight:800;border-top:1px dashed var(--border);padding-top:6px;margin-top:6px}
 
@@ -328,23 +327,30 @@
           <!-- Extras: voeg +€10 badge toe in labels -->
           <div class="field" style="grid-column:1/-1">
             <label id="labelExtras">Extras (je 10,00 €)</label>
-            <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:6px;">
-              <label class="badge"><input type="checkbox" id="xParcours" name="extra_parcours">
-                <span id="extraParcours">Fahrradparcours</span><span class="price">+10€</span></label>
-              <label class="badge"><input type="checkbox" id="xGrill" name="extra_grill">
-                <span id="extraGrill">Grill</span><span class="price">+10€</span></label>
-              <label class="badge"><input type="checkbox" id="xTisch" name="extra_tischtennis">
-                <span id="extraTisch">Tischtennisplatte</span><span class="price">+10€</span></label>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;">
+              <label class="badge">
+                <input type="checkbox" id="xParcours" name="extra_parcours">
+                <span id="extraParcours">Fahrradparcours</span>
+                <span class="price">+10€</span>
+              </label>
+              <label class="badge">
+                <input type="checkbox" id="xGrill" name="extra_grill">
+                <span id="extraGrill">Grill</span>
+                <span class="price">+10€</span>
+              </label>
+              <label class="badge">
+                <input type="checkbox" id="xTisch" name="extra_tischtennis">
+                <span id="extraTisch">Tischtennisplatte</span>
+                <span class="price">+10€</span>
+              </label>
             </div>
-            <div class="hint" id="extrasRunning" style="margin-top:4px">Extras: 0€</div>
           </div>
 
-          <!-- Prijs: compact, met toggle -->
+          <!-- Prijs: compact, altijd zichtbare details -->
           <div id="priceBox" class="price" aria-live="polite">
             <span class="pill"><strong id="priceTitle">Vorläufige Preisindikation:</strong> <span id="priceValue">–</span></span>
-            <span id="priceToggle" class="toggle">Details</span>
           </div>
-          <div id="priceHint" class="hint">(unverbindlich; endgültige Bestätigung und ggf. Anpassungen vorbehalten)</div>
+          <div id="priceHint" class="hint" style="margin-top:4px">(unverbindlich; endgültige Bestätigung und ggf. Anpassungen vorbehalten)</div>
           <div id="priceBreakdown" class="breakdown">
             <div class="row"><span id="bdBaseLabel" class="muted">Basis</span><span id="bdBase">–</span></div>
             <div class="row"><span id="bdPersonsLabel" class="muted">Personen-Staffel</span><span id="bdPersons">–</span></div>
@@ -430,12 +436,12 @@
               <div class="hint" id="addrHintHelp" style="margin-top:6px;display:none"></div>
             </div>
 
-            <!-- Eventdetails -->
-            <div class="field" style="grid-column:1/-1">
+            <!-- Eventdetails - side by side -->
+            <div class="field">
               <label id="labelType">Art der Feier</label>
               <input id="fTypeFree" name="type_free" type="text" placeholder="z. B. Kindergeburtstag, Jubiläum, …">
             </div>
-            <div class="field" style="grid-column:1/-1">
+            <div class="field">
               <label id="labelBikes">Nutzung Fahrräder (kostenlos): Anzahl &amp; Größen/Alter</label>
               <input id="fBikes" name="bikes" type="text" placeholder="z. B. 6 Räder: 2×14'', 2×16'', 2×20'' / Alter 5–9">
             </div>
@@ -448,7 +454,7 @@
           </div>
 
           <!-- Wesentliche Bedingungen -->
-          <details class="summarybox">
+          <details class="summarybox" style="margin-top:8px">
             <summary id="termsSummary">Wesentliche Bedingungen (Kurzfassung)</summary>
             <ul id="termsList" style="margin:8px 0 0 16px;padding:0">
               <li>Nutzungsentgelt vorab per Überweisung; Reservierung erst verbindlich nach Zahlungseingang.</li>
@@ -469,8 +475,8 @@
           </div>
         </div>
 
-        <!-- Sticky verzendbalk -->
-        <div class="sticky-bar" id="stickyBar">
+        <!-- Sticky verzendbalk - alleen in step 2 zichtbaar -->
+        <div class="sticky-bar" id="stickyBar" style="display:none">
           <div class="sum" id="stickySum">
             <b id="stickyPrice">–</b> · <span id="stickyWhen">–</span> · <span id="stickyPersons">–</span>
           </div>
@@ -722,10 +728,6 @@
     const stickyPrice = document.getElementById('stickyPrice');
     const stickyWhen = document.getElementById('stickyWhen');
     const stickyPersons = document.getElementById('stickyPersons');
-
-    const priceTitle  = document.getElementById('priceTitle');
-    const priceHint   = document.getElementById('priceHint');
-    const priceValue  = document.getElementById('priceValue');
     const priceToggle = document.getElementById('priceToggle');
     const priceBreakdown = document.getElementById('priceBreakdown');
     const bdBaseLabel = document.getElementById('bdBaseLabel');
