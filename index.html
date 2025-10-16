@@ -1666,6 +1666,12 @@
         const nameCombined = [fSalutation.value, fFirstName.value, fLastName.value].filter(Boolean).join(' ').trim();
         const phoneCombined = [fPhoneCountry.value, (fPhoneNat.value||'').trim()].filter(Boolean).join(' ');
 
+        // Build extras dynamically from the rendered checkboxes
+        const extrasChecked = Array.from(document.querySelectorAll('#extrasContainer input:checked'));
+        const extrasList = extrasChecked.map(el =>
+          (langSelect.value === 'en' ? el.dataset.labelEn : el.dataset.labelDe) || el.id.replace(/^x_/, '')
+        );
+
         const payload = {
           secret: SECRET,
           school:  fSchool.value,
@@ -1689,11 +1695,7 @@
           zipcity: fZipCity.value,
           address: formatAddress(),
           message: fMsg.value,
-          extras: [
-            xParcours.checked ? (langSelect.value==='en'?'Bike course':'Fahrradparcours') : null,
-            xGrill.checked    ? 'Grill' : null,
-            xTisch.checked    ? (langSelect.value==='en'?'Table tennis':'Tischtennisplatte') : null
-          ].filter(Boolean),
+          extras: extrasList,
           lang: langSelect.value || 'de',
           price: CURRENT_PRICE,
           priceText: priceValue.textContent,
