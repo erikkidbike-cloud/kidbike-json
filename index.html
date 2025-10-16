@@ -183,8 +183,29 @@
       max-height:92vh;overflow-y:auto;margin:auto;box-shadow:0 20px 60px rgba(0,0,0,0.12);}
     .modal h3{margin:0 0 10px;font-size:18px;}
 
-    .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-    .grid-1{grid-template-columns:1fr}
+    /* Step grids stay 2 columns on desktop */
+    #step1 .grid,
+    #step2 .grid { display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
+
+    /* Row: name = 3 columns (short select + two flex) */
+    .row-name { display:grid; grid-template-columns: 120px 1fr 1fr; gap:12px; }
+
+    /* Row: contact -> email takes left col, dial code narrow, phone flex */
+    .row-contact { display:grid; grid-template-columns: 1.6fr 110px 1.4fr; gap:12px; }
+
+    /* Address rows: street+nr then plz+city */
+    .row-address-1 { display:grid; grid-template-columns: 1fr 120px; gap:12px; }
+    .row-address-2 { display:grid; grid-template-columns: 100px 1fr; gap:12px; }
+
+    /* Step 1 first row proportions: school larger than persons */
+    .field--school { grid-column: 1 / 2; }
+    .field--persons { grid-column: 2 / 3; }
+
+    /* Mobile: one column stack */
+    @media (max-width: 720px){
+      #step1 .grid, #step2 .grid,
+      .row-name, .row-contact, .row-address-1, .row-address-2 { grid-template-columns: 1fr; }
+    }
     .row-compact{display:grid;grid-template-columns:1fr 110px;gap:8px} 
     .row-compact > div{display:grid;grid-template-columns:90px 1fr;gap:8px}
     .row-phone{display:grid;grid-template-columns:140px 1fr;gap:8px}
@@ -427,8 +448,8 @@
         <!-- STAP 2 -->
         <div id="step2" style="display:none">
           <div class="grid">
-            <!-- Persoonsgegevens: anrede | voornaam | achternaam -->
-            <div class="row cols-3" style="grid-column:1/-1">
+            <!-- Row: name on one line -->
+            <div class="row row-name" style="grid-column:1/-1">
               <div class="field sm">
                 <label id="labelSalutation">Anrede</label>
                 <select id="fSalutation" name="salutation">
@@ -449,8 +470,8 @@
               </div>
             </div>
 
-            <!-- Contact row: email | dial code | phone -->
-            <div class="row cols-contact" style="grid-column:1/-1">
+            <!-- Row: contact on one line -->
+            <div class="row row-contact" style="grid-column:1/-1">
               <div class="field">
                 <label id="labelEmail">E-Mail *</label>
                 <input id="fEmail" name="email" type="email" required placeholder="name@example.org" autocomplete="email">
@@ -458,13 +479,11 @@
               </div>
               <div class="field sm">
                 <label id="labelPhoneCountry">Vorwahl</label>
-                <!-- free input with suggestions; default +49 -->
                 <input id="fPhoneCountry" name="phone_country" type="text" value="+49" inputmode="tel" pattern="^\+\d{1,4}$" list="dialCodes" placeholder="+49">
                 <datalist id="dialCodes">
                   <option value="+49"><option value="+43"><option value="+41"><option value="+44"><option value="+33">
-                  <option value="+39"><option value="+34"><option value="+32"><option value="+1"><option value="+61">
                   <option value="+31"><option value="+48"><option value="+46"><option value="+45"><option value="+420">
-                  <!-- keep short; user can enter any +code -->
+                  <option value="+1"><option value="+34"><option value="+39"><option value="+32"><option value="+61">
                 </datalist>
               </div>
               <div class="field">
@@ -474,16 +493,16 @@
               </div>
             </div>
 
-            <!-- Adres (met suggesties) - SPLITS PLZ/Ort -->
-            <div class="field" style="grid-column:1/-1">
+            <!-- Address rows -->
+            <div class="field field--street" style="grid-column:1/-1">
               <label id="labelAddress">Anschrift *</label>
-              <div class="row-compact">
+              <div class="row row-address-1">
                 <input id="fStreet" name="street" type="text" placeholder="Straße" required autocomplete="address-line1">
                 <input id="fHouse"  name="house"  type="text" placeholder="Nr." required autocomplete="on">
-                <div style="display:grid;grid-template-columns:90px 1fr;gap:8px">
-                  <input id="fZip"   type="text" placeholder="PLZ" required inputmode="numeric" pattern="[0-9]*" autocomplete="postal-code">
-                  <input id="fCity"  type="text" placeholder="Ort" required autocomplete="address-level2">
-                </div>
+              </div>
+              <div class="row row-address-2">
+                <input id="fZip"   type="text" placeholder="PLZ" required inputmode="numeric" pattern="[0-9]*" autocomplete="postal-code">
+                <input id="fCity"  type="text" placeholder="Ort" required autocomplete="address-level2">
               </div>
               <input id="fZipCity" name="zipcity" type="hidden">
               <input id="fAddressFull" name="address" type="hidden">
@@ -909,6 +928,24 @@
       });
     }
 
+    /* ===== Mark required labels automatically ===== */
+    function markRequiredLabels(){
+      // Add * to label text if its associated control is [required]
+      const labels = document.querySelectorAll('label[id]');
+      labels.forEach(l => {
+        const forInput = l.getAttribute('for') || l.htmlFor || null;
+        const control = forInput ? document.getElementById(forInput) : l.nextElementSibling;
+        if (!control) return;
+
+        const isRequired = control.matches?.('[required]');
+
+        // strip any trailing * first
+        l.textContent = l.textContent.replace(/\s*\*$/, '');
+
+        if (isRequired) l.textContent = l.textContent + ' *';
+      });
+    }
+
     /* ===== Fetch helpers ===== */
     async function fetchJson(url){
       const r = await fetch(url+'?v='+Date.now(), {cache:'no-store'});
@@ -1183,6 +1220,7 @@
       goStep(1);
       modalBack.style.display = 'flex';
       validateTimes();
+      markRequiredLabels(); // Ensure asterisks are correct after opening modal
       if(untrap) untrap(); 
       untrap = trapFocus(modalBack);
     }
@@ -1263,6 +1301,12 @@
       const cur = fPhoneNat.selectionStart;
       fPhoneNat.value = (fPhoneNat.value || '').replace(/[^\d]/g,'');
       fPhoneNat.setSelectionRange(cur, cur);
+    });
+
+    // accept + plus digits up to 4 for dial code
+    fPhoneCountry.addEventListener('input', () => {
+      // allow only "+" and digits
+      fPhoneCountry.value = fPhoneCountry.value.replace(/[^\d+]/g,'').replace(/(?!^)\+/g,'');
     });
 
     function formatDT(dt, lang){
