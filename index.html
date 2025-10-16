@@ -556,8 +556,8 @@
         modalTitle: "Anfrage Nutzung Verkehrsschule",
         formSchool: "Verkehrsschule *",
         persons: "Anzahl Personen *",
-        from: "Datum von *",
-        to: "Datum bis *",
+        from: "Von *",
+        to: "Bis *",
         salutation: "Anrede",
         firstName: "Vorname",
         lastName: "Nachname",
@@ -626,8 +626,8 @@
         modalTitle: "Request to Use Traffic School",
         formSchool: "Traffic school *",
         persons: "Number of people *",
-        from: "Date/Time from *",
-        to: "Date/Time to *",
+        from: "From *",
+        to: "Until *",
         salutation: "Salutation",
         firstName: "First name",
         lastName: "Last name",
@@ -839,8 +839,8 @@
       modalTitle.textContent = L.modalTitle;
       labelFormSchool.textContent = L.formSchool;
       labelPersons.textContent = L.persons;
-      labelFrom.textContent = (langSelect.value==='en'?'Date/Time from *':'Datum von *');
-      labelTo.textContent   = (langSelect.value==='en'?'Date/Time to *':'Datum bis *');
+      labelFrom.textContent = L.from;
+      labelTo.textContent = L.to;
       labelType.textContent = L.type;
       labelBikes.textContent = L.bikes;
       labelEmail.textContent = L.email;
@@ -886,6 +886,27 @@
       timePopover.textContent = L.bdTimeInfo;
       renderStartCards();
       renderSchoolSelectOptions();
+      enforceRequiredAsterisks();
+    }
+
+    /* ===== Auto-enforce asterisks for required fields ===== */
+    function enforceRequiredAsterisks(){
+      // for each label+control pair we explicitly manage
+      const pairs = [
+        [labelFormSchool, fSchool],
+        [labelPersons,    fPersons],
+        [labelFrom,       fFrom],
+        [labelTo,         fTo],
+        [labelEmail,      fEmail],
+        [labelPhone,      fPhoneNat],
+        [labelAddress,    fStreet], // address block requireness -> street drives the label
+      ];
+      pairs.forEach(([lab, ctl])=>{
+        if(!lab || !ctl) return;
+        const needs = !!ctl.required;
+        const txt = lab.textContent.replace(/\s*\*$/, ''); // strip existing
+        lab.textContent = needs ? (txt + ' *') : txt;
+      });
     }
 
     /* ===== Fetch helpers ===== */
