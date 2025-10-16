@@ -268,6 +268,82 @@
       .fc .fc-toolbar-title{ font-size: 14px; }
       .fc .fc-button{ min-height:40px; }
     }
+
+    /* === Always place labels above inputs === */
+    .field{
+      display:flex;
+      flex-direction:column;      /* label on top */
+      align-items:stretch;
+    }
+    .field label{
+      display:block;
+      font-size:13px;
+      font-weight:600;
+      line-height:1.2;
+      margin:0 0 6px 0;
+    }
+
+    /* Consistent control sizing */
+    .field input,
+    .field select,
+    .field textarea{
+      width:100%;
+      min-height:42px;
+      padding:8px 10px;
+      border:1px solid var(--border);
+      border-radius:10px;
+    }
+    input[type="datetime-local"]{ line-height:normal; }
+
+    /* === Step 1 grid with clear areas === */
+    .form-grid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:12px;
+      grid-template-areas:
+        "school persons"
+        "from   to"
+        "type   type"
+        "extras extras";
+    }
+    .field--school  { grid-area: school; }
+    .field--persons { grid-area: persons; }
+    .field--from    { grid-area: from; }
+    .field--to      { grid-area: to; }
+    .field--type    { grid-area: type; }
+    .field--extras  { grid-area: extras; }
+
+    @media (max-width:720px){
+      .form-grid{
+        grid-template-columns:1fr;
+        grid-template-areas:
+          "school"
+          "persons"
+          "from"
+          "to"
+          "type"
+          "extras";
+      }
+    }
+
+    /* === Step 2 column logic === */
+    .row.cols-3{
+      display:grid;
+      grid-template-columns: 140px 1fr 1fr;  /* Anrede fixed, names flexible */
+      gap:12px;
+    }
+    .row.cols-contact{
+      display:grid;
+      grid-template-columns: 2fr 120px 1.4fr; /* email wide, dial code narrow, phone flexible */
+      gap:12px;
+    }
+    @media (max-width:720px){
+      .row.cols-3,
+      .row.cols-contact{ grid-template-columns:1fr; }
+    }
+
+    /* Extras chips layout */
+    .extras{ display:flex; flex-wrap:wrap; gap:8px; }
   </style>
 </head>
 <body>
@@ -344,45 +420,45 @@
         
         <!-- STEP 1 -->
         <div id="step1">
-          <div class="grid">
-            <div class="field">
+          <div class="form-grid">
+            <div class="field field--school">
               <label id="labelFormSchool">Verkehrsschule *</label>
               <input id="fSchool" name="school" type="text" required readonly>
             </div>
-            <div class="field">
+
+            <div class="field field--persons">
               <label id="labelPersons">Anzahl Personen *</label>
               <input id="fPersons" name="persons" type="number" min="1" step="1" placeholder="z. B. 30" required>
               <div class="error-msg">Bitte Anzahl eingeben</div>
             </div>
 
-            <div class="field">
+            <div class="field field--from">
               <label id="labelFrom">Datum von *</label>
               <input id="fFrom" name="from" type="datetime-local" required>
             </div>
-            <div class="field">
+
+            <div class="field field--to">
               <label id="labelTo">Datum bis *</label>
               <input id="fTo" name="to" type="datetime-local" required>
             </div>
-          </div>
 
-          <!-- Art der Feier now in Step 1 -->
-          <div class="field" style="grid-column:1/-1">
-            <label id="labelType">Art der Feier</label>
-            <input id="fTypeFree" name="type_free" type="text" placeholder="z. B. Kindergeburtstag, Jubiläum, …">
-          </div>
-
-          <!-- Extras: voeg +€10 badge toe in labels -->
-          <div class="field" style="grid-column:1/-1">
-            <label id="labelExtras">Extras (je 10,00 €)</label>
-            <div class="extras" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;">
-              <label class="badge"><input type="checkbox" id="xParcours" name="extra_parcours">
-                <span id="extraParcours">Fahrradparcours</span><span class="price">+10€</span></label>
-              <label class="badge"><input type="checkbox" id="xGrill" name="extra_grill">
-                <span id="extraGrill">Grill</span><span class="price">+10€</span></label>
-              <label class="badge"><input type="checkbox" id="xTisch" name="extra_tischtennis">
-                <span id="extraTisch">Tischtennisplatte</span><span class="price">+10€</span></label>
+            <div class="field field--type">
+              <label id="labelType">Art der Feier</label>
+              <input id="fTypeFree" name="type_free" type="text" placeholder="z. B. Kindergeburtstag, Jubiläum, …">
             </div>
-            <div class="hint" id="extrasRunning" style="margin-top:4px">Extras: 0€</div>
+
+            <div class="field field--extras">
+              <label id="labelExtras">Extras (je 10,00 €)</label>
+              <div class="extras">
+                <label class="badge"><input type="checkbox" id="xParcours" name="extra_parcours">
+                  <span id="extraParcours">Fahrradparcours</span><span class="price">+10€</span></label>
+                <label class="badge"><input type="checkbox" id="xGrill" name="extra_grill">
+                  <span id="extraGrill">Grill</span><span class="price">+10€</span></label>
+                <label class="badge"><input type="checkbox" id="xTisch" name="extra_tischtennis">
+                  <span id="extraTisch">Tischtennisplatte</span><span class="price">+10€</span></label>
+              </div>
+              <div class="hint" id="extrasRunning" style="margin-top:4px">Extras: 0€</div>
+            </div>
           </div>
 
           <!-- Prijs: compact, met toggle -->
