@@ -617,20 +617,20 @@
         intro1: "Wählen Sie oben Ihre Verkehrsschule. Blaue Blöcke sind bereits belegt. Tippen oder ziehen Sie im Kalender, um einen Zeitraum auszuwählen und eine Anfrage zu senden.",
         introHint: "Hinweis: Ihre Anfrage ist unverbindlich. Wir melden uns per E-Mail mit einer Bestätigung.",
         modalTitle: "Anfrage Nutzung Verkehrsschule",
-        formSchool: "Verkehrsschule *",
-        persons: "Anzahl Personen *",
-        from: "Datum von *",
-        to: "Datum bis *",
+        formSchool: "Verkehrsschule",
+        persons: "Anzahl Personen",
+        from: "Datum von",
+        to: "Datum bis",
         salutation: "Anrede",
         firstName: "Vorname",
         lastName: "Nachname",
-        email: "E-Mail *",
+        email: "E-Mail",
         phoneCountry: "Vorwahl",
-        phone: "Telefon *",
-        address: "Anschrift *",
+        phone: "Telefon",
+        address: "Anschrift",
         type: "Art der Feier",
         bikes: "Nutzung Fahrräder (kostenlos): Anzahl & Größen/Alter",
-        extras: "Extras (je 10,00 €)",
+        extras: "Extras",
         extraParcours: "Fahrradparcours",
         extraGrill: "Grill",
         extraTisch: "Tischtennisplatte",
@@ -687,20 +687,20 @@
         intro1: "Pick your location above. Blue blocks are already booked. Tap or drag in the calendar to select a time and send a request.",
         introHint: "Note: Your request is non-binding. We'll confirm by email.",
         modalTitle: "Request to Use Traffic School",
-        formSchool: "Traffic school *",
-        persons: "Number of people *",
-        from: "Date/Time from *",
-        to: "Date/Time to *",
+        formSchool: "Traffic school",
+        persons: "Number of people",
+        from: "Date/Time from",
+        to: "Date/Time to",
         salutation: "Salutation",
         firstName: "First name",
         lastName: "Last name",
-        email: "Email *",
+        email: "Email",
         phoneCountry: "Country code",
-        phone: "Phone number *",
-        address: "Address *",
+        phone: "Phone number",
+        address: "Address",
         type: "Type of event",
         bikes: "Use of bikes (free): quantity & sizes/ages",
-        extras: "Extras (€10 each)",
+        extras: "Extras",
         extraParcours: "Bike course",
         extraGrill: "Grill",
         extraTisch: "Table tennis",
@@ -756,6 +756,93 @@
       WI: { name: "Verkehrsschule Wiener Straße",     short:"Wiener Straße",  file: "events-wi.json", address: "Wiener Str. 59c, 10999 Berlin" },
       WE: { name: "Verkehrsschule Weinstraße",        short:"Weinstraße",     file: "events-we.json", address: "Weinstraße 2, 10249 Berlin" }
     };
+
+    /* === Per-school pricing & extras config === */
+    const PRICING = {
+      WE: {                                   // Weinstraße (keep current)
+        tiers: [                              // same as TIERS_MINUTES you had
+          { maxMin: 240, hoursLabel: 4,  base: 100 },
+          { maxMin: 360, hoursLabel: 6,  base: 130 },
+          { maxMin: 480, hoursLabel: 8,  base: 160 },
+          { maxMin: 600, hoursLabel:10,  base: 190 },
+          { maxMin: 720, hoursLabel:12,  base: 220 },
+          { maxMin: 960, hoursLabel:16,  base: 280 },
+          { maxMin:1440, hoursLabel:24,  base: 360 },
+        ],
+        personTiers: [                        // same multipliers you had
+          { max: 30, mult: 1.00, label: "≤30" },
+          { max: 40, mult: 1.25, label: "≤40" },
+          { max: 50, mult: 1.50, label: "≤50" },
+          { max: 75, mult: 1.75, label: "≤75" },
+          { max:100, mult: 2.00, label: "≤100" },
+        ],
+        surcharge: defaultSurcharge30,        // same 30€ rule as now
+        extras: [                             // keep current extras for WE
+          { id: "parcours",  price: 10, labelDe: "Fahrradparcours",  labelEn: "Bike course" },
+          { id: "grill",     price: 10, labelDe: "Grill",            labelEn: "Grill" },
+          { id: "tisch",     price: 10, labelDe: "Tischtennisplatte",labelEn: "Table tennis" },
+        ]
+      },
+
+      WI: {                                   // Wiener Straße (no extras for now)
+        tiers: [                              // same as WE
+          { maxMin: 240, hoursLabel: 4,  base: 100 },
+          { maxMin: 360, hoursLabel: 6,  base: 130 },
+          { maxMin: 480, hoursLabel: 8,  base: 160 },
+          { maxMin: 600, hoursLabel:10,  base: 190 },
+          { maxMin: 720, hoursLabel:12,  base: 220 },
+          { maxMin: 960, hoursLabel:16,  base: 280 },
+          { maxMin:1440, hoursLabel:24,  base: 360 },
+        ],
+        personTiers: [                        // same as WE
+          { max: 30, mult: 1.00, label: "≤30" },
+          { max: 40, mult: 1.25, label: "≤40" },
+          { max: 50, mult: 1.50, label: "≤50" },
+          { max: 75, mult: 1.75, label: "≤75" },
+          { max:100, mult: 2.00, label: "≤100" },
+        ],
+        surcharge: defaultSurcharge30,
+        extras: []                            // none (can add later)
+      },
+
+      WA: {                                   // Wassertorplatz (DIFFERENT scheme)
+        tiers: [                              // higher base prices
+          { maxMin: 240, hoursLabel: 4,  base: 120 },
+          { maxMin: 360, hoursLabel: 6,  base: 155 },
+          { maxMin: 480, hoursLabel: 8,  base: 185 },
+          { maxMin: 600, hoursLabel:10,  base: 220 },
+          { maxMin: 720, hoursLabel:12,  base: 255 },
+          { maxMin: 960, hoursLabel:16,  base: 320 },
+          { maxMin:1440, hoursLabel:24,  base: 400 },
+        ],
+        personTiers: [
+          { max: 30, mult: 1.00, label: "≤30" },
+          { max: 40, mult: 1.20, label: "≤40" },       // different multipliers
+          { max: 50, mult: 1.45, label: "≤50" },
+          { max: 75, mult: 1.70, label: "≤75" },
+          { max:100, mult: 1.95, label: "≤100" },
+        ],
+        surcharge: defaultSurcharge30,        // same rule
+        extras: []                            // none (can add later)
+      },
+    };
+
+    /* Same 30 € rule you already use */
+    function defaultSurcharge30(start, end){
+      const between9_18 = (dt)=> {
+        const m = dt.getHours()*60 + dt.getMinutes();
+        return (m >= 9*60) && (m <= 18*60);
+      };
+      const bothOutside = !(between9_18(start) && between9_18(end));
+
+      function touchesWeekend(s,e){
+        const cur = new Date(s); cur.setHours(0,0,0,0);
+        const endDay = new Date(e); endDay.setHours(23,59,59,999);
+        while(cur <= endDay){ const d=cur.getDay(); if(d===0||d===6) return true; cur.setDate(cur.getDate()+1); }
+        return false;
+      }
+      return (bothOutside || touchesWeekend(start,end)) ? 30 : 0;
+    }
 
     function isTouchDevice(){
       return window.matchMedia('(pointer: coarse)').matches || navigator.maxTouchPoints > 0;
