@@ -360,7 +360,6 @@
       <div class="success-summary" id="successSummary"></div>
       <div class="success-actions">
         <button class="btn" id="btnBackToCalendar">Zurück zum Kalender</button>
-        <button class="btn primary" id="btnNewRequest">Neue Anfrage</button>
       </div>
     </div>
   </div>
@@ -612,8 +611,8 @@
         modalTitle: "Anfrage Nutzung Verkehrsschule",
         formSchool: "Verkehrsschule",
         persons: "Anzahl Personen",
-        from: "Datum von",
-        to: "Datum bis",
+        from: "Von",
+        to: "Bis",
         salutation: "Anrede",
         firstName: "Vorname",
         lastName: "Nachname",
@@ -660,10 +659,10 @@
         priceOnReq: "Preis nach Vereinbarung",
         bdTimeInfo: "30 € Zuschlag, wenn Beginn UND Ende nicht zwischen 9–18 Uhr liegen oder wenn der Zeitraum (auch teilweise) am Wochenende liegt.",
         successTitle: "Anfrage gesendet",
-        successLead: "Vielen Dank. Wir melden uns per E-Mail zur Bestätigung.",
+        successLead: "Vielen Dank. Ihre Anfrage ist noch nicht verbindlich. Wir prüfen die Angaben und melden uns per E-Mail. Sie erhalten dann die Nutzungsvereinbarung sowie weitere Hinweise.",
         successBack: "Zurück zum Kalender",
         successNew: "Neue Anfrage",
-        successSummaryLabels: { school: "Standort", from: "Von", to: "Bis", persons: "Personen", extras: "Extras" },
+        successSummaryLabels: { school: "Standort", from: "Von", to: "Bis", persons: "Personen", extras: "Extras", message: "Nachricht" },
         startTitle: "Bitte wählen Sie Ihre Verkehrsschule",
         startLead: "Einige Standorte sind ggf. noch nicht online buchbar.",
         startHint: "Sie können den Standort später oben im Auswahlfeld wechseln.",
@@ -682,8 +681,8 @@
         modalTitle: "Request to Use Traffic School",
         formSchool: "Traffic school",
         persons: "Number of people",
-        from: "Date/Time from",
-        to: "Date/Time to",
+        from: "From",
+        to: "Until",
         salutation: "Salutation",
         firstName: "First name",
         lastName: "Last name",
@@ -730,10 +729,10 @@
         priceOnReq: "Price on request",
         bdTimeInfo: "€30 surcharge if start AND end are not between 9:00–18:00, or if any part of the booking falls on a weekend.",
         successTitle: "Request submitted",
-        successLead: "Thanks. We will contact you by email to confirm.",
+        successLead: "Thank you. Your request is not yet binding. We will review the details and contact you by email. You will then receive the usage agreement and further instructions.",
         successBack: "Back to calendar",
         successNew: "New request",
-        successSummaryLabels: { school: "Location", from: "From", to: "To", persons: "People", extras: "Extras" },
+        successSummaryLabels: { school: "Location", from: "From", to: "To", persons: "People", extras: "Extras", message: "Message" },
         startTitle: "Please choose your traffic school",
         startLead: "Some locations may not yet be available for online booking.",
         startHint: "You can change the location later from the selector above.",
@@ -973,7 +972,6 @@
     const successLead  = document.getElementById('successLead');
     const successSummary = document.getElementById('successSummary');
     const btnBackToCalendar = document.getElementById('btnBackToCalendar');
-    const btnNewRequest = document.getElementById('btnNewRequest');
     const mobileAdd = document.getElementById('mobileAdd');
 
     const addrHintHelp = document.getElementById('addrHintHelp');
@@ -1003,8 +1001,8 @@
       modalTitle.textContent = L.modalTitle;
       labelFormSchool.textContent = L.formSchool;
       labelPersons.textContent = L.persons;
-      labelFrom.textContent = (langSelect.value==='en'?'Date/Time from *':'Datum von *');
-      labelTo.textContent   = (langSelect.value==='en'?'Date/Time to *':'Datum bis *');
+      labelFrom.textContent = L.from;
+      labelTo.textContent = L.to;
       labelType.textContent = L.type;
       labelBikes.textContent = L.bikes;
       labelEmail.textContent = L.email;
@@ -1425,6 +1423,8 @@
 
     function euro(n){ return new Intl.NumberFormat('de-DE',{style:'currency',currency:'EUR', maximumFractionDigits:2}).format(n); }
 
+    function esc(s){ return String(s||"").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
     /* ===== Calendar loading ===== */
     schoolSelect.addEventListener('change', (e)=> {
       const key = e.target.value;
@@ -1602,7 +1602,6 @@
       successTitle.textContent = L.successTitle;
       successLead.textContent  = L.successLead;
       btnBackToCalendar.textContent = L.successBack;
-      btnNewRequest.textContent     = L.successNew;
 
       const labels = L.successSummaryLabels;
       const extrasText = (CURRENT_PRICE && CURRENT_PRICE.extrasSelected && CURRENT_PRICE.extrasSelected.length)
@@ -1612,27 +1611,23 @@
       const start = parseLocalDT(payload.from);
       const end   = parseLocalDT(payload.to);
 
+      const messageRow = payload.message ? `<div><strong>${labels.message}:</strong> ${esc(payload.message)}</div>` : "";
       successSummary.innerHTML = `
-        <div><strong>${labels.school}:</strong> ${payload.school || ""}</div>
+        <div><strong>${labels.school}:</strong> ${esc(payload.school || "")}</div>
         <div><strong>${labels.from}:</strong> ${formatDT(start, langSelect.value)}</div>
         <div><strong>${labels.to}:</strong> ${formatDT(end,   langSelect.value)}</div>
-        ${payload.persons ? `<div><strong>${labels.persons}:</strong> ${payload.persons}</div>` : ""}
-        <div><strong>${labels.extras}:</strong> ${extrasText.length ? extrasText.join(", ") : ((I18N[langSelect.value]||I18N.de).bdNoExtras)}</div>
+        ${payload.persons ? `<div><strong>${labels.persons}:</strong> ${esc(payload.persons)}</div>` : ""}
+        <div><strong>${labels.extras}:</strong> ${extrasText.length ? esc(extrasText.join(", ")) : (L.bdNoExtras)}</div>
+        ${messageRow}
       `;
 
       successOverlay.style.display = 'flex';
       btnBackToCalendar.focus();
 
-      const esc = (e)=>{ if(e.key === 'Escape') hideSuccessOverlay(); };
-      document.addEventListener('keydown', esc, { once:true });
+      const escKeyHandler = (e)=>{ if(e.key === 'Escape') hideSuccessOverlay(); };
+      document.addEventListener('keydown', escKeyHandler, { once:true });
 
       btnBackToCalendar.onclick = hideSuccessOverlay;
-      btnNewRequest.onclick = ()=>{
-        hideSuccessOverlay();
-        const start = new Date(); start.setDate(start.getDate()+7); start.setHours(10,0,0,0);
-        const end = new Date(start.getTime() + DEFAULT_TAP_MINUTES*60000);
-        openModal({ school: SCHOOLS[currentKey]?.name || '', start, end });
-      };
     }
 
     function hideSuccessOverlay(){ successOverlay.style.display = 'none'; }
@@ -1719,7 +1714,8 @@
           school: payload.school,
           from:   payload.from,
           to:     payload.to,
-          persons: payload.persons
+          persons: payload.persons,
+          message: payload.message
         });
         closeModal();
       }catch(err){
