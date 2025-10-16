@@ -81,14 +81,14 @@
     /* 2) Always show price details in Step 1 (no "Details" button) */
     #priceToggle{display:none!important;}
 
-    /* 3) Fix extras "bubbles" layout/size */
+    /* 3) Fix extras "bubbles" layout/size - make them even more compact */
     .extras .badge{
       display:inline-flex; align-items:center; gap:6px;
-      padding:6px 10px; min-height:36px; border-radius:999px;
-      border:1px solid var(--border); background:#f8fafc; font-size:13px
+      padding:4px 10px; min-height:32px; border-radius:999px;
+      border:1px solid var(--border); background:#f8fafc; font-size:12px
     }
     .extras .badge input{margin-right:6px}
-    .extras .badge .price{font-weight:600;opacity:.7;font-size:12px}
+    .extras .badge .price{font-weight:600;opacity:.7;font-size:11px}
 
     /* 4) Make Step 2 more compact + put "Art der Feier" and "Nutzung Fahrräder" side-by-side */
     .row.cols-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
@@ -102,6 +102,22 @@
 
     /* 7) Hide sticky controls initially */
     #stickyBar .checkline, #btnSubmit { display:none; }
+
+    /* Hide bikes-related UI completely */
+    #labelBikes,[for="fBikes"]{display:none!important;}
+
+    /* Name row sizing: short select + two flexible inputs */
+    .row.cols-3{display:grid;grid-template-columns:120px 1fr 1fr;gap:10px}
+
+    /* Contact row: email gets more space, dial code is narrow, phone flexes */
+    .row.cols-contact{
+      display:grid;
+      grid-template-columns: 2fr 120px 1.4fr;
+      gap:10px;
+    }
+    @media (max-width:720px){
+      .row.cols-contact{grid-template-columns:1fr}
+    }
 
     :root{
       --bg:#f7f9fb; --card:#ffffff; --border:#d8dee6; --ink:#111827;
@@ -225,7 +241,6 @@
     .school-card.disabled .status{color:#92400e;background:#fef3c7;border-color:#fde68a;}
 
     /* --- compactere rijen --- */
-    .row.cols-3 {grid-template-columns: 120px 1fr 1fr;} 
     .row.cols-3b{grid-template-columns: 1fr 120px 1fr;} 
 
     /* small form controls */
@@ -327,7 +342,7 @@
 
       <form id="requestForm" name="requestForm" novalidate>
         
-        <!-- STAP 1 -->
+        <!-- STEP 1 -->
         <div id="step1">
           <div class="grid">
             <div class="field">
@@ -348,6 +363,12 @@
               <label id="labelTo">Datum bis *</label>
               <input id="fTo" name="to" type="datetime-local" required>
             </div>
+          </div>
+
+          <!-- Art der Feier now in Step 1 -->
+          <div class="field" style="grid-column:1/-1">
+            <label id="labelType">Art der Feier</label>
+            <input id="fTypeFree" name="type_free" type="text" placeholder="z. B. Kindergeburtstag, Jubiläum, …">
           </div>
 
           <!-- Extras: voeg +€10 badge toe in labels -->
@@ -390,7 +411,7 @@
           </div>
         </div>
 
-        <!-- STAP 2 -->
+        <!-- STEP 2 -->
         <div id="step2" style="display:none">
           <div class="grid">
             <!-- Persoonsgegevens: anrede | voornaam | achternaam -->
@@ -415,8 +436,8 @@
               </div>
             </div>
 
-            <!-- Contact: e-mail | landcode | telefoon -->
-            <div class="row cols-3b" style="grid-column:1/-1">
+            <!-- Contact row: email | dial code | phone -->
+            <div class="row cols-contact" style="grid-column:1/-1">
               <div class="field">
                 <label id="labelEmail">E-Mail *</label>
                 <input id="fEmail" name="email" type="email" required placeholder="name@example.org" autocomplete="email">
@@ -424,13 +445,14 @@
               </div>
               <div class="field sm">
                 <label id="labelPhoneCountry">Vorwahl</label>
-                <select id="fPhoneCountry" name="phone_country">
-                  <option value="+49" selected>🇩🇪 +49 (DE)</option>
-                  <option value="+43">🇦🇹 +43 (AT)</option>
-                  <option value="+41">🇨🇭 +41 (CH)</option>
-                  <option value="+31">🇳🇱 +31 (NL)</option>
-                  <option value="+48">🇵🇱 +48 (PL)</option>
-                </select>
+                <!-- free input with suggestions; default +49 -->
+                <input id="fPhoneCountry" name="phone_country" type="text" value="+49" inputmode="tel" pattern="^\+\d{1,4}$" list="dialCodes" placeholder="+49">
+                <datalist id="dialCodes">
+                  <option value="+49"><option value="+43"><option value="+41"><option value="+44"><option value="+33">
+                  <option value="+39"><option value="+34"><option value="+32"><option value="+1"><option value="+61">
+                  <option value="+31"><option value="+48"><option value="+46"><option value="+45"><option value="+420">
+                  <!-- keep short; user can enter any +code -->
+                </datalist>
               </div>
               <div class="field">
                 <label id="labelPhone">Telefon *</label>
@@ -455,17 +477,8 @@
               <div class="hint" id="addrHintHelp" style="margin-top:6px;display:none"></div>
             </div>
 
-            <!-- Eventdetails -->
-            <div class="row cols-2" style="grid-column:1/-1">
-              <div class="field">
-                <label id="labelType">Art der Feier</label>
-                <input id="fTypeFree" name="type_free" type="text" placeholder="z. B. Kindergeburtstag, Jubiläum, …">
-              </div>
-              <div class="field">
-                <label id="labelBikes">Nutzung Fahrräder (kostenlos): Anzahl &amp; Größen/Alter</label>
-                <input id="fBikes" name="bikes" type="text" placeholder="z. B. 6 Räder: 2×14'', 2×16'', 2×20'' / Alter 5–9">
-              </div>
-            </div>
+            <!-- Remove visible Eventdetails row; keep hidden fBikes to not break JS -->
+            <input id="fBikes" name="bikes" type="hidden" value="">
 
             <!-- Bericht -->
             <div class="field" style="grid-column:1/-1">
