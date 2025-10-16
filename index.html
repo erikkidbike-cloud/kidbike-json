@@ -448,15 +448,8 @@
             </div>
 
             <div class="field field--extras">
-              <label id="labelExtras">Extras (je 10,00 €)</label>
-              <div class="extras">
-                <label class="badge"><input type="checkbox" id="xParcours" name="extra_parcours">
-                  <span id="extraParcours">Fahrradparcours</span><span class="price">+10€</span></label>
-                <label class="badge"><input type="checkbox" id="xGrill" name="extra_grill">
-                  <span id="extraGrill">Grill</span><span class="price">+10€</span></label>
-                <label class="badge"><input type="checkbox" id="xTisch" name="extra_tischtennis">
-                  <span id="extraTisch">Tischtennisplatte</span><span class="price">+10€</span></label>
-              </div>
+              <label id="labelExtras">Extras</label>
+              <div class="extras" id="extrasContainer"></div>
               <div class="hint" id="extrasRunning" style="margin-top:4px">Extras: 0€</div>
             </div>
           </div>
@@ -848,6 +841,31 @@
       return window.matchMedia('(pointer: coarse)').matches || navigator.maxTouchPoints > 0;
     }
 
+    function renderExtrasForSchool(key){
+      const container = document.getElementById('extrasContainer');
+      container.innerHTML = '';
+      const cfg = PRICING[key] || PRICING.WE;
+      (cfg.extras || []).forEach(ex => {
+        const id = `x_${ex.id}`;
+        const label = (langSelect.value==='en' ? ex.labelEn : ex.labelDe) || ex.id;
+        const wrap = document.createElement('label');
+        wrap.className = 'badge';
+        wrap.innerHTML = `
+          <input type="checkbox" id="${id}" name="extras[]" data-price="${ex.price}" data-label-de="${ex.labelDe||''}" data-label-en="${ex.labelEn||''}">
+          <span>${label}</span><span class="price">+${euro(ex.price).replace(/\s/g,'')}</span>
+        `;
+        container.appendChild(wrap);
+      });
+
+      // Re-bind change listeners to recalc price
+      container.querySelectorAll('input[type="checkbox"]').forEach(el=>{
+        el.addEventListener('change', ()=>{ updatePricePreview(); });
+      });
+
+      // Show/hide the whole field if there are no extras
+      document.querySelector('.field--extras').style.display = (cfg.extras && cfg.extras.length) ? '' : 'none';
+    }
+
     /* ===== DOM refs ===== */
     const schoolSelect = document.getElementById('schoolSelect');
     const langSelect   = document.getElementById('langSelect');
@@ -948,10 +966,6 @@
     const timeInfoIcon = document.getElementById('timeInfo');
     const timePopover  = document.getElementById('timeInfoPopover');
 
-    const xParcours = document.getElementById('xParcours');
-    const xGrill    = document.getElementById('xGrill');
-    const xTisch    = document.getElementById('xTisch');
-
     const successMsg  = document.getElementById('successMsg');
     const successText = document.getElementById('successText');
     const successOverlay = document.getElementById('successOverlay');
@@ -1032,10 +1046,12 @@
 
       if(calendar) calendar.setOption('locale', langSelect.value === 'en' ? 'en-gb' : 'de');
 
+      renderExtrasForSchool(currentKey || 'WE');
       updatePricePreview();
       timePopover.textContent = L.bdTimeInfo;
       renderStartCards();
       renderSchoolSelectOptions();
+    }SchoolSelectOptions();
     }
 
     /* ===== Fetch helpers ===== */
@@ -1278,11 +1294,6 @@
       sendHeightThrottled();
     });
 
-    [xParcours,xGrill,xTisch].forEach(el=> el.addEventListener('change', ()=>{
-      const count = (xParcours.checked?1:0)+(xGrill.checked?1:0)+(xTisch.checked?1:0);
-      extrasRunning.textContent = `Extras: ${count*10}€`;
-    }));
-
     /* ===== Focus trap ===== */
     function trapFocus(container){
       const FOCUS = 'a,button,input,select,textarea,[tabindex]:not([tabindex="-1"])';
@@ -1302,12 +1313,12 @@
       fSchool.value = prefill.school;
       fFrom.value = toInputLocal(prefill.start);
       fTo.value   = toInputLocal(prefill.end);
-      xParcours.checked = xGrill.checked = xTisch.checked = false;
       alertConflict.style.display = 'none';
       alertShort.style.display = 'none';
       fAccept.checked = false;
       btnSubmit.disabled = true;
       formatAddress();
+      renderExtrasForSchool(currentKey || 'WE');
       updatePricePreview();
       goStep(1);
       modalBack.style.display = 'flex';
@@ -1379,7 +1390,7 @@
       el.addEventListener('blur', ()=>{ el.dataset.touched='1'; validateTimes(); }); 
     });
 
-    [fFrom,fTo,fPersons,xParcours,xGrill,xTisch,fEmail,fPhoneNat,fAccept].forEach(el=>{
+    [fFrom,fTo,fPersons,fEmail,fPhoneNat,fAccept].forEach(el=>{
       el.addEventListener('change', validateTimes);
       el.addEventListener('input', validateTimes);
     });
@@ -1482,60 +1493,16 @@
       calendarLoading.style.display = 'none';
       calendarEl.classList.add('loaded');
       fSchool.value = SCHOOLS[currentKey].name;
+      renderExtrasForSchool(key);
+      updatePricePreview();
     }
 
-    /* ===== Prijsindicatie ===== */
-    const TIERS_MINUTES = [
-      {maxMin: 240, hoursLabel: 4,  base:100},
-      {maxMin: 360, hoursLabel: 6,  base:130},
-      {maxMin: 480, hoursLabel: 8,  base:160},
-      {maxMin: 600, hoursLabel:10,  base:190},
-      {maxMin: 720, hoursLabel:12,  base:220},
-      {maxMin: 960, hoursLabel:16,  base:280},
-      {maxMin: 1440, hoursLabel:24, base:360},
-    ];
-
-    function pickTierByMinutes(totalMin){
-      for(const t of TIERS_MINUTES){ if(totalMin <= t.maxMin) return t; }
-      return null;
-    }
-
-    function personMultiplier(p){
-      const n = Number(p||0);
-      if(n <= 30)  return {mult:1.00, label:"≤30"};
-      if(n <= 40)  return {mult:1.25, label:"≤40"};
-      if(n <= 50)  return {mult:1.50, label:"≤50"};
-      if(n <= 75)  return {mult:1.75, label:"≤75"};
-      if(n <= 100) return {mult:2.00, label:"≤100"};
-      return {mult:null, label:">100"};
-    }
-
-    function surcharge30(start, end){
-      const between9_18 = (dt)=> {
-        const m = dt.getHours()*60 + dt.getMinutes();
-        return (m >= 9*60) && (m <= 18*60);
-      };
-      const bothOutside = !(between9_18(start) && between9_18(end));
-      function touchesWeekend(s,e){
-        const cur = new Date(s); cur.setHours(0,0,0,0);
-        const endDay = new Date(e); endDay.setHours(23,59,59,999);
-        while(cur <= endDay){
-          const dow = cur.getDay();
-          if(dow === 0 || dow === 6) return true;
-          cur.setDate(cur.getDate()+1);
-        }
-        return false;
-      }
-      const weekend = touchesWeekend(start, end);
-      return (bothOutside || weekend) ? 30 : 0;
-    }
-
+    /* ===== Price calculation ===== */
     function updatePricePreview(){
       const L = I18N[langSelect.value] || I18N.de;
       const start = parseLocalDT(fFrom.value);
       const end   = parseLocalDT(fTo.value);
       const persons = Number(fPersons.value || 0);
-
       CURRENT_PRICE = null;
 
       if(!(start && end) || end <= start){
@@ -1546,9 +1513,17 @@
         return;
       }
 
+      const cfg = PRICING[currentKey] || PRICING.WE;
+
+      // tier by minutes
       const totalMin = Math.round((end - start) / 60000);
-      const tier = pickTierByMinutes(totalMin);
-      const {mult, label} = personMultiplier(persons);
+      const tier = (cfg.tiers || []).find(t => totalMin <= t.maxMin) || null;
+
+      // person multiplier
+      let mult = null, pplLabel = ">100";
+      for (const pt of (cfg.personTiers || [])){
+        if (persons <= pt.max){ mult = pt.mult; pplLabel = pt.label; break; }
+      }
 
       if(!tier || mult === null){
         priceValue.textContent = L.priceOnReq;
@@ -1561,51 +1536,49 @@
       const base = tier.base;
       const basePlusPersons = base * mult;
       const personsDelta = basePlusPersons - base;
-      const timeAdd = surcharge30(start, end);
-      const extrasCount = (xParcours.checked?1:0) + (xGrill.checked?1:0) + (xTisch.checked?1:0);
-      const extrasCost = extrasCount * 10;
+      const timeAdd = typeof cfg.surcharge === 'function' ? cfg.surcharge(start, end) : 0;
+
+      // extras (dynamic)
+      const checked = Array.from(document.querySelectorAll('#extrasContainer input:checked'));
+      const extrasCost = checked.reduce((sum, el)=> sum + Number(el.dataset.price||0), 0);
+      const extrasSelected = checked.map(el => (langSelect.value==='en' ? el.dataset.labelEn : el.dataset.labelDe) || '');
+
       const total = basePlusPersons + timeAdd + extrasCost;
 
+      // UI
       priceValue.textContent = euro(total);
-
       bdBaseLabel.textContent = (langSelect.value==='en' ? I18N.en.bdBase(tier.hoursLabel) : I18N.de.bdBase(tier.hoursLabel));
       bdBase.textContent = euro(base);
-
-      bdPersonsLabel.textContent = (langSelect.value==='en' ? I18N.en.bdPersons(label) : I18N.de.bdPersons(label));
+      bdPersonsLabel.textContent = (langSelect.value==='en' ? I18N.en.bdPersons(pplLabel) : I18N.de.bdPersons(pplLabel));
       bdPersons.textContent = personsDelta === 0 ? (langSelect.value==='en' ? "€0.00" : "0,00 €") : euro(personsDelta);
-
       bdTimeLabel.textContent = L.bdTime;
       bdTime.textContent = timeAdd ? euro(timeAdd) : (langSelect.value==='en' ? "€0.00" : "0,00 €");
-
       bdExtrasLabel.textContent = L.bdExtras;
       bdExtras.textContent = extrasCost ? euro(extrasCost) : (L.bdNoExtras || (langSelect.value==='en' ? "none" : "keine"));
-
       bdTotalLabel.textContent = L.bdTotal;
       bdTotal.textContent = euro(total);
-
       timePopover.textContent = L.bdTimeInfo;
-
-      const extrasSelected = [];
-      if (xParcours.checked) extrasSelected.push((I18N[langSelect.value]||I18N.de).extraParcours);
-      if (xGrill.checked)    extrasSelected.push((I18N[langSelect.value]||I18N.de).extraGrill);
-      if (xTisch.checked)    extrasSelected.push((I18N[langSelect.value]||I18N.de).extraTisch);
 
       CURRENT_PRICE = {
         currency: 'EUR',
         tierHours: tier.hoursLabel,
         personsMultiplier: mult,
-        personsLabel: label,
+        personsLabel: pplLabel,
         base: Number(base),
         personsDelta: Number(personsDelta),
         timeSurcharge: Number(timeAdd),
-        extrasCount: Number(extrasCount),
+        extrasCount: checked.length,
         extrasCost: Number(extrasCost),
         total: Number(total),
         extrasSelected
       };
-      
+
       priceBreakdown.style.display = 'block';
       updateSticky();
+
+      // Small running hint (optional)
+      const extrasRunning = document.getElementById('extrasRunning');
+      if (extrasRunning) extrasRunning.textContent = `Extras: ${euro(extrasCost)}`;
     }
 
     /* ===== Popover help ===== */
@@ -1633,10 +1606,9 @@
       btnNewRequest.textContent     = L.successNew;
 
       const labels = L.successSummaryLabels;
-      const extrasText = [];
-      if (xParcours.checked) extrasText.push((I18N[langSelect.value]||I18N.de).extraParcours);
-      if (xGrill.checked)    extrasText.push((I18N[langSelect.value]||I18N.de).extraGrill);
-      if (xTisch.checked)    extrasText.push((I18N[langSelect.value]||I18N.de).extraTisch);
+      const extrasText = (CURRENT_PRICE && CURRENT_PRICE.extrasSelected && CURRENT_PRICE.extrasSelected.length)
+        ? CURRENT_PRICE.extrasSelected
+        : [];
 
       const start = parseLocalDT(payload.from);
       const end   = parseLocalDT(payload.to);
