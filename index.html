@@ -1734,8 +1734,18 @@
           const txt = await res.text().catch(()=> "");
           throw new Error('Serverfehler: ' + txt);
         }
-        const out = await res.json().catch(()=>({ok:true}));
-        if (!out.ok) throw new Error(out.error || 'Unbekannter Fehler');
+        let out;
+        const text = await res.text();
+        try {
+          out = JSON.parse(text);
+        } catch {
+          console.error('Server returned non-JSON:', text);
+          throw new Error('Serverantwort ist keine JSON:\n' + text.slice(0, 500));
+        }
+        if (!out.ok) {
+          throw new Error(out.error || 'Unbekannter Fehler');
+        }
+
 
         showSuccessOverlay({
           school: payload.school,
