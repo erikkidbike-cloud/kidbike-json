@@ -157,13 +157,21 @@
     .fc-timegrid-slot{min-height:20px;}
     .fc-event.busy{background:var(--busy)!important;border:1px solid #045983!important;color:#fff;}
 
-    /* tentative hold: outlined, transparent */
-    .fc-event.tentative {
-      background: transparent !important;
-      color: #036ba7 !important;
+    /* Tentative holds: duidelijke arcering + dashed rand */
+    .fc-event.tentative{
+      background: repeating-linear-gradient(
+        45deg,
+        rgba(14,165,233,.18) 0,
+        rgba(14,165,233,.18) 6px,
+        transparent 6px,
+        transparent 12px
+      ) !important;
       border: 2px dashed #0ea5e9 !important;
+      color: #0b4a6f !important;
+      font-weight: 700;
     }
-    .fc-event.tentative .fc-event-title { font-weight: 700; }
+    .fc-event.tentative .fc-event-time{ opacity: .9; }
+    .fc-event.tentative .fc-event-title{ white-space: normal; line-height:1.25; }
 
     .loading{display:flex;align-items:center;justify-content:center;padding:32px;color:var(--muted);}
     .loading::after{content:'';width:18px;height:18px;margin-left:8px;border:2px solid var(--border);border-top:2px solid var(--brand);
@@ -1482,7 +1490,7 @@
           const arr = await r.json();
           if (Array.isArray(arr)) {
             holdEvents = arr.map(h => ({
-              title: (langSelect.value==='en' ? 'On hold — pending confirmation' : 'Vormerkung – wartet auf Bestätigung'),
+              title: (langSelect.value==='en' ? 'Tentative — awaiting confirmation' : 'Vormerkung — noch nicht bestätigt'),
               start: new Date(h.start),
               end:   new Date(h.end),
               editable: false,
@@ -1515,7 +1523,7 @@
         selectLongPressDelay: 300,
 
         selectAllow: selectAllowFn,
-        events: [...busyEvents, ...holdEvents],   // <— here's the merge
+        events: busyEvents, // alleen vaste bezette blokken
         windowResize: () => applyResponsiveView(),
         select: (info)=>{
           openModal({ school: SCHOOLS[currentKey].name, start: info.start, end: info.end });
@@ -1530,6 +1538,9 @@
       });
 
       calendar.render();
+      
+      // voeg de eerste lading holds los toe
+      holdEvents.forEach(ev => calendar.addEvent(ev));
       mobileAdd.style.display = isTouchDevice() ? 'block' : 'none';
       applyResponsiveView();
       calendarLoading.style.display = 'none';
@@ -1846,7 +1857,7 @@
             const arr = await r.json();
             if (Array.isArray(arr)) {
               const holdEvents = arr.map(h => ({
-                title: (langSelect.value==='en' ? 'On hold — pending confirmation' : 'Vormerkung – wartet auf Bestätigung'),
+                title: (langSelect.value==='en' ? 'Tentative — awaiting confirmation' : 'Vormerkung — noch nicht bestätigt'),
                 start: new Date(h.start),
                 end:   new Date(h.end),
                 editable: false,
@@ -1854,9 +1865,13 @@
                 classNames: ['tentative']
               }));
               
-              // Update calendar with fresh data
-              calendar.removeAllEvents();
-              calendar.addEventSource([...busyEvents, ...holdEvents]);
+              // 1) Verwijder alleen bestaande 'tentative' events
+              calendar.getEvents()
+                .filter(ev => (ev.classNames || []).includes('tentative'))
+                .forEach(ev => ev.remove());
+
+              // 2) Voeg de nieuwste holds toe
+              holdEvents.forEach(ev => calendar.addEvent(ev));
             }
           }
         } catch(_) {
@@ -1867,9 +1882,34 @@
 
     /* ===== Handle successful submission - reload holds ===== */
     function reloadCalendarAfterSubmission() {
-      if (currentKey) {
-        setTimeout(() => {
-          loadCalendar(currentKey);
+      if (currentKey && calendar) {
+        setTimeout(async () => {
+          try {
+            const r = await fetch(`${APPS_SCRIPT_URL}?type=holds&school=${encodeURIComponent(currentKey)}&v=${Date.now()}`);
+            if (r.ok) {
+              const arr = await r.json();
+              if (Array.isArray(arr)) {
+                const holdEvents = arr.map(h => ({
+                  title: (langSelect.value==='en' ? 'Tentative — awaiting confirmation' : 'Vormerkung — noch nicht bestätigt'),
+                  start: new Date(h.start),
+                  end:   new Date(h.end),
+                  editable: false,
+                  overlap: true,
+                  classNames: ['tentative']
+                }));
+                
+                // 1) Verwijder alleen bestaande 'tentative' events
+                calendar.getEvents()
+                  .filter(ev => (ev.classNames || []).includes('tentative'))
+                  .forEach(ev => ev.remove());
+
+                // 2) Voeg de nieuwste holds toe
+                holdEvents.forEach(ev => calendar.addEvent(ev));
+              }
+            }
+          } catch(_) {
+            // Silently fail
+          }
         }, 1000);
       }
     }
