@@ -1317,7 +1317,21 @@
     }
 
     function updateSticky(){
-      stickyPrice.textContent = priceValue.textContent || '–';
+      let stickyText = '–';
+      if (currentKey === 'WA' && CURRENT_PRICE && CURRENT_PRICE.total != null) {
+        // Bij WA: toon huur + Kaution los
+        if (CURRENT_PRICE.caution) {
+          stickyText = `${euro(CURRENT_PRICE.total)} + ${euro(CURRENT_PRICE.caution)} Kaution`;
+        } else {
+          stickyText = euro(CURRENT_PRICE.total);
+        }
+      } else if (CURRENT_PRICE && CURRENT_PRICE.total != null) {
+        stickyText = euro(CURRENT_PRICE.total);
+      } else if (priceValue.textContent) {
+        stickyText = priceValue.textContent;
+      }
+stickyPrice.textContent = stickyText;
+
       const s = parseLocalDT(fFrom.value), e = parseLocalDT(fTo.value);
       stickyWhen.textContent = (s&&e)? `${formatDT(s, langSelect.value)} – ${formatDT(e, langSelect.value)}` : '–';
       stickyPersons.textContent = fPersons.value ? `${fPersons.value} Pers.` : '';
@@ -1668,7 +1682,14 @@
         // WA: geen extras, geen tijdtoeslag
         const total = out.price;
 
-        priceValue.textContent = euro(total);
+        // Toon huurprijs + Kaution los naast elkaar (Kaution niet in Summe)
+        if (currentKey === 'WA' && (out.caution ?? cfg.cautionFn?.(persons))) {
+          const depo = (typeof out.caution !== 'undefined') ? out.caution : cfg.cautionFn(persons);
+          priceValue.textContent = `${euro(total)} + ${euro(depo)} Kaution`;
+        } else {
+         priceValue.textContent = euro(total);
+        }
+
         bdBaseLabel.textContent = (langSelect.value==='en'
           ? `Base (${out.tierLabel || ''})`
           : `Basis (${out.tierLabel || ''})`);
