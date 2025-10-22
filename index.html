@@ -859,54 +859,29 @@
       },
 
       WA: {
-        // Geen extras te boeken
-        extras: [],
-        // Kaution: 50 € ≤45 Pers., anders 70 €
-        cautionFn(persons){
-          const p = Number(persons || 0);
-          if (!p) return null;
-          return (p <= 45) ? 50 : 70;
-        },
-        // Vaste pakketprijzen:
-        //  - ≤12h:  ≤45 Pers.: 140 € | ≥46 Pers.: 220 €
-        //  - 12–16h: ≤45 Pers.: 200 € | ≥46 Pers.: 310 €
-        //  - >16h: Preis nach Vereinbarung (geen bedrag tonen)
-        customPrice(start, end, persons){
-          if (!(start && end) || end <= start) return null;
-          const hours = (end - start) / 3600000;
-          const p = Number(persons || 0);
+  // Duur-gebonden basis (personenonafhankelijk)
+  tiers: [
+    { maxMin: 720, hoursLabel: 12, base: 140 }, // bis 12 Std.
+    { maxMin: 960, hoursLabel: 16, base: 200 }, // 12–16 Std.
+  ],
+  // Personen-banden als vaste opslag bovenop de basis
+  usePersonBands: true,
+  personBands: [
+    { max: 45,   addByTier: { 12: 0,  16: 0   },  label: "≤45" },
+    { max: 9999, addByTier: { 12: 80, 16: 110 },  label: "≥46" }
+  ],
+  // Geen tijdtoeslag bij WA
+  surcharge: () => 0,
+  // Geen extras boekbaar bij WA
+  extras: [],
+  // Kaution: 50 € ≤45 Pers., anders 70 €
+  cautionFn(persons){
+    const p = Number(persons || 0);
+    if (!p) return null;
+    return (p <= 45) ? 50 : 70;
+  }
+}
 
-          if (hours > 16) {
-            return {
-              price: null,
-              tierLabel: "über 16 Std.",
-              personsLabel: p ? (p <= 45 ? "≤45" : "≥46") : "",
-              caution: this.cautionFn(p)
-            };
-          }
-
-          const short = hours <= 12;
-          const tierLabel = short ? "bis 12 Std." : "12–16 Std.";
-          const personsLabel = p ? (p <= 45 ? "≤45" : "≥46") : "";
-          let base;
-
-          if (p <= 45) {
-            base = short ? 140 : 200;
-          } else {
-            base = short ? 220 : 310;
-          }
-
-          return {
-            price: base,
-            base,
-            personsDelta: 0,
-            timeSurcharge: 0,
-            tierLabel,
-            personsLabel,
-            caution: this.cautionFn(p)
-          };
-        }
-      }
     };
 
     /* Touch detection */
@@ -1647,37 +1622,114 @@ stickyPrice.textContent = stickyText;
 
       const cfg = PRICING[currentKey] || PRICING.WE;
 
-      // ===== A) customPrice-pad (bv. WA) =====
-      if (typeof cfg.customPrice === 'function') {
-        const out = cfg.customPrice(start, end, persons);
+      // ===== A) WA: basis per duur + aparte Personen-Staffel + Kaution =====
+if (currentKey === 'WA' && cfg.usePersonBands) {
+  const totalMin = Math.round((end - start) / 60000);
+  const tier = (cfg.tiers || []).find(t => totalMin <= t.maxMin) || null;
 
-        if (!out || out.price === null) {
-          // >16h bij WA => prijs op aanvraag; Kaution (indien van toepassing) toch tonen
-          showPriceOnReq();
-          if (cfg.cautionFn) {
-            const depo = cfg.cautionFn(persons);
-            if (depo && bdDepositRow) {
-              bdDeposit.textContent = euro(depo);
-              bdDepositRow.style.display = '';
-            }
-          }
-          CURRENT_PRICE = {
-            currency: 'EUR',
-            tierHours: out?.tierLabel || '',
-            personsMultiplier: 1,
-            personsLabel: out?.personsLabel || '',
-            base: null,
-            personsDelta: 0,
-            timeSurcharge: 0,
-            extrasCount: 0,
-            extrasCost: 0,
-            total: null,
-            extrasSelected: [],
-            caution: out?.caution ?? (cfg.cautionFn ? cfg.cautionFn(persons) : null)
-          };
-          updateSticky();
-          return;
-        }
+  // >16h => Preis auf Anfrage (Kaution los tonen)
+  if (!tier) {
+    const depo = cfg.cautionFn ? cfg.cautionFn(persons) : null;
+
+    priceValue.textContent = depo
+      ? `${L.priceOnReq} + ${euro(depo)} Kaution`
+      : L.priceOnReq;
+
+    bdBaseLabel.textContent    = (langSelect.value==='en' ? 'Base' : 'Basis');
+    bdBase.textContent         = '–';
+    bdPersonsLabel.textContent = (langSelect.value==='en' ? 'People tier' : 'Personen-Staffel');
+    bdPersons.textContent      = (langSelect.value==='en' ? '€0.00' : '0,00 €');
+    bdTime.textContent         = (langSelect.value==='en' ? '€0.00' : '0,00 €');
+    bdExtras.textContent       = (L.bdNoExtras || (langSelect.value==='en' ? 'none' : 'keine'));
+    bdTotal.textContent        = '–';
+
+    if (bdDepositRow) {
+      if (depo) { bdDeposit.textContent = euro(depo); bdDepositRow.style.display = ''; }
+      else { bdDepositRow.style.display = 'none'; }
+    }
+
+    CURRENT_PRICE = {
+      currency: 'EUR',
+      tierHours: 'über 16',
+      personsMultiplier: 1,
+      personsLabel: persons ? (persons <= 45 ? '≤45' : '≥46') : '',
+      base: null,
+      personsDelta: 0,
+      timeSurcharge: 0,
+      extrasCount: 0,
+      extrasCost: 0,
+      total: null,        // heel belangrijk: GEEN Kaution hierin
+      extrasSelected: [],
+      caution: depo
+    };
+
+    priceBreakdown.style.display = 'block';
+    updateSticky();
+    timePopover.textContent = (langSelect.value === 'en')
+      ? 'No time surcharge at Wassertorplatz.'
+      : 'Kein Zeit-Zuschlag am Wassertorplatz.';
+    return;
+  }
+
+  // ≤16h: basis + personen-opslag, GEEN tijdtoeslag, GEEN extras
+  const base = tier.base;                  // <-- alleen duur
+  const tierHours = tier.hoursLabel;       // 12 of 16
+  const band = (cfg.personBands || []).find(b => persons <= b.max) || null;
+  const personsAdd = band ? (band.addByTier?.[tierHours] ?? 0) : 0;
+  const personsLabel = band ? band.label : (persons ? '≥46' : '');
+  const total = base + personsAdd;         // <-- TOTAAL ZONDER KAUTION
+
+  const depo = cfg.cautionFn ? cfg.cautionFn(persons) : null;
+
+  // Pill (en sticky) tonen "huur zonder Kaution + Kaution"
+  priceValue.textContent = depo
+    ? `${euro(total)} + ${euro(depo)} Kaution`
+    : euro(total);
+
+  const baseLabel = (langSelect.value==='en')
+    ? (tierHours === 12 ? 'Base (up to 12 h)' : 'Base (12–16 h)')
+    : (tierHours === 12 ? 'Basis (bis 12 Std.)' : 'Basis (12–16 Std.)');
+
+  // BELANGRIJK: deze rijen altijd als losse bedragen tonen
+  bdBaseLabel.textContent    = baseLabel;
+  bdBase.textContent         = euro(base);            // <-- NIET total
+  bdPersonsLabel.textContent = (langSelect.value==='en'
+    ? `People tier (${personsLabel || ''})`
+    : `Personen-Staffel (${personsLabel || ''})`);
+  bdPersons.textContent      = personsAdd ? euro(personsAdd) : (langSelect.value==='en' ? '€0.00' : '0,00 €');
+  bdTime.textContent         = (langSelect.value==='en' ? '€0.00' : '0,00 €');
+  bdExtras.textContent       = (L.bdNoExtras || (langSelect.value==='en' ? 'none' : 'keine'));
+  bdTotal.textContent        = euro(total);           // <-- ZONDER Kaution
+
+  if (bdDepositRow) {
+    if (depo) { bdDeposit.textContent = euro(depo); bdDepositRow.style.display = ''; }
+    else { bdDepositRow.style.display = 'none'; }
+  }
+
+  CURRENT_PRICE = {
+    currency: 'EUR',
+    tierHours,
+    personsMultiplier: 1,
+    personsLabel,
+    base: Number(base),
+    personsDelta: Number(personsAdd),
+    timeSurcharge: 0,
+    extrasCount: 0,
+    extrasCost: 0,
+    total: Number(total),  // <-- ZONDER Kaution
+    extrasSelected: [],
+    caution: depo          // <-- Kaution los
+  };
+
+  timePopover.textContent = (langSelect.value === 'en')
+    ? 'No time surcharge at Wassertorplatz.'
+    : 'Kein Zeit-Zuschlag am Wassertorplatz.';
+
+  priceBreakdown.style.display = 'block';
+  updateSticky();
+  return;
+}
+
 
         // WA: geen extras, geen tijdtoeslag
         const total = out.price;
