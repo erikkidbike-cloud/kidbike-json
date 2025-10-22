@@ -247,7 +247,7 @@
     .success-actions .btn{ min-width:160px; }
 
     .start-overlay{position:fixed;inset:0;z-index:110;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;padding:20px;}
-    .start-card{width:min(920px, 96vw);background:#fff;border:1px solid var(--border);border-radius:14px;padding:22px;box-shadow:0 24px 80px rgba(0,0,0,.18);}
+    .start-card{width:min(920px, 96vw);background:#fff;border:1px solid var(--border);border-radius:14px;padding:22px;box-shadow:0 24px 80px rgba(0,0,0,0.18);}
     .start-card h2{margin:0 0 8px;font-size:22px;}
     .start-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:12px;}
     .school-card{border:1px solid var(--border);border-radius:12px;padding:14px;background:#fff;display:flex;flex-direction:column;gap:8px;transition:transform .12s, box-shadow .12s, border-color .12s;}
@@ -399,7 +399,7 @@
       <h2 id="startTitle">Bitte wählen Sie Ihre Verkehrsschule</h2>
       <p id="startLead" class="start-hint">Einige Standorte sind ggf. noch nicht online buchbar.</p>
       <div class="start-grid"></div>
-      <p class="start-hint" id="startHintBelow">Sie können den Standort später oben im Auswahlfeld wechseln.</p>
+      <p id="startHintBelow" class="start-hint">Sie können den Standort später oben im Auswahlfeld wechseln.</p>
     </div>
   </div>
 
@@ -488,6 +488,8 @@
             <span id="priceToggle" class="toggle">Details</span>
           </div>
           <div id="priceHint" class="hint">(unverbindlich; endgültige Bestätigung und ggf. Anpassungen vorbehalten)</div>
+
+          <!-- === PRICE BREAKDOWN (met Kaution-rij) === -->
           <div id="priceBreakdown" class="breakdown">
             <div class="row"><span id="bdBaseLabel" class="muted">Basis</span><span id="bdBase">–</span></div>
             <div class="row"><span id="bdPersonsLabel" class="muted">Personen-Staffel</span><span id="bdPersons">–</span></div>
@@ -500,6 +502,12 @@
               <span id="bdTime">–</span>
             </div>
             <div class="row"><span id="bdExtrasLabel" class="muted">Extras</span><span id="bdExtras">–</span></div>
+
+            <!-- ➕ NIEUW: Kaution (alleen zichtbaar bij WA; telt niet mee in Summe) -->
+            <div class="row" id="bdDepositRow" style="display:none">
+              <span class="muted">Kaution</span><span id="bdDeposit">–</span>
+            </div>
+
             <div class="row total"><span id="bdTotalLabel">Summe</span><span id="bdTotal">–</span></div>
           </div>
 
@@ -548,7 +556,6 @@
                   <option value="+49"><option value="+43"><option value="+41"><option value="+44"><option value="+33">
                   <option value="+39"><option value="+34"><option value="+32"><option value="+1"><option value="+61">
                   <option value="+31"><option value="+48"><option value="+46"><option value="+45"><option value="+420">
-                  <!-- keep short; user can enter any +code -->
                 </datalist>
               </div>
               <div class="field">
@@ -574,7 +581,7 @@
               <div class="hint" id="addrHintHelp" style="margin-top:6px;display:none"></div>
             </div>
 
-            <!-- Remove visible Eventdetails row; keep hidden fBikes to not break JS -->
+            <!-- Bikes UI verborgen; veld blijft voor compat -->
             <input id="fBikes" name="bikes" type="hidden" value="">
 
             <!-- Bericht -->
@@ -587,18 +594,7 @@
           <!-- Wesentliche Bedingungen -->
           <details class="summarybox">
             <summary id="termsSummary">Wesentliche Bedingungen (Kurzfassung)</summary>
-            <ul id="termsList" style="margin:8px 0 0 16px;padding:0">
-              <li>Nutzungsentgelt vorab per Überweisung; Reservierung erst verbindlich nach Zahlungseingang.</li>
-              <li>Stornierung bis 14 Tage vor Termin: volle Erstattung; danach Einbehalt als Entschädigung.</li>
-              <li>Saubere Übergabe; Müll bitte mitnehmen. Unzureichende Reinigung kann berechnet werden.</li>
-              <li>Rücksicht auf Nachbarn: werktags &amp; So ab 20:00, Sa ab 22:00 Lautstärke reduzieren.</li>
-              <li>Rauchverbot auf dem Gelände (nur außerhalb, Aschenbecher nutzen).</li>
-              <li>Nutzung auf eigene Gefahr; empfohlen: Veranstaltungshaftpflichtversicherung.</li>
-              <li>Für verursachte Schäden haften die Nutzer*innen.</li>
-              <li>Kein exklusives Nutzungsrecht am gesamten Gelände; ggf. Parallelnutzungen ohne Konflikte.</li>
-              <li>Mo–Sa 14:00–18:00 Kinderfreizeitprojekt: Innenraum steht Ihnen exklusiv zur Verfügung.</li>
-              <li>Verspätete An-/Abmeldung kann mit 50 €/angefangene Stunde berechnet werden.</li>
-            </ul>
+            <ul id="termsList" style="margin:8px 0 0 16px;padding:0"></ul>
           </details>
 
           <div class="modal-actions" style="justify-content:space-between">
@@ -627,6 +623,7 @@
     </div>
   </div>
 
+  <!-- SCRIPT volgt in deel 2 -->
   <script>
     /* ================================
        I18N
@@ -774,6 +771,21 @@
       }
     };
 
+    /* ===== Per-school Terms ===== */
+    function getTermsForSchool(lang, key){
+      const base = (I18N[lang] || I18N.de).terms.slice();
+
+      if (key === 'WA') {
+        // Wassertorplatz: verwijder parallel-gebruik en voeg sleutel-über-/rückgabe toe
+        const filtered = base.filter(t => !/Parallel/i.test(t));
+        const extraDe = "Schlüssel-Übergabe und -Rückgabe sind vorab mit der Mitarbeiter*in vor Ort abzustimmen.";
+        const extraEn = "Key handover and return must be arranged in advance with the staff on site.";
+        filtered.push(lang === 'en' ? extraEn : extraDe);
+        return filtered;
+      }
+      return base;
+    }
+
     /* ===== Locations ===== */
     const SCHOOLS = {
       WA: { name: "Verkehrsschule am Wassertorplatz", short:"Wassertorplatz", file: "events-wa.json", address: "Wassertorplatz 1, 10999 Berlin" },
@@ -781,77 +793,7 @@
       WE: { name: "Verkehrsschule Weinstraße",        short:"Weinstraße",     file: "events-we.json", address: "Weinstraße 2, 10249 Berlin" }
     };
 
-    /* === Per-school pricing & extras config === */
-    const PRICING = {
-      WE: {                                   // Weinstraße (keep current)
-        tiers: [                              // same as TIERS_MINUTES you had
-          { maxMin: 240, hoursLabel: 4,  base: 100 },
-          { maxMin: 360, hoursLabel: 6,  base: 130 },
-          { maxMin: 480, hoursLabel: 8,  base: 160 },
-          { maxMin: 600, hoursLabel:10,  base: 190 },
-          { maxMin: 720, hoursLabel:12,  base: 220 },
-          { maxMin: 960, hoursLabel:16,  base: 280 },
-          { maxMin:1440, hoursLabel:24,  base: 360 },
-        ],
-        personTiers: [                        // same multipliers you had
-          { max: 30, mult: 1.00, label: "≤30" },
-          { max: 40, mult: 1.25, label: "≤40" },
-          { max: 50, mult: 1.50, label: "≤50" },
-          { max: 75, mult: 1.75, label: "≤75" },
-          { max:100, mult: 2.00, label: "≤100" },
-        ],
-        surcharge: defaultSurcharge30,        // same 30€ rule as now
-        extras: [                             // keep current extras for WE
-          { id: "parcours",  price: 10, labelDe: "Fahrradparcours",  labelEn: "Bike course" },
-          { id: "grill",     price: 10, labelDe: "Grill",            labelEn: "Grill" },
-          { id: "tisch",     price: 10, labelDe: "Tischtennisplatte",labelEn: "Table tennis" },
-        ]
-      },
-
-      WI: {                                   // Wiener Straße (no extras for now)
-        tiers: [                              // same as WE
-          { maxMin: 240, hoursLabel: 4,  base: 100 },
-          { maxMin: 360, hoursLabel: 6,  base: 130 },
-          { maxMin: 480, hoursLabel: 8,  base: 160 },
-          { maxMin: 600, hoursLabel:10,  base: 190 },
-          { maxMin: 720, hoursLabel:12,  base: 220 },
-          { maxMin: 960, hoursLabel:16,  base: 280 },
-          { maxMin:1440, hoursLabel:24,  base: 360 },
-        ],
-        personTiers: [                        // same as WE
-          { max: 30, mult: 1.00, label: "≤30" },
-          { max: 40, mult: 1.25, label: "≤40" },
-          { max: 50, mult: 1.50, label: "≤50" },
-          { max: 75, mult: 1.75, label: "≤75" },
-          { max:100, mult: 2.00, label: "≤100" },
-        ],
-        surcharge: defaultSurcharge30,
-        extras: []                            // none (can add later)
-      },
-
-      WA: {                                   // Wassertorplatz (DIFFERENT scheme)
-        tiers: [                              // higher base prices
-          { maxMin: 240, hoursLabel: 4,  base: 120 },
-          { maxMin: 360, hoursLabel: 6,  base: 155 },
-          { maxMin: 480, hoursLabel: 8,  base: 185 },
-          { maxMin: 600, hoursLabel:10,  base: 220 },
-          { maxMin: 720, hoursLabel:12,  base: 255 },
-          { maxMin: 960, hoursLabel:16,  base: 320 },
-          { maxMin:1440, hoursLabel:24,  base: 400 },
-        ],
-        personTiers: [
-          { max: 30, mult: 1.00, label: "≤30" },
-          { max: 40, mult: 1.20, label: "≤40" },       // different multipliers
-          { max: 50, mult: 1.45, label: "≤50" },
-          { max: 75, mult: 1.70, label: "≤75" },
-          { max:100, mult: 1.95, label: "≤100" },
-        ],
-        surcharge: defaultSurcharge30,        // same rule
-        extras: []                            // none (can add later)
-      },
-    };
-
-    /* Same 30 € rule you already use */
+    /* ===== Surcharge helper (WE/WI) ===== */
     function defaultSurcharge30(start, end){
       const between9_18 = (dt)=> {
         const m = dt.getHours()*60 + dt.getMinutes();
@@ -868,10 +810,111 @@
       return (bothOutside || touchesWeekend(start,end)) ? 30 : 0;
     }
 
+    /* === Per-school pricing & extras config (incl. WA customPrice + Kaution) === */
+    const PRICING = {
+      WE: {
+        tiers: [
+          { maxMin: 240, hoursLabel: 4,  base: 100 },
+          { maxMin: 360, hoursLabel: 6,  base: 130 },
+          { maxMin: 480, hoursLabel: 8,  base: 160 },
+          { maxMin: 600, hoursLabel:10,  base: 190 },
+          { maxMin: 720, hoursLabel:12,  base: 220 },
+          { maxMin: 960, hoursLabel:16,  base: 280 },
+          { maxMin:1440, hoursLabel:24,  base: 360 },
+        ],
+        personTiers: [
+          { max: 30, mult: 1.00, label: "≤30" },
+          { max: 40, mult: 1.25, label: "≤40" },
+          { max: 50, mult: 1.50, label: "≤50" },
+          { max: 75, mult: 1.75, label: "≤75" },
+          { max:100, mult: 2.00, label: "≤100" },
+        ],
+        surcharge: defaultSurcharge30,
+        extras: [
+          { id: "parcours",  price: 10, labelDe: "Fahrradparcours",  labelEn: "Bike course" },
+          { id: "grill",     price: 10, labelDe: "Grill",            labelEn: "Grill" },
+          { id: "tisch",     price: 10, labelDe: "Tischtennisplatte",labelEn: "Table tennis" },
+        ]
+      },
+
+      WI: {
+        tiers: [
+          { maxMin: 240, hoursLabel: 4,  base: 100 },
+          { maxMin: 360, hoursLabel: 6,  base: 130 },
+          { maxMin: 480, hoursLabel: 8,  base: 160 },
+          { maxMin: 600, hoursLabel:10,  base: 190 },
+          { maxMin: 720, hoursLabel:12,  base: 220 },
+          { maxMin: 960, hoursLabel:16,  base: 280 },
+          { maxMin:1440, hoursLabel:24,  base: 360 },
+        ],
+        personTiers: [
+          { max: 30, mult: 1.00, label: "≤30" },
+          { max: 40, mult: 1.25, label: "≤40" },
+          { max: 50, mult: 1.50, label: "≤50" },
+          { max: 75, mult: 1.75, label: "≤75" },
+          { max:100, mult: 2.00, label: "≤100" },
+        ],
+        surcharge: defaultSurcharge30,
+        extras: []
+      },
+
+      WA: {
+        // Geen extras te boeken
+        extras: [],
+        // Kaution: 50 € ≤45 Pers., anders 70 €
+        cautionFn(persons){
+          const p = Number(persons || 0);
+          if (!p) return null;
+          return (p <= 45) ? 50 : 70;
+        },
+        // Vaste pakketprijzen:
+        //  - ≤12h:  ≤45 Pers.: 140 € | ≥46 Pers.: 220 €
+        //  - 12–16h: ≤45 Pers.: 200 € | ≥46 Pers.: 310 €
+        //  - >16h: Preis nach Vereinbarung (geen bedrag tonen)
+        customPrice(start, end, persons){
+          if (!(start && end) || end <= start) return null;
+          const hours = (end - start) / 3600000;
+          const p = Number(persons || 0);
+
+          if (hours > 16) {
+            return {
+              price: null,
+              tierLabel: "über 16 Std.",
+              personsLabel: p ? (p <= 45 ? "≤45" : "≥46") : "",
+              caution: this.cautionFn(p)
+            };
+          }
+
+          const short = hours <= 12;
+          const tierLabel = short ? "bis 12 Std." : "12–16 Std.";
+          const personsLabel = p ? (p <= 45 ? "≤45" : "≥46") : "";
+          let base;
+
+          if (p <= 45) {
+            base = short ? 140 : 200;
+          } else {
+            base = short ? 220 : 310;
+          }
+
+          return {
+            price: base,
+            base,
+            personsDelta: 0,
+            timeSurcharge: 0,
+            tierLabel,
+            personsLabel,
+            caution: this.cautionFn(p)
+          };
+        }
+      }
+    };
+
+    /* Touch detection */
     function isTouchDevice(){
       return window.matchMedia('(pointer: coarse)').matches || navigator.maxTouchPoints > 0;
     }
 
+    /* Render extras per school (veld verbergen als geen extras) */
     function renderExtrasForSchool(key){
       const container = document.getElementById('extrasContainer');
       container.innerHTML = '';
@@ -893,8 +936,11 @@
         el.addEventListener('change', ()=>{ updatePricePreview(); });
       });
 
-      // Show/hide the whole field if there are no extras
-      document.querySelector('.field--extras').style.display = (cfg.extras && cfg.extras.length) ? '' : 'none';
+      // Hele veld tonen/verbergen op basis van beschikbaarheid extras
+      const extrasField = document.querySelector('.field--extras');
+      if (extrasField) {
+        extrasField.style.display = (cfg.extras && cfg.extras.length) ? '' : 'none';
+      }
     }
 
     /* ===== DOM refs ===== */
@@ -1008,6 +1054,10 @@
 
     const addrHintHelp = document.getElementById('addrHintHelp');
 
+    // ➕ NIEUW: Deposit (Kaution) refs
+    const bdDepositRow = document.getElementById('bdDepositRow');
+    const bdDeposit    = document.getElementById('bdDeposit');
+
     const DEFAULT_TAP_MINUTES = 120;
     const MAX_EVENT_HOURS   = 24;
     const FALLBACK_MINUTES  = 120;
@@ -1020,7 +1070,7 @@
     let CURRENT_PRICE = null;
     let untrap = null;
 
-    /* ===== I18N apply ===== */
+    /* ===== I18N apply (incl. per-school terms) ===== */
     function applyI18n(){
       const L = I18N[langSelect.value] || I18N.de;
       titleApp.textContent = L.appTitle;
@@ -1053,7 +1103,8 @@
 
       const termsList = document.getElementById('termsList');
       termsList.innerHTML = "";
-      L.terms.forEach(t => { const li = document.createElement('li'); li.textContent = t; termsList.appendChild(li); });
+      const termsToRender = getTermsForSchool(langSelect.value, currentKey);
+      termsToRender.forEach(t => { const li = document.createElement('li'); li.textContent = t; termsList.appendChild(li); });
 
       document.getElementById('bdTimeLabel').textContent = L.bdTime;
       document.getElementById('bdExtrasLabel').textContent = L.bdExtras;
@@ -1063,7 +1114,7 @@
 
       fPersons.placeholder = L.phPersons;
       fTypeFree.placeholder = L.phType;
-      fBikes.placeholder = L.phBikes;
+      // fBikes blijft verborgen; placeholder kan blijven bestaan
 
       successTitle.textContent = L.successTitle;
       successLead.textContent  = L.successLead;
@@ -1082,7 +1133,7 @@
       renderSchoolSelectOptions();
     }
 
-    /* ===== Fetch helpers ===== */
+    /* ===== Fetch helpers / JSON ===== */
     async function fetchJson(url){
       const r = await fetch(url+'?v='+Date.now(), {cache:'no-store'});
       if(!r.ok) throw new Error('HTTP '+r.status);
@@ -1115,7 +1166,7 @@
       }).filter(ev => !ev.__drop && ev.start instanceof Date && !isNaN(ev.start) && ev.end instanceof Date && !isNaN(ev.end));
     }
 
-    /* ===== Discover schools ===== */
+    /* ===== Discover schools (online/offline) ===== */
     async function discoverSchools(){
       const keys = Object.keys(SCHOOLS);
       for(const key of keys){
@@ -1176,7 +1227,7 @@
       }
     }
 
-    /* ===== Rules / validation ===== */
+    /* ===== Rules / validation helpers ===== */
     function minStartDate(){ const d=new Date(); d.setDate(d.getDate()+7); d.setHours(0,0,0,0); return d; }
     function overlaps(aStart,aEnd,bStart,bEnd){ return (aStart < bEnd) && (aEnd > bStart); }
 
@@ -1213,7 +1264,7 @@
           if(overlaps(start, end, bS, bE)){ ok = false; break; }
         }
       }
-      
+
       const showConflict = !ok && (wasSubmitted || (fFrom.dataset.touched==='1' && fTo.dataset.touched==='1'));
       alertConflict.style.display = showConflict ? 'block':'none';
       alertConflict.textContent = (I18N[langSelect.value]||I18N.de).conflict;
@@ -1258,7 +1309,6 @@
       if(n===1){ step1.style.display='block'; step2.style.display='none'; }
       else { step1.style.display='none'; step2.style.display='block'; }
 
-      // show/hide final controls
       const agreeWrap = document.getElementById('fAccept').closest('.checkline');
       if(agreeWrap){ agreeWrap.style.display = (n===2 ? 'inline-flex' : 'none'); }
       btnSubmit.style.display = (n===2 ? 'inline-flex' : 'none');
@@ -1274,7 +1324,6 @@
     }
 
     btnToStep2.addEventListener('click', ()=>{ 
-      // Valideer alleen stap 1 velden
       const start = parseLocalDT(fFrom.value);
       const end   = parseLocalDT(fTo.value);
       
@@ -1301,13 +1350,11 @@
         alertShort.style.display='none'; 
       }
       
-      // Check alleen personen voor stap 1
       highlight(fPersons, !fPersons.value);
       
       if(ok && fPersons.value) {
         goStep(2);
       } else {
-        // Zet touched op true zodat errors zichtbaar worden
         fFrom.dataset.touched = '1';
         fTo.dataset.touched = '1';
         fPersons.dataset.touched = '1';
@@ -1336,7 +1383,6 @@
       container.addEventListener('keydown', onKey);
       return ()=>container.removeEventListener('keydown', onKey);
     }
-
     function openModal(prefill){
       fSchool.value = prefill.school;
       fFrom.value = toInputLocal(prefill.start);
@@ -1399,15 +1445,7 @@
     const updateCityHints = debounce(async ()=>{
       const q=(fCity.value||'').trim();
       if(q.length<3) return;
-      
-      const data = await nominatim(q);
-      const hints = new Set();
-      data.forEach(r=>{
-        const a = r.address||{};
-        const plz  = a.postcode || '';
-        const city = a.city || a.town || a.village || a.suburb || '';
-        if(plz && city) hints.add(`${plz} ${city}`);
-      });
+      await nominatim(q); // we gebruiken hier alleen rate-limiting/‘warming’
     }, 450);
 
     fStreet.addEventListener('input', updateStreetHints);
@@ -1453,7 +1491,6 @@
     }
 
     function euro(n){ return new Intl.NumberFormat('de-DE',{style:'currency',currency:'EUR', maximumFractionDigits:2}).format(n); }
-
     function esc(s){ return String(s||"").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
 
     /* ===== Calendar loading ===== */
@@ -1478,11 +1515,11 @@
       calendarLoading.style.display = 'block';
       if(calendar) calendar.destroy();
 
-      // booked/busy from JSON
+      // geboekte/blokkeerde events uit JSON
       const raw = await fetchJson(SCHOOLS[key].file);
       busyEvents = normalizeEvents(raw);
 
-      // holds from Apps Script
+      // (optioneel) holds ophalen
       let holdEvents = [];
       try {
         const r = await fetch(`${APPS_SCRIPT_URL}?type=holds&school=${encodeURIComponent(key)}&v=${Date.now()}`);
@@ -1497,7 +1534,7 @@
               end:   new Date(h.end),
               editable: false,
               overlap: true,
-              classNames: (h.classNames && h.classNames.includes('tentative')) ? ['tentative'] : ['tentative']
+              classNames: ['tentative']
             }));
           }
         }
@@ -1540,8 +1577,8 @@
       });
 
       calendar.render();
-      
-      // voeg de eerste lading holds los toe
+
+      // voeg holds toe
       holdEvents.forEach(ev => calendar.addEvent(ev));
       mobileAdd.style.display = isTouchDevice() ? 'block' : 'none';
       applyResponsiveView();
@@ -1549,18 +1586,44 @@
       calendarEl.classList.add('loaded');
       fSchool.value = SCHOOLS[currentKey].name;
       renderExtrasForSchool(key);
+
+      // terms opnieuw opbouwen voor deze school
+      (function refreshTerms(){
+        const termsList = document.getElementById('termsList');
+        if (!termsList) return;
+        const L = I18N[langSelect.value] || I18N.de;
+        document.getElementById('termsSummary').textContent = L.termsSummary;
+        termsList.innerHTML = "";
+        getTermsForSchool(langSelect.value, currentKey).forEach(t => {
+          const li = document.createElement('li'); li.textContent = t; termsList.appendChild(li);
+        });
+      })();
+
       updatePricePreview();
     }
-
-    /* ===== Price calculation ===== */
+    /* ===== Price calculation (incl. WA customPrice + Kaution) ===== */
     function updatePricePreview(){
       const L = I18N[langSelect.value] || I18N.de;
-      const start = parseLocalDT(fFrom.value);
-      const end   = parseLocalDT(fTo.value);
+      const start   = parseLocalDT(fFrom.value);
+      const end     = parseLocalDT(fTo.value);
       const persons = Number(fPersons.value || 0);
       CURRENT_PRICE = null;
 
-      if(!(start && end) || end <= start){
+      const showPriceOnReq = ()=> {
+        priceValue.textContent = L.priceOnReq;
+        bdBaseLabel.textContent = (langSelect.value==='en' ? 'Base' : 'Basis');
+        bdBase.textContent = '–';
+        bdPersonsLabel.textContent = (langSelect.value==='en' ? 'People tier' : 'Personen-Staffel');
+        bdPersons.textContent = (langSelect.value==='en' ? '€0.00' : '0,00 €');
+        bdTime.textContent = (langSelect.value==='en' ? '€0.00' : '0,00 €');
+        bdExtras.textContent = (L.bdNoExtras || (langSelect.value==='en' ? 'none' : 'keine'));
+        bdTotal.textContent = '–';
+        if (bdDepositRow) bdDepositRow.style.display = 'none';
+        priceBreakdown.style.display = 'block';
+        updateSticky();
+      };
+
+      if (!(start && end) || end <= start){
         priceValue.textContent = '–';
         priceBreakdown.style.display = 'none';
         hidePopover();
@@ -1570,21 +1633,100 @@
 
       const cfg = PRICING[currentKey] || PRICING.WE;
 
-      // tier by minutes
+      // ===== A) customPrice-pad (bv. WA) =====
+      if (typeof cfg.customPrice === 'function') {
+        const out = cfg.customPrice(start, end, persons);
+
+        if (!out || out.price === null) {
+          // >16h bij WA => prijs op aanvraag; Kaution (indien van toepassing) toch tonen
+          showPriceOnReq();
+          if (cfg.cautionFn) {
+            const depo = cfg.cautionFn(persons);
+            if (depo && bdDepositRow) {
+              bdDeposit.textContent = euro(depo);
+              bdDepositRow.style.display = '';
+            }
+          }
+          CURRENT_PRICE = {
+            currency: 'EUR',
+            tierHours: out?.tierLabel || '',
+            personsMultiplier: 1,
+            personsLabel: out?.personsLabel || '',
+            base: null,
+            personsDelta: 0,
+            timeSurcharge: 0,
+            extrasCount: 0,
+            extrasCost: 0,
+            total: null,
+            extrasSelected: [],
+            caution: out?.caution ?? (cfg.cautionFn ? cfg.cautionFn(persons) : null)
+          };
+          updateSticky();
+          return;
+        }
+
+        // WA: geen extras, geen tijdtoeslag
+        const total = out.price;
+
+        priceValue.textContent = euro(total);
+        bdBaseLabel.textContent = (langSelect.value==='en'
+          ? `Base (${out.tierLabel || ''})`
+          : `Basis (${out.tierLabel || ''})`);
+        bdBase.textContent = euro(out.base ?? total);
+
+        bdPersonsLabel.textContent = (langSelect.value==='en'
+          ? `People tier (${out.personsLabel || ''})`
+          : `Personen-Staffel (${out.personsLabel || ''})`);
+        bdPersons.textContent = (langSelect.value==='en' ? '€0.00' : '0,00 €');
+
+        bdTime.textContent = (langSelect.value==='en' ? '€0.00' : '0,00 €');
+
+        bdExtras.textContent = (L.bdNoExtras || (langSelect.value==='en' ? 'none' : 'keine'));
+
+        bdTotal.textContent = euro(total);
+
+        // Kaution tonen (niet optellen bij Summe)
+        if (cfg.cautionFn || typeof out.caution !== 'undefined') {
+          const depo = (typeof out.caution !== 'undefined') ? out.caution : cfg.cautionFn(persons);
+          if (depo && bdDepositRow) {
+            bdDeposit.textContent = euro(depo);
+            bdDepositRow.style.display = '';
+          } else if (bdDepositRow) {
+            bdDepositRow.style.display = 'none';
+          }
+        }
+
+        CURRENT_PRICE = {
+          currency: 'EUR',
+          tierHours: out.tierLabel || '',
+          personsMultiplier: 1,
+          personsLabel: out.personsLabel || '',
+          base: Number(out.base ?? total),
+          personsDelta: 0,
+          timeSurcharge: 0,
+          extrasCount: 0,
+          extrasCost: 0,
+          total: Number(total),
+          extrasSelected: [],
+          caution: (typeof out.caution !== 'undefined') ? out.caution : (cfg.cautionFn ? cfg.cautionFn(persons) : null)
+        };
+
+        priceBreakdown.style.display = 'block';
+        updateSticky();
+        return;
+      }
+
+      // ===== B) generiek pad (WE/WI) =====
       const totalMin = Math.round((end - start) / 60000);
       const tier = (cfg.tiers || []).find(t => totalMin <= t.maxMin) || null;
 
-      // person multiplier
       let mult = null, pplLabel = ">100";
       for (const pt of (cfg.personTiers || [])){
         if (persons <= pt.max){ mult = pt.mult; pplLabel = pt.label; break; }
       }
 
       if(!tier || mult === null){
-        priceValue.textContent = L.priceOnReq;
-        priceBreakdown.style.display = 'none';
-        hidePopover();
-        updateSticky();
+        showPriceOnReq();
         return;
       }
 
@@ -1593,26 +1735,23 @@
       const personsDelta = basePlusPersons - base;
       const timeAdd = typeof cfg.surcharge === 'function' ? cfg.surcharge(start, end) : 0;
 
-      // extras (dynamic)
+      // extras
       const checked = Array.from(document.querySelectorAll('#extrasContainer input:checked'));
       const extrasCost = checked.reduce((sum, el)=> sum + Number(el.dataset.price||0), 0);
       const extrasSelected = checked.map(el => (langSelect.value==='en' ? el.dataset.labelEn : el.dataset.labelDe) || '');
 
       const total = basePlusPersons + timeAdd + extrasCost;
 
-      // UI
       priceValue.textContent = euro(total);
       bdBaseLabel.textContent = (langSelect.value==='en' ? I18N.en.bdBase(tier.hoursLabel) : I18N.de.bdBase(tier.hoursLabel));
       bdBase.textContent = euro(base);
       bdPersonsLabel.textContent = (langSelect.value==='en' ? I18N.en.bdPersons(pplLabel) : I18N.de.bdPersons(pplLabel));
       bdPersons.textContent = personsDelta === 0 ? (langSelect.value==='en' ? "€0.00" : "0,00 €") : euro(personsDelta);
-      bdTimeLabel.textContent = L.bdTime;
       bdTime.textContent = timeAdd ? euro(timeAdd) : (langSelect.value==='en' ? "€0.00" : "0,00 €");
-      bdExtrasLabel.textContent = L.bdExtras;
       bdExtras.textContent = extrasCost ? euro(extrasCost) : (L.bdNoExtras || (langSelect.value==='en' ? "none" : "keine"));
-      bdTotalLabel.textContent = L.bdTotal;
       bdTotal.textContent = euro(total);
-      timePopover.textContent = L.bdTimeInfo;
+
+      if (bdDepositRow) bdDepositRow.style.display = 'none';
 
       CURRENT_PRICE = {
         currency: 'EUR',
@@ -1631,7 +1770,6 @@
       priceBreakdown.style.display = 'block';
       updateSticky();
 
-      // Small running hint (optional)
       const extrasRunning = document.getElementById('extrasRunning');
       if (extrasRunning) extrasRunning.textContent = `Extras: ${euro(extrasCost)}`;
     }
@@ -1652,7 +1790,7 @@
     timeInfoIcon.addEventListener('click', (e)=>{ e.stopPropagation(); togglePopover(); });
     timeInfoIcon.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); togglePopover(); } });
 
-    /* ===== Success overlay ===== */
+    /* ===== Success overlay (met optionele Kaution-regel) ===== */
     function showSuccessOverlay(payload){
       const L = I18N[langSelect.value] || I18N.de;
       successTitle.textContent = L.successTitle;
@@ -1668,11 +1806,19 @@
       const end   = parseLocalDT(payload.to);
 
       const messageRow = payload.message ? `<div><strong>${labels.message}:</strong> ${esc(payload.message)}</div>` : "";
+
+      // ➕ Optioneel: toon Kaution als berekend
+      let depositRow = "";
+      if (CURRENT_PRICE && CURRENT_PRICE.caution) {
+        depositRow = `<div><strong>Kaution:</strong> ${euro(CURRENT_PRICE.caution)}</div>`;
+      }
+
       successSummary.innerHTML = `
         <div><strong>${labels.school}:</strong> ${esc(payload.school || "")}</div>
         <div><strong>${labels.from}:</strong> ${formatDT(start, langSelect.value)}</div>
         <div><strong>${labels.to}:</strong> ${formatDT(end,   langSelect.value)}</div>
         ${payload.persons ? `<div><strong>${labels.persons}:</strong> ${esc(payload.persons)}</div>` : ""}
+        ${depositRow}
         <div><strong>${labels.extras}:</strong> ${extrasText.length ? esc(extrasText.join(", ")) : (L.bdNoExtras)}</div>
         ${messageRow}
       `;
@@ -1694,7 +1840,7 @@
       setTimeout(()=> successMsg.classList.remove('show'), 3000);
     }
 
-    /* ===== Submit naar Apps Script - ENHANCED VERSION ===== */
+    /* ===== Submit naar Apps Script ===== */
     const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby-fC-flM6XSCbtO6hZ8ZXJQkJc4olINKwUUhtqU7zhYK1GEQVSwofkIx6s395vCCo9/exec";
     const SECRET = "kidbike_0d2e1f8d3a7c4b9e5f2a1c8d7b4e3f";
 
@@ -1717,7 +1863,6 @@
       btnSubmit.disabled = true;
       btnSubmit.textContent = (langSelect.value==='en'?'Sending…':'Senden…');
 
-      // timeout guard zodat een hanging fetch niet "stil" blijft
       const ctl = new AbortController();
       const t = setTimeout(()=>ctl.abort(), 15000);
 
@@ -1732,7 +1877,7 @@
 
         const payload = {
           secret: SECRET,
-          school:  fSchool.value,              // let op: dit is de NAAM, niet de key (WE/WI/WA)
+          school:  fSchool.value,              // naam, niet de key
           from:    fFrom.value,
           to:      fTo.value,
           persons: fPersons.value,
@@ -1760,34 +1905,25 @@
           accepted_terms: !!fAccept.checked
         };
 
-        // ——— de fetch met maximale 'zichtbaarheid' van wat er terugkomt
         const res = await fetch(APPS_SCRIPT_URL, {
           method: 'POST',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // voorkomt preflight
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // geen preflight
           body: JSON.stringify(payload),
           redirect: 'follow',
           signal: ctl.signal
         }).catch(err => {
-          // netwerk/CORS error (bij CORS faalt fetch en kom je hier)
-          throw new Error('Netwerk- of CORS-fehler: ' + String(err && err.message ? err.message : err));
+          throw new Error('Netzwerk- oder CORS-Fehler: ' + String(err && err.message ? err.message : err));
         });
 
         clearTimeout(t);
 
-        // Let op: bij CORS-issues kan res.type/ok/status afwijkend zijn
-        console.log('[submit] res.type:', res.type, 'status:', res.status, 'ok:', res.ok, 'url:', res.url);
-
         const text = await res.text().catch(()=> '');
-        console.log('[submit] raw response text (first 1k):\n', text.slice(0,1000));
-
         if (!res.ok) {
-          // 4xx/5xx of opaque zonder CORS
           errBox.textContent = `Serverfehler (HTTP ${res.status}):\n` + text.slice(0,1000);
           errBox.style.display = 'block';
           throw new Error('HTTP '+res.status);
         }
 
-        // Probeer JSON te parsen; als het HTML/redirect is, tonen we dat
         let out;
         try {
           out = JSON.parse(text);
@@ -1797,8 +1933,6 @@
           throw new Error('Non-JSON response');
         }
 
-        console.log('[submit] parsed JSON:', out);
-
         if (!out.ok) {
           const msg = out.error || 'Unbekannter Fehler (ok:false).';
           errBox.textContent = msg;
@@ -1806,7 +1940,6 @@
           throw new Error(msg);
         }
 
-        // 🎉 success
         showSuccessOverlay({
           school: payload.school,
           from:   payload.from,
@@ -1815,11 +1948,10 @@
           message: payload.message
         });
         closeModal();
+        reloadCalendarAfterSubmission(); // na succes: holds verversen
 
       } catch(err){
         console.error('Submit failed:', err);
-        // Geen alert meer; alles staat in errBox. Desnoods nog zachtjes:
-        // alert('Senden fehlgeschlagen: ' + (err.message || err));
       } finally {
         clearTimeout(t);
         btnSubmit.classList.remove('loading');
@@ -1827,7 +1959,6 @@
         btnSubmit.textContent = (I18N[langSelect.value]||I18N.de).btnSend || 'Anfrage senden';
       }
     });
-
     /* ===== embed-size throttle ===== */
     function _sendHeight(){
       var doc=document.documentElement, body=document.body;
@@ -1869,17 +2000,15 @@
                 classNames: ['tentative']
               }));
               
-              // 1) Verwijder alleen bestaande 'tentative' events
-              if (Array.isArray(holdEvents) && holdEvents.length) {
-                calendar.getEvents()
-                  .filter(ev => (ev.classNames || []).includes('tentative'))
-                  .forEach(ev => ev.remove());
-                holdEvents.forEach(ev => calendar.addEvent(ev));
-              }
+              // Verwijder bestaande 'tentative' events en voeg nieuwe toe
+              calendar.getEvents()
+                .filter(ev => (ev.classNames || []).includes('tentative'))
+                .forEach(ev => ev.remove());
+              holdEvents.forEach(ev => calendar.addEvent(ev));
             }
           }
         } catch(_) {
-          // Silently fail - don't disrupt user experience
+          // Stil falen
         }
       }
     }, 30000);
@@ -1904,13 +2033,10 @@
                   classNames: ['tentative']
                 }));
                 
-                // 1) Verwijder alleen bestaande 'tentative' events
-                if (Array.isArray(holdEvents) && holdEvents.length) {
-                  calendar.getEvents()
-                    .filter(ev => (ev.classNames || []).includes('tentative'))
-                    .forEach(ev => ev.remove());
-                  holdEvents.forEach(ev => calendar.addEvent(ev));
-                }
+                calendar.getEvents()
+                  .filter(ev => (ev.classNames || []).includes('tentative'))
+                  .forEach(ev => ev.remove());
+                holdEvents.forEach(ev => calendar.addEvent(ev));
               }
             }
           } catch(_) {
@@ -1947,10 +2073,8 @@
 
     /* ===== Touch device enhancements ===== */
     if (isTouchDevice()) {
-      // Add touch-specific event handling
       document.addEventListener('touchstart', (e) => {
         if (e.target.closest('.fc-event')) {
-          // Add visual feedback for touching events
           e.target.style.opacity = '0.7';
           setTimeout(() => {
             if (e.target.style) e.target.style.opacity = '';
@@ -1972,7 +2096,6 @@
     /* ===== Error handling and user feedback ===== */
     window.addEventListener('error', (event) => {
       console.error('Application error:', event.error);
-      // Don't show error to user unless it's critical
     });
 
     window.addEventListener('unhandledrejection', (event) => {
@@ -1986,7 +2109,6 @@
     }
 
     /* ===== Accessibility enhancements ===== */
-    // Announce important changes to screen readers
     function announceToScreenReader(message) {
       const announcement = document.createElement('div');
       announcement.setAttribute('aria-live', 'polite');
@@ -2000,16 +2122,15 @@
       }, 1000);
     }
 
-    // Enhance form submission feedback
-    const originalShowSuccessOverlay = showSuccessOverlay;
+    // Alleen toegankelijkheidsmelding toevoegen na succes (geen extra reload hier)
+    const _origShowSuccessOverlay = showSuccessOverlay;
     showSuccessOverlay = function(payload) {
-      originalShowSuccessOverlay(payload);
+      _origShowSuccessOverlay(payload);
       announceToScreenReader(
         langSelect.value === 'en' 
           ? 'Request submitted successfully'
           : 'Anfrage erfolgreich gesendet'
       );
-      reloadCalendarAfterSubmission();
     };
 
   </script>
