@@ -189,728 +189,1378 @@
 
     .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
     .grid-1{grid-template-columns:1fr}
-    .row{display:flex;flex-wrap:wrap;gap:6px;align-items:end}
-    .row > .field{margin-bottom:0}
+    .row-compact{display:grid;grid-template-columns:1fr 110px;gap:8px} 
+    .row-compact > div{display:grid;grid-template-columns:90px 1fr;gap:8px}
+    .row-phone{display:grid;grid-template-columns:140px 1fr;gap:8px}
 
-    .field{margin-bottom:8px}
-    .field label{display:block;margin-bottom:3px;font-weight:500;font-size:14px;color:var(--ink)}
-    .field.required label::after{content:'*';color:var(--warn);margin-left:2px}
-    .field input,.field textarea,.field select{
-      width:100%;border:1px solid var(--border);border-radius:8px;font-size:16px;background:#fff;
-      transition:border-color 0.2s,box-shadow 0.2s;
+    .field input:focus,.field textarea:focus,.field select:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 3px rgba(14,165,233,0.1);}
+    .field input.error,.field select.error{border-color:var(--warn);}
+    .field .error-msg{font-size:12px;color:var(--warn);margin-top:4px;display:none;}
+    .field input.error + .error-msg, .field select.error + .error-msg{display:block;}
+
+    .modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
+    .btn{padding:11px 16px;border-radius:10px;border:1px solid var(--border);background:#fff;font-weight:700;cursor:pointer;transition:all 0.2s;display:inline-flex;align-items:center;justify-content:center;font-size:14px}
+    .btn:disabled{opacity:0.6;cursor:not-allowed;}
+    .btn.primary{background:var(--brand);border-color:var(--brand);color:#fff}
+    .btn.primary:hover:not(:disabled){filter:brightness(1.1)}
+    .btn.danger{background:#fff;border-color:#e5e7eb;color:#374151}
+    .btn.danger:hover{background:#f9fafb}
+
+    .hint{font-size:12px;color:var(--muted);margin-top:4px}
+    .warn{font-size:13px;color:var(--warn);margin-top:6px;display:none;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:8px 12px;}
+    .warn.show{display:block;}
+    .short-term-warning{font-size:12px;color:var(--warning);margin-top:8px;display:none;background:var(--warning-bg);border:1px solid var(--warning-border);border-radius:8px;padding:8px 10px;}
+    .short-term-warning.show{display:block;}
+
+    .badge{display:inline-block;padding:4px 10px;border-radius:999px;border:1px solid var(--border);font-size:12px;color:#374151;background:#f8fafc;cursor:pointer;user-select:none;transition:all 0.2s;}
+    .badge:hover{background:#f1f5f9;}
+    .badge input[type="checkbox"]{margin-right:6px;}
+
+    details.summarybox{margin-top:10px;border:1px dashed var(--border);padding:10px;border-radius:10px;background:#fafbfc}
+    details.summarybox summary{cursor:pointer;font-weight:700;font-size:14px}
+
+    .breakdown{margin-top:6px;font-size:13px;color:#374141;display:none}
+    .breakdown .row{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:1px 0;}
+    .breakdown .muted{color:#6b7280}
+    .breakdown .total{font-weight:800;border-top:1px dashed var(--border);padding-top:6px;margin-top:6px}
+
+    .tooltip-wrap{position:relative;display:inline-flex;align-items:center}
+    .tooltip-icon{cursor:pointer;font-weight:bold;margin-left:6px;user-select:none;background:var(--brand);color:white;border-radius:50%;width:16px;height:16px;
+      display:inline-flex;align-items:center;justify-content:center;font-size:10px;}
+    .tooltip-icon:hover{filter:brightness(1.1)}
+    .popover{position:absolute; top:100%; left:0; transform:translateY(8px); background:var(--popover-bg); color:var(--popover);
+      border:1px solid var(--popover-border); border-radius:10px; padding:10px 12px; max-width:320px; box-shadow:0 8px 24px rgba(0,0,0,.08);
+      font-size:12px; line-height:1.4; z-index:60; display:none;}
+    .popover.show{display:block}
+    .popover::after{content:""; position:absolute; top:-6px; left:14px; width:10px; height:10px; background:var(--popover-bg); transform:rotate(45deg); border-left:1px solid var(--popover-border); border-top:1px solid var(--popover-border);}
+
+    .success-msg{position:fixed;top:16px;right:16px;z-index:70;background:#dcfce7;border:1px solid #bbf7d0;color:#166534;
+      padding:10px 14px;border-radius:10px;font-size:13px;box-shadow:0 4px 12px rgba(0,0,0,0.1);transform:translateX(100%);transition:transform 0.3s;}
+    .success-msg.show{transform:translateX(0);}
+
+    .success-overlay{position:fixed; inset:0; z-index:120; background:rgba(0,0,0,.45); display:none; align-items:center; justify-content:center; padding:20px;}
+    .success-card{width:min(720px, 96vw); background:#fff; color:#0f172a; border:1px solid var(--border); border-radius:14px; padding:22px; box-shadow:0 24px 80px rgba(0,0,0,0.18);}
+    .success-card h2{ margin:0 0 10px; font-size:22px; }
+    .success-card p{ margin:6px 0; line-height:1.5; }
+    .success-summary{ margin:12px 0 0; padding:12px; border:1px dashed var(--border); border-radius:10px; background:#f8fafc; font-size:15px; }
+    .success-actions{ display:flex; gap:10px; justify-content:flex-end; margin-top:16px; }
+    .success-actions .btn{ min-width:160px; }
+
+    .start-overlay{position:fixed;inset:0;z-index:110;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;padding:20px;}
+    .start-card{width:min(920px, 96vw);background:#fff;border:1px solid var(--border);border-radius:14px;padding:22px;box-shadow:0 24px 80px rgba(0,0,0,.18);}
+    .start-card h2{margin:0 0 8px;font-size:22px;}
+    .start-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:12px;}
+    .school-card{border:1px solid var(--border);border-radius:12px;padding:14px;background:#fff;display:flex;flex-direction:column;gap:8px;transition:transform .12s, box-shadow .12s, border-color .12s;}
+    .school-card:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(0,0,0,.06);border-color:#cbd5e1;}
+    .school-card .status{font-size:12px;color:#065f46;background:#ecfdf5;border:1px solid #a7f3d0;padding:4px 8px;border-radius:999px;width:max-content;}
+    .school-card.disabled{opacity:.55;filter:grayscale(0.2);background:var(--disabled-bg);}
+    .school-card.disabled .status{color:#92400e;background:#fef3c7;border-color:#fde68a;}
+
+    /* --- compactere rijen --- */
+    .row.cols-3b{grid-template-columns: 1fr 120px 1fr;} 
+
+    /* small form controls */
+    .field.sm select,.field.sm input{padding:8px 10px}
+
+    /* checkbox-rij compacter en duidelijk */
+    .checkline{display:inline-flex;align-items:center;gap:8px;font-weight:600}
+    .checkline input[type="checkbox"]{margin:0}
+
+    /* foutmelding alleen tonen als .error gezet is (zie JS) */
+    .field .error-msg{display:none}
+    .field input.error + .error-msg,
+    .field select.error + .error-msg{display:block}
+
+    @media (max-width:900px){
+      .start-grid{grid-template-columns:1fr;}
+      .success-actions{flex-direction:column;}
+      .success-actions .btn{width:100%;}
     }
-    .field input:focus,.field textarea:focus,.field select:focus{outline:none;border-color:var(--brand);
-      box-shadow:0 0 0 3px rgba(14,165,233,0.1)}
-    .field input:invalid{border-color:var(--warn)}
-    .field input[type="datetime-local"]{font-family:monospace}
-    .field textarea{resize:vertical;min-height:80px}
-
-    .field--checkbox{display:flex;align-items:center;gap:8px;margin-bottom:6px}
-    .field--checkbox input[type="checkbox"]{width:auto;margin:0}
-    .field--checkbox label{margin:0;font-weight:400;cursor:pointer}
-
-    .btn{background:var(--brand);color:white;border:none;border-radius:8px;padding:10px 16px;font-size:14px;font-weight:600;
-      cursor:pointer;transition:background 0.2s;text-align:center;text-decoration:none;display:inline-block;}
-    .btn:hover{background:var(--busy)}
-    .btn:disabled{background:var(--disabled);cursor:not-allowed}
-    .btn.secondary{background:var(--card);color:var(--ink);border:1px solid var(--border)}
-    .btn.secondary:hover{background:#f9fafb}
-
-    /* price styling */
-    .price{display:flex;align-items:center;gap:8px;margin:6px 0}
-    .price .pill{background:#e0f2fe;border:1px solid #0ea5e9;color:#0c4a6e;padding:6px 10px;border-radius:999px;font-weight:600;font-size:14px}
-    .price .toggle{color:var(--brand);font-size:12px;cursor:pointer;text-decoration:underline}
-
-    .breakdown{background:#f8fafc;border:1px solid var(--border);border-radius:8px;padding:10px;margin:8px 0;font-size:13px;display:none}
-    .breakdown .row{display:flex;justify-content:space-between;margin:2px 0;padding:2px 0}
-    .breakdown .row.total{border-top:1px solid var(--border);margin-top:6px;padding-top:6px;font-weight:700}
-    .breakdown .muted{color:var(--muted)}
-
-    .extras{margin:8px 0}
-    .extras .badge{display:inline-flex;align-items:center;gap:6px;margin:4px 6px 4px 0;padding:4px 10px;
-      border:1px solid var(--border);border-radius:999px;background:#f8fafc;cursor:pointer;transition:background 0.2s;font-size:12px;min-height:32px}
-    .extras .badge:hover{background:#f1f5f9}
-    .extras .badge input{margin:0}
-    .extras .badge .price{font-weight:600;opacity:.7;font-size:11px}
-
-    .popover{position:absolute;background:var(--popover-bg);border:1px solid var(--popover-border);border-radius:8px;
-      padding:8px 10px;font-size:12px;color:var(--popover);max-width:200px;z-index:30;box-shadow:0 4px 12px rgba(0,0,0,0.1);display:none}
-
-    .tooltip-wrap{position:relative}
-    .tooltip-icon{background:var(--brand);color:white;border-radius:50%;width:16px;height:16px;display:inline-flex;
-      align-items:center;justify-content:center;font-size:10px;margin-left:4px;cursor:pointer}
-
-    .steps{margin:10px 0;color:var(--muted);font-size:12px}
-
-    .sticky-bar{position:sticky;bottom:0;z-index:10;background:var(--card);border-top:1px solid var(--border);
-      padding:10px 12px;display:flex;gap:10px;align-items:center;justify-content:space-between;border-radius:0 0 12px 12px}
-    .sticky-bar .sum{font-size:13px;color:var(--muted)}
-    .sticky-bar .sum b{color:var(--ink);font-weight:800}
-    .sticky-bar .checkline{display:flex;align-items:center;gap:6px;font-size:12px}
-
-    .success-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:60;padding:16px}
-    .success-content{background:var(--card);border-radius:12px;padding:20px;max-width:500px;text-align:center;position:relative}
-    .success-content h3{color:var(--green);margin:0 0 12px}
-    .success-content .summary{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:12px;margin:12px 0;text-align:left;font-size:13px}
-
-    /* responsive */
-    @media (max-width:720px){
-      .modal{max-width:100%;width:100%;height:100%;max-height:100%;border-radius:0;margin:0;padding:14px}
+    @media (max-width: 720px){
       .grid{grid-template-columns:1fr}
-      .row{flex-direction:column;align-items:stretch}
-      .row.cols-2{grid-template-columns:1fr}
-      .row.cols-3{grid-template-columns:1fr}
-      .row.cols-contact{grid-template-columns:1fr}
+      .row-compact{grid-template-columns:1fr 100px}
+      .row-compact > div{grid-template-columns:90px 1fr}
+      .row-phone{grid-template-columns:140px 1fr}
+      .fc .fc-toolbar-title{ font-size: 14px; }
+      .fc .fc-button{ min-height:40px; }
     }
 
-    /* Dark mode support */
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --bg: #0f172a;
-        --card: #1e293b;
-        --border: #334155;
-        --ink: #f1f5f9;
-        --muted: #94a3b8;
+    /* === Always place labels above inputs === */
+    .field{
+      display:flex;
+      flex-direction:column;      /* label on top */
+      align-items:stretch;
+    }
+    .field label{
+      display:block;
+      font-size:13px;
+      font-weight:600;
+      line-height:1.2;
+      margin:0 0 6px 0;
+    }
+
+    /* Consistent control sizing */
+    .field input,
+    .field select,
+    .field textarea{
+      width:100%;
+      min-height:42px;
+      padding:8px 10px;
+      border:1px solid var(--border);
+      border-radius:10px;
+    }
+    input[type="datetime-local"]{ line-height:normal; }
+
+    /* === Step 1 grid with clear areas === */
+    .form-grid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:12px;
+      grid-template-areas:
+        "school persons"
+        "from   to"
+        "type   type"
+        "extras extras";
+    }
+    .field--school  { grid-area: school; }
+    .field--persons { grid-area: persons; }
+    .field--from    { grid-area: from; }
+    .field--to      { grid-area: to; }
+    .field--type    { grid-area: type; }
+    .field--extras  { grid-area: extras; }
+
+    @media (max-width:720px){
+      .form-grid{
+        grid-template-columns:1fr;
+        grid-template-areas:
+          "school"
+          "persons"
+          "from"
+          "to"
+          "type"
+          "extras";
       }
     }
 
-    @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-    .modal{animation:fadeIn 0.2s ease-out}
-
-    /* Improve accessibility */
-    .btn:focus-visible,
-    .field input:focus-visible,
-    .field select:focus-visible,
-    .field textarea:focus-visible {
-      outline: 2px solid var(--brand);
-      outline-offset: 2px;
+    /* === Step 2 column logic === */
+    .row.cols-3{
+      display:grid;
+      grid-template-columns: 140px 1fr 1fr;  /* Anrede fixed, names flexible */
+      gap:12px;
+    }
+    .row.cols-contact{
+      display:grid;
+      grid-template-columns: 2fr 120px 1.4fr; /* email wide, dial code narrow, phone flexible */
+      gap:12px;
+    }
+    @media (max-width:720px){
+      .row.cols-3,
+      .row.cols-contact{ grid-template-columns:1fr; }
     }
 
-    /* Loading states */
-    .loading-state {
-      opacity: 0.6;
-      pointer-events: none;
-    }
+    /* Extras chips layout */
+    .extras{ display:flex; flex-wrap:wrap; gap:8px; }
 
-    /* Better error states */
-    .field.error input,
-    .field.error select,
-    .field.error textarea {
-      border-color: var(--warn);
-      background-color: #fef2f2;
+    /* Error box styling */
+    #submitError{
+      display:none;
+      margin:10px 0 0;
+      padding:10px 12px;
+      border:1px solid #fecaca;
+      background:#fef2f2;
+      color:#7f1d1d;
+      border-radius:8px;
+      font-size:13px;
+      white-space:pre-wrap;
     }
-
-    .field .error-message {
-      color: var(--warn);
-      font-size: 12px;
-      margin-top: 4px;
-    }
-
   </style>
 </head>
-
 <body>
+  <!-- Toast -->
+  <div id="successMsg" class="success-msg" role="status" aria-live="polite">
+    <span id="successText">Anfrage erfolgreich gesendet!</span>
+  </div>
+
+  <!-- Success overlay -->
+  <div id="successOverlay" class="success-overlay" role="dialog" aria-modal="true" aria-labelledby="successTitle">
+    <div class="success-card">
+      <h2 id="successTitle">Anfrage gesendet</h2>
+      <p id="successLead">Vielen Dank. Wir melden uns per E-Mail zur Bestätigung.</p>
+      <div class="success-summary" id="successSummary"></div>
+      <div class="success-actions">
+        <button class="btn" id="btnBackToCalendar">Zurück zum Kalender</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Start overlay -->
+  <div id="startOverlay" class="start-overlay" role="dialog" aria-modal="true" aria-labelledby="startTitle">
+    <div class="start-card">
+      <h2 id="startTitle">Bitte wählen Sie Ihre Verkehrsschule</h2>
+      <p id="startLead" class="start-hint">Einige Standorte sind ggf. noch nicht online buchbar.</p>
+      <div class="start-grid"></div>
+      <p class="start-hint" id="startHintBelow">Sie können den Standort später oben im Auswahlfeld wechseln.</p>
+    </div>
+  </div>
+
+  <!-- Header -->
   <header>
     <div class="left">
-      <img src="logo.webp" alt="KidBike e. V." style="display:none;" id="logoImg">
-      <h1 id="headerTitle">Verkehrsschule buchen</h1>
+      <img src="logo.webp" alt="Logo" style="display:none;" id="logoImg">
+      <h1 id="titleApp">Belegung Verkehrsschulen</h1>
     </div>
-
     <div class="controls">
-      <label for="langSelect" id="langLabel">Sprache:</label>
-      <select id="langSelect">
-        <option value="de">Deutsch</option>
-        <option value="en">English</option>
+      <label for="schoolSelect" id="labelSchool">Standort</label>
+      <select id="schoolSelect">
+        <option value="" disabled selected id="loadingOption">Lade Standorte...</option>
       </select>
 
-      <label for="schoolSelect" id="schoolLabel">Standort:</label>
-      <select id="schoolSelect">
-        <option value="" id="schoolSelectPlaceholder">Verkehrsschule wählen...</option>
+      <label for="langSelect" id="labelLang">Sprache</label>
+      <select id="langSelect">
+        <option value="de" selected>Deutsch</option>
+        <option value="en">English</option>
       </select>
     </div>
   </header>
 
+  <!-- Intro -->
   <div class="intro">
-    <p id="introText">Wähle eine Verkehrsschule aus der Liste, um den Kalender zu laden und eine Buchungsanfrage zu stellen.</p>
+    <p id="introLine1">Wählen Sie oben Ihre Verkehrsschule. Blaue Blöcke sind bereits belegt. Tippen oder ziehen Sie im Kalender, um einen Zeitraum auszuwählen und eine Anfrage zu senden.</p>
+    <p id="introHint" class="hint">Hinweis: Ihre Anfrage ist unverbindlich. Wir melden uns per E-Mail mit einer Bestätigung.</p>
   </div>
 
-  <div id="calendar">
-    <div id="calendarLoading" class="loading">Kalender wird geladen...</div>
-  </div>
+  <!-- Calendar -->
+  <div id="calendarLoading" class="loading">Lade Kalender...</div>
+  <div id="calendar"></div>
 
-  <button class="mobile-add" id="mobileAddBtn" aria-label="Neue Buchung">+</button>
+  <button id="mobileAdd" class="mobile-add" title="Zeitslot hinzufügen" aria-label="Zeitslot hinzufügen">+</button>
 
   <!-- Modal -->
   <div id="modalBackdrop" class="modal-backdrop">
-    <div class="modal" role="dialog" aria-labelledby="modalTitle" aria-describedby="modalDesc">
-      <button class="close-x" id="modalClose" aria-label="Schließen">&times;</button>
-      
-      <h3 id="modalTitle">Neue Anfrage erstellen</h3>
-      <p id="modalDesc" class="muted">Füllen Sie das Formular aus, um eine Buchungsanfrage zu senden.</p>
+    <div class="modal" role="dialog" aria-modal="true">
+      <h3 id="modalTitle">Anfrage Nutzung Verkehrsschule</h3>
+      <button type="button" class="close-x" id="btnCloseX" aria-label="Schließen">×</button>
 
-      <div class="steps" id="stepsText">Schritt 1 von 2: Datum & Zeit</div>
+      <div class="alert warn" id="alertConflict" style="display:none;"></div>
+      <div class="alert note" id="alertShort" style="display:none;"></div>
 
-      <!-- Step 1: DateTime & Pricing -->
-      <div id="step1" class="grid">
-        <div class="field required">
-          <label for="fFrom" id="labelFrom">Von</label>
-          <input type="datetime-local" id="fFrom" required>
-        </div>
-        <div class="field required">
-          <label for="fTo" id="labelTo">Bis</label>
-          <input type="datetime-local" id="fTo" required>
-        </div>
-        <div class="field required">
-          <label for="fPersons" id="labelPersons">Anzahl Personen</label>
-          <input type="number" id="fPersons" min="1" max="150" required>
-        </div>
+      <form id="requestForm" name="requestForm" novalidate>
+        
+        <!-- STEP 1 -->
+        <div id="step1">
+          <div class="form-grid">
+            <div class="field field--school">
+              <label id="labelFormSchool">Verkehrsschule *</label>
+              <input id="fSchool" name="school" type="text" required readonly>
+            </div>
 
-        <!-- Extras (dynamically filled) -->
-        <div class="field field--extras">
-          <label id="labelExtras">Extras</label>
-          <div id="extrasContainer" class="extras"></div>
-        </div>
+            <div class="field field--persons">
+              <label id="labelPersons">Anzahl Personen *</label>
+              <input id="fPersons" name="persons" type="number" min="1" step="1" placeholder="z. B. 30" required>
+              <div class="error-msg">Bitte Anzahl eingeben</div>
+            </div>
 
-        <!-- Price Preview -->
-        <div class="price">
-          <div class="pill" id="priceValue">–</div>
-          <span class="toggle" id="priceToggle" style="display:none">Details</span>
-        </div>
+            <div class="field field--from">
+              <label id="labelFrom">Datum von *</label>
+              <input id="fFrom" name="from" type="datetime-local" required>
+            </div>
 
-        <!-- Price Breakdown -->
-        <div id="priceBreakdown" class="breakdown">
-          <div class="row"><span id="bdBaseLabel" class="muted">Basis</span><span id="bdBase">–</span></div>
-          <div class="row"><span id="bdPersonsLabel" class="muted">Personen-Staffel</span><span id="bdPersons">–</span></div>
-          <div class="row">
-            <span class="muted tooltip-wrap">
-              <span id="bdTimeLabel">Zeit-Zuschlag</span>
-              <span id="timeInfo" class="tooltip-icon" aria-haspopup="dialog" aria-expanded="false" tabindex="0">?</span>
-              <div id="timeInfoPopover" class="popover" role="dialog" aria-hidden="true"></div>
-            </span>
-            <span id="bdTime">–</span>
-          </div>
-          <div class="row"><span id="bdExtrasLabel" class="muted">Extras</span><span id="bdExtras">–</span></div>
-          
-          <!-- NEW: Kaution (only visible for WA) -->
-          <div class="row" id="bdDepositRow" style="display:none">
-            <span class="muted">Kaution</span><span id="bdDeposit">–</span>
+            <div class="field field--to">
+              <label id="labelTo">Datum bis *</label>
+              <input id="fTo" name="to" type="datetime-local" required>
+            </div>
+
+            <div class="field field--type">
+              <label id="labelType">Art der Feier</label>
+              <input id="fTypeFree" name="type_free" type="text" placeholder="z. B. Kindergeburtstag, Jubiläum, …">
+            </div>
+
+            <div class="field field--extras">
+              <label id="labelExtras">Extras</label>
+              <div class="extras" id="extrasContainer"></div>
+              <div class="hint" id="extrasRunning" style="margin-top:4px">Extras: 0€</div>
+            </div>
           </div>
 
-          <div class="row total"><span id="bdTotalLabel">Summe</span><span id="bdTotal">–</span></div>
-        </div>
-      </div>
+          <!-- Prijs: compact, met toggle -->
+          <div id="priceBox" class="price" aria-live="polite">
+            <span class="pill"><strong id="priceTitle">Vorläufige Preisindikation:</strong> <span id="priceValue">–</span></span>
+            <span id="priceToggle" class="toggle">Details</span>
+          </div>
+          <div id="priceHint" class="hint">(unverbindlich; endgültige Bestätigung und ggf. Anpassungen vorbehalten)</div>
+          <div id="priceBreakdown" class="breakdown">
+            <div class="row"><span id="bdBaseLabel" class="muted">Basis</span><span id="bdBase">–</span></div>
+            <div class="row"><span id="bdPersonsLabel" class="muted">Personen-Staffel</span><span id="bdPersons">–</span></div>
+            <div class="row">
+              <span class="muted tooltip-wrap">
+                <span id="bdTimeLabel">Zeit-Zuschlag</span>
+                <span id="timeInfo" class="tooltip-icon" aria-haspopup="dialog" aria-expanded="false" tabindex="0">?</span>
+                <div id="timeInfoPopover" class="popover" role="dialog" aria-hidden="true"></div>
+              </span>
+              <span id="bdTime">–</span>
+            </div>
+            <div class="row"><span id="bdExtrasLabel" class="muted">Extras</span><span id="bdExtras">–</span></div>
+            <div class="row total"><span id="bdTotalLabel">Summe</span><span id="bdTotal">–</span></div>
+          </div>
 
-      <!-- Step 2: Personal Info -->
-      <div id="step2" class="grid-1" style="display:none">
-        <div class="row cols-3">
-          <div class="field required">
-            <label for="fTitle" id="labelTitle">Anrede</label>
-            <select id="fTitle" required>
-              <option value="">Bitte wählen</option>
-              <option value="Herr">Herr</option>
-              <option value="Frau">Frau</option>
-              <option value="Divers">Divers</option>
-            </select>
-          </div>
-          <div class="field required">
-            <label for="fFirstName" id="labelFirstName">Vorname</label>
-            <input type="text" id="fFirstName" required>
-          </div>
-          <div class="field required">
-            <label for="fLastName" id="labelLastName">Nachname</label>
-            <input type="text" id="fLastName" required>
+          <div class="modal-actions">
+            <button type="button" class="btn primary" id="btnToStep2">Weiter</button>
           </div>
         </div>
 
-        <div class="row cols-contact">
-          <div class="field required">
-            <label for="fEmail" id="labelEmail">E-Mail</label>
-            <input type="email" id="fEmail" required>
+        <!-- STEP 2 -->
+        <div id="step2" style="display:none">
+          <div class="grid">
+            <!-- Persoonsgegevens: anrede | voornaam | achternaam -->
+            <div class="row cols-3" style="grid-column:1/-1">
+              <div class="field sm">
+                <label id="labelSalutation">Anrede</label>
+                <select id="fSalutation" name="salutation">
+                  <option value=""></option>
+                  <option value="Frau">Frau</option>
+                  <option value="Herr">Herr</option>
+                  <option value="Divers">Divers</option>
+                  <option value="Keine Angabe">Keine Angabe</option>
+                </select>
+              </div>
+              <div class="field">
+                <label id="labelFirstName">Vorname</label>
+                <input id="fFirstName" name="first_name" type="text" placeholder="z. B. Alex" autocomplete="given-name">
+              </div>
+              <div class="field">
+                <label id="labelLastName">Nachname</label>
+                <input id="fLastName" name="last_name" type="text" placeholder="z. B. Müller" autocomplete="family-name">
+              </div>
+            </div>
+
+            <!-- Contact row: email | dial code | phone -->
+            <div class="row cols-contact" style="grid-column:1/-1">
+              <div class="field">
+                <label id="labelEmail">E-Mail *</label>
+                <input id="fEmail" name="email" type="email" required placeholder="name@example.org" autocomplete="email">
+                <div class="error-msg">Gültige E-Mail-Adresse erforderlich</div>
+              </div>
+              <div class="field sm">
+                <label id="labelPhoneCountry">Vorwahl</label>
+                <!-- free input with suggestions; default +49 -->
+                <input id="fPhoneCountry" name="phone_country" type="text" value="+49" inputmode="tel" pattern="^\+\d{1,4}$" list="dialCodes" placeholder="+49">
+                <datalist id="dialCodes">
+                  <option value="+49"><option value="+43"><option value="+41"><option value="+44"><option value="+33">
+                  <option value="+39"><option value="+34"><option value="+32"><option value="+1"><option value="+61">
+                  <option value="+31"><option value="+48"><option value="+46"><option value="+45"><option value="+420">
+                  <!-- keep short; user can enter any +code -->
+                </datalist>
+              </div>
+              <div class="field">
+                <label id="labelPhone">Telefon *</label>
+                <input id="fPhoneNat" name="phone_national" type="tel" inputmode="tel" placeholder="z. B. 1512345678" required autocomplete="tel-national">
+                <div class="error-msg">Bitte eine gültige Nummer angeben</div>
+              </div>
+            </div>
+
+            <!-- Adres (met suggesties) - SPLITS PLZ/Ort -->
+            <div class="field" style="grid-column:1/-1">
+              <label id="labelAddress">Anschrift *</label>
+              <div class="row-compact">
+                <input id="fStreet" name="street" type="text" placeholder="Straße" required autocomplete="address-line1">
+                <input id="fHouse"  name="house"  type="text" placeholder="Nr." required autocomplete="on">
+                <div style="display:grid;grid-template-columns:90px 1fr;gap:8px">
+                  <input id="fZip"   type="text" placeholder="PLZ" required inputmode="numeric" pattern="[0-9]*" autocomplete="postal-code">
+                  <input id="fCity"  type="text" placeholder="Ort" required autocomplete="address-level2">
+                </div>
+              </div>
+              <input id="fZipCity" name="zipcity" type="hidden">
+              <input id="fAddressFull" name="address" type="hidden">
+              <div class="hint" id="addrHintHelp" style="margin-top:6px;display:none"></div>
+            </div>
+
+            <!-- Remove visible Eventdetails row; keep hidden fBikes to not break JS -->
+            <input id="fBikes" name="bikes" type="hidden" value="">
+
+            <!-- Bericht -->
+            <div class="field" style="grid-column:1/-1">
+              <label id="labelMsg">Nachricht (optional)</label>
+              <textarea id="fMsg" name="message" rows="3" placeholder="Weitere Hinweise…"></textarea>
+            </div>
           </div>
-          <div class="field required">
-            <label for="fDialCode" id="labelDialCode">Vorwahl</label>
-            <select id="fDialCode" required>
-              <option value="+49">+49 (DE)</option>
-              <option value="+43">+43 (AT)</option>
-              <option value="+41">+41 (CH)</option>
-              <option value="+33">+33 (FR)</option>
-              <option value="+31">+31 (NL)</option>
-              <option value="+32">+32 (BE)</option>
-              <option value="+45">+45 (DK)</option>
-              <option value="+46">+46 (SE)</option>
-              <option value="+47">+47 (NO)</option>
-              <option value="+48">+48 (PL)</option>
-              <option value="+420">+420 (CZ)</option>
-              <option value="+36">+36 (HU)</option>
-              <option value="+44">+44 (GB)</option>
-              <option value="+1">+1 (US/CA)</option>
-              <option value="+39">+39 (IT)</option>
-              <option value="+34">+34 (ES)</option>
-              <option value="+351">+351 (PT)</option>
-            </select>
-          </div>
-          <div class="field required">
-            <label for="fPhone" id="labelPhone">Telefon</label>
-            <input type="tel" id="fPhone" required>
+
+          <!-- Wesentliche Bedingungen -->
+          <details class="summarybox">
+            <summary id="termsSummary">Wesentliche Bedingungen (Kurzfassung)</summary>
+            <ul id="termsList" style="margin:8px 0 0 16px;padding:0">
+              <li>Nutzungsentgelt vorab per Überweisung; Reservierung erst verbindlich nach Zahlungseingang.</li>
+              <li>Stornierung bis 14 Tage vor Termin: volle Erstattung; danach Einbehalt als Entschädigung.</li>
+              <li>Saubere Übergabe; Müll bitte mitnehmen. Unzureichende Reinigung kann berechnet werden.</li>
+              <li>Rücksicht auf Nachbarn: werktags &amp; So ab 20:00, Sa ab 22:00 Lautstärke reduzieren.</li>
+              <li>Rauchverbot auf dem Gelände (nur außerhalb, Aschenbecher nutzen).</li>
+              <li>Nutzung auf eigene Gefahr; empfohlen: Veranstaltungshaftpflichtversicherung.</li>
+              <li>Für verursachte Schäden haften die Nutzer*innen.</li>
+              <li>Kein exklusives Nutzungsrecht am gesamten Gelände; ggf. Parallelnutzungen ohne Konflikte.</li>
+              <li>Mo–Sa 14:00–18:00 Kinderfreizeitprojekt: Innenraum steht Ihnen exklusiv zur Verfügung.</li>
+              <li>Verspätete An-/Abmeldung kann mit 50 €/angefangene Stunde berechnet werden.</li>
+            </ul>
+          </details>
+
+          <div class="modal-actions" style="justify-content:space-between">
+            <button type="button" class="btn" id="btnBackStep1">Zurück</button>
           </div>
         </div>
 
-        <div class="row cols-2">
-          <div class="field">
-            <label for="fEventType" id="labelEventType">Art der Feier</label>
-            <select id="fEventType">
-              <option value="">Bitte wählen</option>
-              <option value="Kindergeburtstag">Kindergeburtstag</option>
-              <option value="Erwachsenengeburtstag">Erwachsenengeburtstag</option>
-              <option value="Hochzeit">Hochzeit</option>
-              <option value="Firmenfeier">Firmenfeier</option>
-              <option value="Familienfeier">Familienfeier</option>
-              <option value="Vereinsfeier">Vereinsfeier</option>
-              <option value="Schulklassenfeier">Schulklassenfeier</option>
-              <option value="Jugendgruppe">Jugendgruppe</option>
-              <option value="Workshop">Workshop</option>
-              <option value="Seminar">Seminar</option>
-              <option value="Kurs">Kurs</option>
-              <option value="Sonstiges">Sonstiges</option>
-            </select>
+        <!-- Sticky verzendbalk -->
+        <div class="sticky-bar" id="stickyBar">
+          <div class="sum" id="stickySum">
+            <b id="stickyPrice">–</b> · <span id="stickyWhen">–</span> · <span id="stickyPersons">–</span>
           </div>
-          <div class="field" id="labelBikes" style="display:none">
-            <label for="fBikes">Nutzung Fahrräder</label>
-            <select id="fBikes">
-              <option value="">Bitte wählen</option>
-              <option value="Ja">Ja</option>
-              <option value="Nein">Nein</option>
-            </select>
-          </div>
+          <label class="checkline" style="margin-left:auto;margin-right:6px">
+            <input type="checkbox" id="fAccept"> <span id="labelAccept">Ich habe die wesentlichen Bedingungen gelesen und akzeptiere sie.</span>
+          </label>
+          <button type="submit" class="btn primary" id="btnSubmit" disabled>Anfrage senden</button>
         </div>
 
-        <div class="field">
-          <label for="fMessage" id="labelMessage">Nachricht (optional)</label>
-          <textarea id="fMessage" placeholder="Weitere Informationen zu Ihrer Veranstaltung..."></textarea>
-        </div>
+        <!-- Error box for submission errors -->
+        <div id="submitError"></div>
 
-        <div class="field--checkbox">
-          <input type="checkbox" id="fTerms" required>
-          <label for="fTerms" id="labelTerms">Ich akzeptiere die wesentlichen Bedingungen</label>
-        </div>
-
-        <!-- Terms Summary -->
-        <details style="margin:8px 0;padding:8px;border:1px solid var(--border);border-radius:6px">
-          <summary id="termsSummary" style="cursor:pointer;font-weight:600;font-size:13px">Wesentliche Bedingungen</summary>
-          <ul id="termsList" style="margin:8px 0 0;padding-left:20px;font-size:12px;color:var(--muted)"></ul>
-        </details>
-      </div>
-
-      <!-- Navigation & Submit -->
-      <div class="row" style="margin-top:12px;gap:8px">
-        <button type="button" id="btnBack" class="btn secondary" style="display:none">Zurück</button>
-        <button type="button" id="btnNext" class="btn">Weiter</button>
-        <button type="button" id="btnSubmit" class="btn" style="display:none">Anfrage senden</button>
-      </div>
-
-      <!-- Sticky Bar -->
-      <div id="stickyBar" class="sticky-bar">
-        <div class="sum">
-          <span id="stickySum">Summe: <b id="stickyTotal">–</b></span>
-          <span id="extrasRunning" style="display:none"></span>
-        </div>
-        <div class="checkline" style="display:none">
-          <input type="checkbox" id="stickyTerms" style="margin:0">
-          <label for="stickyTerms" style="font-size:11px;margin:0" id="stickyTermsLabel">Bedingungen akzeptiert</label>
-        </div>
-        <button type="button" id="btnSubmit" class="btn" style="display:none">Anfrage senden</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Success Overlay -->
-  <div id="successOverlay" class="success-overlay">
-    <div class="success-content">
-      <h3 id="successTitle">✓ Anfrage erfolgreich gesendet!</h3>
-      <p id="successMessage">Ihre Anfrage wurde erfolgreich übermittelt. Sie erhalten in Kürze eine Bestätigung per E-Mail.</p>
-      <div id="successSummary" class="summary"></div>
-      <button class="btn" id="successOk">OK</button>
+        <noscript>
+          <p class="hint">JavaScript ist deaktiviert. Nach dem Absenden wird das Formular neu geladen.</p>
+        </noscript>
+      </form>
     </div>
   </div>
 
   <script>
-    /* Global Variables */
-    let calendar = null;
-    let currentKey = '';
-    let CURRENT_PRICE = null;
+    /* ================================
+       I18N
+       ================================ */
+    const I18N = {
+      de: {
+        appTitle: "Belegung Verkehrsschulen",
+        labelSchool: "Standort",
+        labelLang: "Sprache",
+        loadingSchools: "Lade Standorte...",
+        loadingCalendar: "Lade Kalender...",
+        intro1: "Wählen Sie oben Ihre Verkehrsschule. Blaue Blöcke sind bereits belegt. Tippen oder ziehen Sie im Kalender, um einen Zeitraum auszuwählen und eine Anfrage zu senden.",
+        introHint: "Hinweis: Ihre Anfrage ist unverbindlich. Wir melden uns per E-Mail mit einer Bestätigung.",
+        modalTitle: "Anfrage Nutzung Verkehrsschule",
+        formSchool: "Verkehrsschule",
+        persons: "Anzahl Personen",
+        from: "Von",
+        to: "Bis",
+        salutation: "Anrede",
+        firstName: "Vorname",
+        lastName: "Nachname",
+        email: "E-Mail",
+        phoneCountry: "Vorwahl",
+        phone: "Telefon",
+        address: "Anschrift",
+        type: "Art der Feier",
+        bikes: "Nutzung Fahrräder (kostenlos): Anzahl & Größen/Alter",
+        extras: "Extras",
+        extraParcours: "Fahrradparcours",
+        extraGrill: "Grill",
+        extraTisch: "Tischtennisplatte",
+        message: "Nachricht (optional)",
+        accept: "Ich habe die wesentlichen Bedingungen gelesen und akzeptiere sie.",
+        conflict: "Ausgewählter Zeitraum überschneidet sich mit einer bestehenden Belegung, ist kürzer als 30 Minuten oder ungültig (Ende vor Beginn).",
+        shortTermWarning: "<strong>Kurzfristige Anfrage:</strong> Da Ihr gewünschter Termin in weniger als 7 Tagen liegt, können wir nicht garantieren, dass wir Ihre Anfrage rechtzeitig bearbeiten können.",
+        priceTitle: "Vorläufige Preisindikation:",
+        priceHint: " (unverbindlich; endgültige Bestätigung und ggf. Anpassungen vorbehalten)",
+        termsSummary: "Wesentliche Bedingungen (Kurzfassung)",
+        terms: [
+          "Nutzungsentgelt vorab per Überweisung; Reservierung erst verbindlich nach Zahlungseingang.",
+          "Stornierung bis 14 Tage vor Termin: volle Erstattung; danach Einbehalt als Entschädigung.",
+          "Saubere Übergabe; Müll bitte mitnehmen. Unzureichende Reinigung kann berechnet werden.",
+          "Rücksicht auf Nachbarn: werktags & So ab 20:00, Sa ab 22:00 Lautstärke reduzieren.",
+          "Rauchverbot auf dem Gelände (nur außerhalb, Aschenbecher nutzen).",
+          "Nutzung auf eigene Gefahr; empfohlen: Veranstaltungshaftpflichtversicherung.",
+          "Für verursachte Schäden haften die Nutzer*innen.",
+          "Kein exklusives Nutzungsrecht am gesamten Gelände; ggf. Parallelnutzungen ohne Konflikte.",
+          "Mo–Sa 14:00–18:00 Kinderfreizeitprojekt: Innenraum steht Ihnen exklusiv zur Verfügung.",
+          "Verspätete An-/Abmeldung kann mit 50 €/angefangene Stunde berechnet werden."
+        ],
+        btnCancel: "Abbrechen",
+        btnSend: "Anfrage senden",
+        phPersons: "z. B. 30",
+        phType: "z. B. Kindergeburtstag, Jubiläum, …",
+        phBikes: "z. B. 6 Räder: 2×14'', 2×16'', 2×20'' / Alter 5–9",
+        bdBase: (tier)=>`Basis (bis ${tier} Std.)`,
+        bdPersons: (label)=>`Personen-Staffel (${label})`,
+        bdTime: "Zeit-Zuschlag",
+        bdExtras: "Extras",
+        bdTotal: "Summe",
+        bdNoExtras: "keine",
+        priceOnReq: "Preis nach Vereinbarung",
+        bdTimeInfo: "30 € Zuschlag, wenn Beginn UND Ende nicht zwischen 9–18 Uhr liegen oder wenn der Zeitraum (auch teilweise) am Wochenende liegt.",
+        successTitle: "Anfrage gesendet",
+        successLead: "Vielen Dank. Ihre Anfrage ist noch nicht verbindlich. Wir prüfen die Angaben und melden uns per E-Mail. Sie erhalten dann die Nutzungsvereinbarung sowie weitere Hinweise.",
+        successBack: "Zurück zum Kalender",
+        successNew: "Neue Anfrage",
+        successSummaryLabels: { school: "Standort", from: "Von", to: "Bis", persons: "Personen", extras: "Extras", message: "Nachricht" },
+        startTitle: "Bitte wählen Sie Ihre Verkehrsschule",
+        startLead: "Einige Standorte sind ggf. noch nicht online buchbar.",
+        startHint: "Sie können den Standort später oben im Auswahlfeld wechseln.",
+        onlineBookable: "Online buchbar",
+        notOnline: "Derzeit nicht online buchbar",
+        choose: "Auswählen"
+      },
+      en: {
+        appTitle: "Traffic School Availability",
+        labelSchool: "Location",
+        labelLang: "Language",
+        loadingSchools: "Loading locations...",
+        loadingCalendar: "Loading calendar...",
+        intro1: "Pick your location above. Blue blocks are already booked. Tap or drag in the calendar to select a time and send a request.",
+        introHint: "Note: Your request is non-binding. We'll confirm by email.",
+        modalTitle: "Request to Use Traffic School",
+        formSchool: "Traffic school",
+        persons: "Number of people",
+        from: "From",
+        to: "Until",
+        salutation: "Salutation",
+        firstName: "First name",
+        lastName: "Last name",
+        email: "Email",
+        phoneCountry: "Country code",
+        phone: "Phone number",
+        address: "Address",
+        type: "Type of event",
+        bikes: "Use of bikes (free): quantity & sizes/ages",
+        extras: "Extras",
+        extraParcours: "Bike course",
+        extraGrill: "Grill",
+        extraTisch: "Table tennis",
+        message: "Message (optional)",
+        accept: "I have read and accept the key conditions.",
+        conflict: "Selected period overlaps with an existing booking, is shorter than 30 minutes, or is invalid (end before start).",
+        shortTermWarning: "<strong>Short-notice request:</strong> As your requested time is in less than 7 days, we cannot guarantee timely processing.",
+        priceTitle: "Preliminary price indication:",
+        priceHint: " (non-binding; subject to confirmation and possible adjustments)",
+        termsSummary: "Key conditions (short version)",
+        terms: [
+          "Pay in advance by bank transfer; booking becomes binding only after receipt of payment.",
+          "Cancellation up to 14 days before: full refund; after that, fee retained as compensation.",
+          "Leave the venue clean; take your rubbish with you. Extra cleaning may be charged.",
+          "Be mindful of neighbours: lower noise after 20:00 (Mon–Fri & Sun) and after 22:00 (Sat).",
+          "No smoking on the premises (outside only; use an ashtray).",
+          "Use at your own risk; event liability insurance recommended.",
+          "Users are liable for any damages caused.",
+          "No exclusive right to the entire site; parallel use may occur without conflicts.",
+          "Mon–Sat 14:00–18:00 kids' project: indoor room is exclusively yours.",
+          "Late start/overrun may be charged at €50 per started hour."
+        ],
+        btnCancel: "Cancel",
+        btnSend: "Send request",
+        phPersons: "e.g. 30",
+        phType: "e.g. kids' birthday, anniversary …",
+        phBikes: "e.g. 6 bikes: 2×14'', 2×16'', 2×20'' / ages 5–9",
+        bdBase: (tier)=>`Base (up to ${tier} h)`,
+        bdPersons: (label)=>`People tier (${label})`,
+        bdTime: "Time surcharge",
+        bdExtras: "Extras",
+        bdTotal: "Total",
+        bdNoExtras: "none",
+        priceOnReq: "Price on request",
+        bdTimeInfo: "€30 surcharge if start AND end are not between 9:00–18:00, or if any part of the booking falls on a weekend.",
+        successTitle: "Request submitted",
+        successLead: "Thank you. Your request is not yet binding. We will review the details and contact you by email. You will then receive the usage agreement and further instructions.",
+        successBack: "Back to calendar",
+        successNew: "New request",
+        successSummaryLabels: { school: "Location", from: "From", to: "To", persons: "People", extras: "Extras", message: "Message" },
+        startTitle: "Please choose your traffic school",
+        startLead: "Some locations may not yet be available for online booking.",
+        startHint: "You can change the location later from the selector above.",
+        onlineBookable: "Bookable online",
+        notOnline: "Currently not online bookable",
+        choose: "Choose"
+      }
+    };
 
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzdDJ-3V3mU0hnGT1fYXCOEqzl8bLQGfggKEGCMVYSxMQQOCHh8MiVhFfn-L_vZAKOu/exec';
+    /* ===== Locations ===== */
+    const SCHOOLS = {
+      WA: { name: "Verkehrsschule am Wassertorplatz", short:"Wassertorplatz", file: "events-wa.json", address: "Wassertorplatz 1, 10999 Berlin" },
+      WI: { name: "Verkehrsschule Wiener Straße",     short:"Wiener Straße",  file: "events-wi.json", address: "Wiener Str. 59c, 10999 Berlin" },
+      WE: { name: "Verkehrsschule Weinstraße",        short:"Weinstraße",     file: "events-we.json", address: "Weinstraße 2, 10249 Berlin" }
+    };
 
-    /* DOM References */
-    const logoImg = document.getElementById('logoImg');
-    const langSelect = document.getElementById('langSelect');
+    /* === Per-school pricing & extras config === */
+    const PRICING = {
+      WE: {                                   // Weinstraße (keep current)
+        tiers: [                              // same as TIERS_MINUTES you had
+          { maxMin: 240, hoursLabel: 4,  base: 100 },
+          { maxMin: 360, hoursLabel: 6,  base: 130 },
+          { maxMin: 480, hoursLabel: 8,  base: 160 },
+          { maxMin: 600, hoursLabel:10,  base: 190 },
+          { maxMin: 720, hoursLabel:12,  base: 220 },
+          { maxMin: 960, hoursLabel:16,  base: 280 },
+          { maxMin:1440, hoursLabel:24,  base: 360 },
+        ],
+        personTiers: [                        // same multipliers you had
+          { max: 30, mult: 1.00, label: "≤30" },
+          { max: 40, mult: 1.25, label: "≤40" },
+          { max: 50, mult: 1.50, label: "≤50" },
+          { max: 75, mult: 1.75, label: "≤75" },
+          { max:100, mult: 2.00, label: "≤100" },
+        ],
+        surcharge: defaultSurcharge30,        // same 30€ rule as now
+        extras: [                             // keep current extras for WE
+          { id: "parcours",  price: 10, labelDe: "Fahrradparcours",  labelEn: "Bike course" },
+          { id: "grill",     price: 10, labelDe: "Grill",            labelEn: "Grill" },
+          { id: "tisch",     price: 10, labelDe: "Tischtennisplatte",labelEn: "Table tennis" },
+        ]
+      },
+
+      WI: {                                   // Wiener Straße (no extras for now)
+        tiers: [                              // same as WE
+          { maxMin: 240, hoursLabel: 4,  base: 100 },
+          { maxMin: 360, hoursLabel: 6,  base: 130 },
+          { maxMin: 480, hoursLabel: 8,  base: 160 },
+          { maxMin: 600, hoursLabel:10,  base: 190 },
+          { maxMin: 720, hoursLabel:12,  base: 220 },
+          { maxMin: 960, hoursLabel:16,  base: 280 },
+          { maxMin:1440, hoursLabel:24,  base: 360 },
+        ],
+        personTiers: [                        // same as WE
+          { max: 30, mult: 1.00, label: "≤30" },
+          { max: 40, mult: 1.25, label: "≤40" },
+          { max: 50, mult: 1.50, label: "≤50" },
+          { max: 75, mult: 1.75, label: "≤75" },
+          { max:100, mult: 2.00, label: "≤100" },
+        ],
+        surcharge: defaultSurcharge30,
+        extras: []                            // none (can add later)
+      },
+
+      WA: {                                   // Wassertorplatz (DIFFERENT scheme)
+        tiers: [                              // higher base prices
+          { maxMin: 240, hoursLabel: 4,  base: 120 },
+          { maxMin: 360, hoursLabel: 6,  base: 155 },
+          { maxMin: 480, hoursLabel: 8,  base: 185 },
+          { maxMin: 600, hoursLabel:10,  base: 220 },
+          { maxMin: 720, hoursLabel:12,  base: 255 },
+          { maxMin: 960, hoursLabel:16,  base: 320 },
+          { maxMin:1440, hoursLabel:24,  base: 400 },
+        ],
+        personTiers: [
+          { max: 30, mult: 1.00, label: "≤30" },
+          { max: 40, mult: 1.20, label: "≤40" },       // different multipliers
+          { max: 50, mult: 1.45, label: "≤50" },
+          { max: 75, mult: 1.70, label: "≤75" },
+          { max:100, mult: 1.95, label: "≤100" },
+        ],
+        surcharge: defaultSurcharge30,        // same rule
+        extras: []                            // none (can add later)
+      },
+    };
+
+    /* Same 30 € rule you already use */
+    function defaultSurcharge30(start, end){
+      const between9_18 = (dt)=> {
+        const m = dt.getHours()*60 + dt.getMinutes();
+        return (m >= 9*60) && (m <= 18*60);
+      };
+      const bothOutside = !(between9_18(start) && between9_18(end));
+
+      function touchesWeekend(s,e){
+        const cur = new Date(s); cur.setHours(0,0,0,0);
+        const endDay = new Date(e); endDay.setHours(23,59,59,999);
+        while(cur <= endDay){ const d=cur.getDay(); if(d===0||d===6) return true; cur.setDate(cur.getDate()+1); }
+        return false;
+      }
+      return (bothOutside || touchesWeekend(start,end)) ? 30 : 0;
+    }
+
+    function isTouchDevice(){
+      return window.matchMedia('(pointer: coarse)').matches || navigator.maxTouchPoints > 0;
+    }
+
+    function renderExtrasForSchool(key){
+      const container = document.getElementById('extrasContainer');
+      container.innerHTML = '';
+      const cfg = PRICING[key] || PRICING.WE;
+      (cfg.extras || []).forEach(ex => {
+        const id = `x_${ex.id}`;
+        const label = (langSelect.value==='en' ? ex.labelEn : ex.labelDe) || ex.id;
+        const wrap = document.createElement('label');
+        wrap.className = 'badge';
+        wrap.innerHTML = `
+          <input type="checkbox" id="${id}" name="extras[]" data-price="${ex.price}" data-label-de="${ex.labelDe||''}" data-label-en="${ex.labelEn||''}">
+          <span>${label}</span><span class="price">+${euro(ex.price).replace(/\s/g,'')}</span>
+        `;
+        container.appendChild(wrap);
+      });
+
+      // Re-bind change listeners to recalc price
+      container.querySelectorAll('input[type="checkbox"]').forEach(el=>{
+        el.addEventListener('change', ()=>{ updatePricePreview(); });
+      });
+
+      // Show/hide the whole field if there are no extras
+      document.querySelector('.field--extras').style.display = (cfg.extras && cfg.extras.length) ? '' : 'none';
+    }
+
+    /* ===== DOM refs ===== */
     const schoolSelect = document.getElementById('schoolSelect');
-    const modalBack = document.getElementById('modalBackdrop');
-    const modalClose = document.getElementById('modalClose');
-    const mobileAddBtn = document.getElementById('mobileAddBtn');
+    const langSelect   = document.getElementById('langSelect');
+    const calendarEl   = document.getElementById('calendar');
+    const calendarLoading = document.getElementById('calendarLoading');
+    const logoImg      = document.getElementById('logoImg');
 
-    // Form fields
-    const fFrom = document.getElementById('fFrom');
-    const fTo = document.getElementById('fTo');
-    const fPersons = document.getElementById('fPersons');
-    const fTitle = document.getElementById('fTitle');
-    const fFirstName = document.getElementById('fFirstName');
-    const fLastName = document.getElementById('fLastName');
-    const fEmail = document.getElementById('fEmail');
-    const fDialCode = document.getElementById('fDialCode');
-    const fPhone = document.getElementById('fPhone');
-    const fEventType = document.getElementById('fEventType');
-    const fBikes = document.getElementById('fBikes');
-    const fMessage = document.getElementById('fMessage');
-    const fTerms = document.getElementById('fTerms');
+    const titleApp  = document.getElementById('titleApp');
+    const labelSchool = document.getElementById('labelSchool');
+    const labelLang = document.getElementById('labelLang');
+    const introLine1 = document.getElementById('introLine1');
+    const introHint  = document.getElementById('introHint');
 
-    // Navigation
+    const startOverlay = document.getElementById('startOverlay');
+    const startTitle = document.getElementById('startTitle');
+    const startLead = document.getElementById('startLead');
+    const startHintBelow = document.getElementById('startHintBelow');
+    const startGrid = startOverlay.querySelector('.start-grid');
+
+    const modalBack    = document.getElementById('modalBackdrop');
+    const modalTitle   = document.getElementById('modalTitle');
+    const form         = document.getElementById('requestForm');
+
     const step1 = document.getElementById('step1');
     const step2 = document.getElementById('step2');
-    const btnBack = document.getElementById('btnBack');
-    const btnNext = document.getElementById('btnNext');
-    const btnSubmit = document.getElementById('btnSubmit');
+    const btnToStep2 = document.getElementById('btnToStep2');
+    const btnBackStep1 = document.getElementById('btnBackStep1');
+    const btnCloseX = document.getElementById('btnCloseX');
 
-    // Price elements
-    const priceValue = document.getElementById('priceValue');
+    const alertConflict = document.getElementById('alertConflict');
+    const alertShort = document.getElementById('alertShort');
+
+    const fSchool = document.getElementById('fSchool');
+    const fFrom   = document.getElementById('fFrom');
+    const fTo     = document.getElementById('fTo');
+    const fPersons = document.getElementById('fPersons');
+
+    const fSalutation = document.getElementById('fSalutation');
+    const fFirstName  = document.getElementById('fFirstName');
+    const fLastName   = document.getElementById('fLastName');
+
+    const fEmail    = document.getElementById('fEmail');
+    const fPhoneCountry = document.getElementById('fPhoneCountry');
+    const fPhoneNat = document.getElementById('fPhoneNat');
+
+    const fStreet = document.getElementById('fStreet');
+    const fHouse  = document.getElementById('fHouse');
+    const fZip = document.getElementById('fZip');
+    const fCity = document.getElementById('fCity');
+    const fZipCity= document.getElementById('fZipCity');
+    const fAddressFull = document.getElementById('fAddressFull');
+
+    const fTypeFree = document.getElementById('fTypeFree');
+    const fBikes    = document.getElementById('fBikes');
+    const fMsg      = document.getElementById('fMsg');
+
+    const labelFormSchool = document.getElementById('labelFormSchool');
+    const labelPersons = document.getElementById('labelPersons');
+    const labelFrom = document.getElementById('labelFrom');
+    const labelTo = document.getElementById('labelTo');
+    const labelType = document.getElementById('labelType');
+    const labelBikes = document.getElementById('labelBikes');
+    const labelEmail = document.getElementById('labelEmail');
+    const labelPhone = document.getElementById('labelPhone');
+    const labelPhoneCountry = document.getElementById('labelPhoneCountry');
+    const labelAddress = document.getElementById('labelAddress');
+    const labelSalutation = document.getElementById('labelSalutation');
+    const labelFirstName = document.getElementById('labelFirstName');
+    const labelLastName = document.getElementById('labelLastName');
+    const labelMsg = document.getElementById('labelMsg');
+    const labelAccept = document.getElementById('labelAccept');
+    const fAccept = document.getElementById('fAccept');
+
+    const stickyBar = document.getElementById('stickyBar');
+    const stickyPrice = document.getElementById('stickyPrice');
+    const stickyWhen = document.getElementById('stickyWhen');
+    const stickyPersons = document.getElementById('stickyPersons');
+
+    const priceTitle  = document.getElementById('priceTitle');
+    const priceHint   = document.getElementById('priceHint');
+    const priceValue  = document.getElementById('priceValue');
     const priceToggle = document.getElementById('priceToggle');
     const priceBreakdown = document.getElementById('priceBreakdown');
     const bdBaseLabel = document.getElementById('bdBaseLabel');
-    const bdBase = document.getElementById('bdBase');
+    const bdBase      = document.getElementById('bdBase');
     const bdPersonsLabel = document.getElementById('bdPersonsLabel');
-    const bdPersons = document.getElementById('bdPersons');
-    const bdTime = document.getElementById('bdTime');
-    const bdExtras = document.getElementById('bdExtras');
-    const bdTotal = document.getElementById('bdTotal');
-    const bdDepositRow = document.getElementById('bdDepositRow');
-    const bdDeposit = document.getElementById('bdDeposit');
+    const bdPersons   = document.getElementById('bdPersons');
+    const bdTimeLabel = document.getElementById('bdTimeLabel');
+    const bdTime      = document.getElementById('bdTime');
+    const bdExtrasLabel = document.getElementById('bdExtrasLabel');
+    const bdExtras    = document.getElementById('bdExtras');
+    const bdTotalLabel= document.getElementById('bdTotalLabel');
+    const bdTotal     = document.getElementById('bdTotal');
+    const extrasRunning = document.getElementById('extrasRunning');
 
-    // Sticky bar
-    const stickyBar = document.getElementById('stickyBar');
-    const stickyTotal = document.getElementById('stickyTotal');
-    const stickyTerms = document.getElementById('stickyTerms');
+    const btnSubmit   = document.getElementById('btnSubmit');
 
-    // Success overlay
+    const timeInfoIcon = document.getElementById('timeInfo');
+    const timePopover  = document.getElementById('timeInfoPopover');
+
+    const successMsg  = document.getElementById('successMsg');
+    const successText = document.getElementById('successText');
     const successOverlay = document.getElementById('successOverlay');
-    const successOk = document.getElementById('successOk');
+    const successTitle = document.getElementById('successTitle');
+    const successLead  = document.getElementById('successLead');
+    const successSummary = document.getElementById('successSummary');
+    const btnBackToCalendar = document.getElementById('btnBackToCalendar');
+    const mobileAdd = document.getElementById('mobileAdd');
 
-    /* I18N */
-    const I18N = {
-      de: {
-        // Header
-        headerTitle: 'Verkehrsschule buchen',
-        langLabel: 'Sprache:',
-        schoolLabel: 'Standort:',
-        schoolSelectPlaceholder: 'Verkehrsschule wählen...',
+    const addrHintHelp = document.getElementById('addrHintHelp');
 
-        // Intro
-        introText: 'Wähle eine Verkehrsschule aus der Liste, um den Kalender zu laden und eine Buchungsanfrage zu stellen.',
+    const DEFAULT_TAP_MINUTES = 120;
+    const MAX_EVENT_HOURS   = 24;
+    const FALLBACK_MINUTES  = 120;
 
-        // Modal
-        modalTitle: 'Neue Anfrage erstellen',
-        modalDesc: 'Füllen Sie das Formular aus, um eine Buchungsanfrage zu senden.',
-        step1of2: 'Schritt 1 von 2: Datum & Zeit',
-        step2of2: 'Schritt 2 von 2: Kontaktdaten',
+    let calendar = null;
+    let currentKey = null;
+    let busyEvents = [];
+    let wasSubmitted = false;
+    const availability = {};
+    let CURRENT_PRICE = null;
+    let untrap = null;
 
-        // Form labels
-        labelFrom: 'Von',
-        labelTo: 'Bis',
-        labelPersons: 'Anzahl Personen',
-        labelExtras: 'Extras',
-        labelTitle: 'Anrede',
-        labelFirstName: 'Vorname',
-        labelLastName: 'Nachname',
-        labelEmail: 'E-Mail',
-        labelDialCode: 'Vorwahl',
-        labelPhone: 'Telefon',
-        labelEventType: 'Art der Feier',
-        labelBikes: 'Nutzung Fahrräder',
-        labelMessage: 'Nachricht (optional)',
-        labelTerms: 'Ich akzeptiere die wesentlichen Bedingungen',
+    /* ===== I18N apply ===== */
+    function applyI18n(){
+      const L = I18N[langSelect.value] || I18N.de;
+      titleApp.textContent = L.appTitle;
+      labelSchool.textContent = L.labelSchool;
+      labelLang.textContent = L.labelLang;
+      introLine1.textContent = L.intro1;
+      introHint.textContent  = L.introHint;
+      document.getElementById('calendarLoading').firstChild.nodeValue = L.loadingCalendar;
 
-        // Buttons
-        btnBack: 'Zurück',
-        btnNext: 'Weiter',
-        btnSend: 'Anfrage senden',
+      modalTitle.textContent = L.modalTitle;
+      labelFormSchool.textContent = L.formSchool;
+      labelPersons.textContent = L.persons;
+      labelFrom.textContent = L.from;
+      labelTo.textContent = L.to;
+      labelType.textContent = L.type;
+      labelBikes.textContent = L.bikes;
+      labelEmail.textContent = L.email;
+      labelPhone.textContent = (langSelect.value==='en'?'Phone number *':'Telefon *');
+      labelPhoneCountry.textContent = L.phoneCountry;
+      labelAddress.textContent = L.address;
+      labelSalutation.textContent = L.salutation;
+      labelFirstName.textContent = L.firstName;
+      labelLastName.textContent = L.lastName;
+      labelMsg.textContent = L.message;
+      labelAccept.textContent = L.accept;
 
-        // Price
-        priceOnReq: 'Preis nach Vereinbarung',
-        bdBase: hoursLabel => `Basis (${hoursLabel})`,
-        bdPersons: pplLabel => `Personen-Staffel (${pplLabel})`,
-        bdTimeLabel: 'Zeit-Zuschlag',
-        bdExtrasLabel: 'Extras',
-        bdTotalLabel: 'Summe',
-        bdNoExtras: 'keine',
+      priceTitle.textContent = L.priceTitle;
+      priceHint.textContent = L.priceHint;
+      document.getElementById('termsSummary').textContent = L.termsSummary;
 
-        // Success
-        successTitle: '✓ Anfrage erfolgreich gesendet!',
-        successMessage: 'Ihre Anfrage wurde erfolgreich übermittelt. Sie erhalten in Kürze eine Bestätigung per E-Mail.',
-        successOk: 'OK',
+      const termsList = document.getElementById('termsList');
+      termsList.innerHTML = "";
+      L.terms.forEach(t => { const li = document.createElement('li'); li.textContent = t; termsList.appendChild(li); });
 
-        // Calendar
-        loadingCalendar: 'Kalender wird geladen...',
+      document.getElementById('bdTimeLabel').textContent = L.bdTime;
+      document.getElementById('bdExtrasLabel').textContent = L.bdExtras;
+      document.getElementById('bdTotalLabel').textContent = L.bdTotal;
 
-        // Terms
-        termsSummary: 'Wesentliche Bedingungen',
-        terms: [
-          'Die Nutzung erfolgt ausschließlich zu den angegebenen Zeiten.',
-          'Parallel-Veranstaltungen durch andere Gruppen sind möglich.',
-          'Schäden sind umgehend zu melden und können in Rechnung gestellt werden.',
-          'Die Räumlichkeiten sind in sauberem Zustand zu hinterlassen.',
-          'Rauchen ist in den Räumlichkeiten untersagt.',
-          'Eine Absage ist bis 48 Stunden vor Beginn kostenlos möglich.',
-          'Bei kurzfristiger Absage wird eine Bearbeitungsgebühr erhoben.'
-        ]
-      },
+      btnSubmit.textContent = L.btnSend;
 
-      en: {
-        // Header
-        headerTitle: 'Book Traffic School',
-        langLabel: 'Language:',
-        schoolLabel: 'Location:',
-        schoolSelectPlaceholder: 'Choose traffic school...',
+      fPersons.placeholder = L.phPersons;
+      fTypeFree.placeholder = L.phType;
+      fBikes.placeholder = L.phBikes;
 
-        // Intro
-        introText: 'Select a traffic school from the list to load the calendar and submit a booking request.',
+      successTitle.textContent = L.successTitle;
+      successLead.textContent  = L.successLead;
+      btnBackToCalendar.textContent = L.successBack;
 
-        // Modal
-        modalTitle: 'Create New Request',
-        modalDesc: 'Fill out the form to send a booking request.',
-        step1of2: 'Step 1 of 2: Date & Time',
-        step2of2: 'Step 2 of 2: Contact Details',
+      startTitle.textContent = L.startTitle;
+      startLead.textContent = L.startLead;
+      startHintBelow.textContent = L.startHint;
 
-        // Form labels
-        labelFrom: 'From',
-        labelTo: 'To',
-        labelPersons: 'Number of People',
-        labelExtras: 'Extras',
-        labelTitle: 'Title',
-        labelFirstName: 'First Name',
-        labelLastName: 'Last Name',
-        labelEmail: 'Email',
-        labelDialCode: 'Country Code',
-        labelPhone: 'Phone',
-        labelEventType: 'Type of Event',
-        labelBikes: 'Bicycle Usage',
-        labelMessage: 'Message (optional)',
-        labelTerms: 'I accept the essential terms',
+      if(calendar) calendar.setOption('locale', langSelect.value === 'en' ? 'en-gb' : 'de');
 
-        // Buttons
-        btnBack: 'Back',
-        btnNext: 'Continue',
-        btnSend: 'Send Request',
+      renderExtrasForSchool(currentKey || 'WE');
+      updatePricePreview();
+      timePopover.textContent = L.bdTimeInfo;
+      renderStartCards();
+      renderSchoolSelectOptions();
+    }
 
-        // Price
-        priceOnReq: 'Price on request',
-        bdBase: hoursLabel => `Base (${hoursLabel})`,
-        bdPersons: pplLabel => `People tier (${pplLabel})`,
-        bdTimeLabel: 'Time Surcharge',
-        bdExtrasLabel: 'Extras',
-        bdTotalLabel: 'Total',
-        bdNoExtras: 'none',
+    /* ===== Fetch helpers ===== */
+    async function fetchJson(url){
+      const r = await fetch(url+'?v='+Date.now(), {cache:'no-store'});
+      if(!r.ok) throw new Error('HTTP '+r.status);
+      const txt = await r.text();
+      return JSON.parse(txt.replace(/^\uFEFF/, ''));
+    }
 
-        // Success
-        successTitle: '✓ Request sent successfully!',
-        successMessage: 'Your request has been submitted successfully. You will receive a confirmation email shortly.',
-        successOk: 'OK',
+    /* ===== Events normalize ===== */
+    function normalizeEvents(raw){
+      if(!Array.isArray(raw)) return [];
+      const MS_PER_MIN = 60000, MS_PER_HOUR = 3600000, MS_24H = 24*MS_PER_HOUR;
+      const isValidDate = (d)=> d instanceof Date && !isNaN(d.getTime());
 
-        // Calendar
-        loadingCalendar: 'Loading calendar...',
+      return raw.map(ev=>{
+        const s = new Date(ev.start);
+        let e = ev.end ? new Date(ev.end) : null;
 
-        // Terms
-        termsSummary: 'Essential Terms',
-        terms: [
-          'Use is exclusively during the specified times.',
-          'Parallel events by other groups are possible.',
-          'Damages must be reported immediately and may be charged.',
-          'The premises must be left in a clean condition.',
-          'Smoking is prohibited in the premises.',
-          'Cancellation is free of charge up to 48 hours before the start.',
-          'A processing fee will be charged for short-notice cancellations.'
-        ]
+        if(!isValidDate(s)) return { __drop:true };
+        if(!isValidDate(e)) e = new Date(s.getTime() + FALLBACK_MINUTES*MS_PER_MIN);
+        if(e <= s){
+          e = new Date(e.getTime() + MS_24H);
+          if(e <= s) e = new Date(s.getTime() + Math.max(30, FALLBACK_MINUTES)*MS_PER_MIN);
+        }
+        if((e - s) > MS_24H) e = new Date(s.getTime() + MS_24H);
+
+        return {
+          ...ev, start: s, end: e, title: ev.title || 'Belegt',
+          classNames: Array.isArray(ev.classNames) ? [...ev.classNames, 'busy'] : ['busy']
+        };
+      }).filter(ev => !ev.__drop && ev.start instanceof Date && !isNaN(ev.start) && ev.end instanceof Date && !isNaN(ev.end));
+    }
+
+    /* ===== Discover schools ===== */
+    async function discoverSchools(){
+      const keys = Object.keys(SCHOOLS);
+      for(const key of keys){
+        try{ const data = await fetchJson(SCHOOLS[key].file); availability[key]={ok:Array.isArray(data)}; }
+        catch(_e){ availability[key]={ok:false}; }
       }
-    };
+      renderSchoolSelectOptions();
+      renderStartCards();
+      startOverlay.style.display = 'flex';
+    }
 
-    /* Pricing Configuration with WA Support */
-    const PRICING = {
-      WE: {
-        tiers: [
-          { maxMin: 240, base: 140, hoursLabel: 'bis 4 Std.' },
-          { maxMin: 480, base: 200, hoursLabel: '4–8 Std.' },
-          { maxMin: 720, base: 280, hoursLabel: '8–12 Std.' },
-          { maxMin: 960, base: 380, hoursLabel: '12–16 Std.' }
-        ],
-        personTiers: [
-          { max: 25, mult: 1.0, label: '≤25' },
-          { max: 45, mult: 1.4, label: '26–45' },
-          { max: 100, mult: 2.0, label: '46–100' }
-        ],
-        surcharge(start, end) {
-          const hour = start.getHours();
-          return (hour < 8 || hour >= 18) ? 20 : 0;
-        },
-        extras: [
-          { label: 'Catering-Paket Standard', labelEn: 'Standard Catering Package', price: 45 },
-          { label: 'Catering-Paket Premium', labelEn: 'Premium Catering Package', price: 85 },
-          { label: 'Getränke-Service', labelEn: 'Beverage Service', price: 25 },
-          { label: 'Technik-Paket (Beamer, Sound)', labelEn: 'Tech Package (Projector, Sound)', price: 40 },
-          { label: 'Erweiterte Reinigung', labelEn: 'Extended Cleaning', price: 30 }
-        ]
-      },
+    function renderSchoolSelectOptions(){
+      const L = I18N[langSelect.value] || I18N.de;
+      schoolSelect.innerHTML = '';
+      const placeholder = document.createElement('option');
+      placeholder.value = ''; placeholder.disabled = true; placeholder.selected = !currentKey;
+      placeholder.textContent = L.loadingSchools.replace('Lade', langSelect.value==='en'?'Select':'Wählen');
+      schoolSelect.appendChild(placeholder);
 
-      WI: {
-        tiers: [
-          { maxMin: 240, base: 120, hoursLabel: 'bis 4 Std.' },
-          { maxMin: 480, base: 180, hoursLabel: '4–8 Std.' },
-          { maxMin: 720, base: 240, hoursLabel: '8–12 Std.' },
-          { maxMin: 960, base: 320, hoursLabel: '12–16 Std.' }
-        ],
-        personTiers: [
-          { max: 25, mult: 1.0, label: '≤25' },
-          { max: 45, mult: 1.3, label: '26–45' },
-          { max: 100, mult: 1.8, label: '46–100' }
-        ],
-        surcharge(start, end) {
-          const hour = start.getHours();
-          return (hour < 8 || hour >= 18) ? 15 : 0;
-        },
-        extras: [
-          { label: 'Catering-Service', labelEn: 'Catering Service', price: 35 },
-          { label: 'Getränke-Paket', labelEn: 'Beverage Package', price: 20 },
-          { label: 'Technik-Support', labelEn: 'Technical Support', price: 30 },
-          { label: 'Zusatz-Reinigung', labelEn: 'Additional Cleaning', price: 25 }
-        ]
-      },
+      for(const key of Object.keys(SCHOOLS)){
+        const opt = document.createElement('option');
+        opt.value = key;
+        const ok = availability[key]?.ok;
+        const name = SCHOOLS[key].name;
+        opt.textContent = ok ? `${name}` : `${name} — ${L.notOnline}`;
+        opt.className = ok ? '' : 'disabled';
+        opt.disabled = !ok;
+        schoolSelect.appendChild(opt);
+      }
+      if(currentKey) schoolSelect.value = currentKey;
+    }
 
-      WA: {
-        // No extras for WA
-        extras: [],
+    function renderStartCards(){
+      const L = I18N[langSelect.value] || I18N.de;
+      startGrid.innerHTML = '';
+      for(const key of Object.keys(SCHOOLS)){
+        const { name, address } = SCHOOLS[key];
+        const ok = availability[key]?.ok;
+        const card = document.createElement('div');
+        card.className = 'school-card' + (ok ? '' : ' disabled');
+        card.innerHTML = `
+          <h3 style="margin:0;font-size:16px;">${name}</h3>
+          <p style="margin:0;color:#374151;font-size:13px;">${address}</p>
+          <span class="status">${ ok ? L.onlineBookable : L.notOnline }</span>
+          <div class="choose" style="margin-top:auto">
+            <button class="btn ${ok ? 'primary' : ''}" ${ ok ? '' : 'disabled' }>${L.choose}</button>
+          </div>`;
+        const btn = card.querySelector('button');
+        btn.addEventListener('click', ()=>{
+          if(!ok) return;
+          currentKey = key;
+          startOverlay.style.display = 'none';
+          renderSchoolSelectOptions();
+          schoolSelect.value = key;
+          loadCalendar(key);
+        });
+        startGrid.appendChild(card);
+      }
+    }
 
-        // Deposit rule for WA: 50 € bis einschl. 45 Pers., sonst 70 €
-        cautionFn(persons){
-          const p = Number(persons || 0);
-          if (!p) return null;
-          return (p <= 45) ? 50 : 70;
-        },
+    /* ===== Rules / validation ===== */
+    function minStartDate(){ const d=new Date(); d.setDate(d.getDate()+7); d.setHours(0,0,0,0); return d; }
+    function overlaps(aStart,aEnd,bStart,bEnd){ return (aStart < bEnd) && (aEnd > bStart); }
 
-        // Custom pricing function for WA (replaces generic tiers+personTiers)
-        // Rules:
-        // - bis einschließlich 12 Std.:
-        //      ≤45 Pers.: 140 €   |   ≥46 Pers.: 220 €
-        // - 12–16 Std.:
-        //      ≤45 Pers.: 200 €   |   ≥46 Pers.: 310 €
-        // - >16 Std.: Preis nach Vereinbarung (no fixed amount)
-        customPrice(start, end, persons){
-          const ms = (end - start);
-          if (!start || !end || ms <= 0) return null;
+    function formatAddress(){
+      const street=(fStreet.value||'').trim();
+      const house=(fHouse.value||'').trim();
+      const zip=(fZip.value||'').trim();
+      const city=(fCity.value||'').trim();
+      const full = [street, house].filter(Boolean).join(' ') + ((zip||city)?(', '+[zip,city].filter(Boolean).join(' ')):'');
+      fAddressFull.value = full.trim();
+      fZipCity.value = [zip, city].filter(Boolean).join(' ').trim();
+      return fAddressFull.value;
+    }
 
-          const hours = ms / 3600000;
-          const p = Number(persons || 0);
+    function highlight(el, on){
+      const shouldShow = on && (wasSubmitted || el.dataset.touched === '1');
+      el.classList.toggle('error', !!shouldShow);
+      const msg = el.parentElement.querySelector('.error-msg');
+      if (msg) msg.style.display = shouldShow ? 'block' : 'none';
+    }
 
-          // More than 16 hours? => no fixed price (show "Preis nach Vereinbarung")
-          if (hours > 16) {
-            return {
-              price: null,                           // => UI shows "Preis nach Vereinbarung"
-              tierLabel: "über 16 Std.",
-              personsLabel: p ? (p <= 45 ? "≤45" : "≥46") : "",
-              caution: this.cautionFn(p)             // still show deposit
-            };
-          }
+    function validateTimes(){
+      const start = parseLocalDT(fFrom.value);
+      const end   = parseLocalDT(fTo.value);
 
-          const short = hours <= 12;
-          const tierLabel = short ? "bis 12 Std." : "12–16 Std.";
-          const personsLabel = p ? (p <= 45 ? "≤45" : "≥46") : "";
+      let ok = true;
+      if(!(start && end)) ok = false;
+      if(ok && end <= start) ok = false;
+      if(ok && (end - start) < 30*60000) ok = false;
 
-          let base;
-          if (p <= 45) {
-            base = short ? 140 : 200;
-          } else {
-            base = short ? 220 : 310;
-          }
-
-          return {
-            price: base,              // total without extras (WA has no extras)
-            base,
-            personsDelta: 0,
-            timeSurcharge: 0,
-            tierLabel,
-            personsLabel,
-            caution: this.cautionFn(p)
-          };
+      if(ok){
+        for(const ev of busyEvents){
+          const bS = new Date(ev.start), bE = new Date(ev.end || ev.start);
+          if(overlaps(start, end, bS, bE)){ ok = false; break; }
         }
       }
-    };
+      
+      const showConflict = !ok && (wasSubmitted || (fFrom.dataset.touched==='1' && fTo.dataset.touched==='1'));
+      alertConflict.style.display = showConflict ? 'block':'none';
+      alertConflict.textContent = (I18N[langSelect.value]||I18N.de).conflict;
 
-    /* Helper Functions */
-    function euro(amount) {
-      return new Intl.NumberFormat('de-DE', {
-        style: 'currency',
-        currency: 'EUR'
-      }).format(amount);
+      if(start && start < minStartDate()) { alertShort.style.display='block'; alertShort.innerHTML = (I18N[langSelect.value]||I18N.de).shortTermWarning; }
+      else { alertShort.style.display='none'; }
+
+      const phoneOk = (fPhoneNat.value||'').replace(/[^\d]/g,'').length >= 6;
+      const addrOk  = !!formatAddress();
+
+      highlight(fPersons, !fPersons.value);
+      highlight(fEmail, !fEmail.validity.valid);
+      highlight(fPhoneNat, !phoneOk);
+      highlight(fStreet, !(fStreet.value||'').trim());
+      highlight(fHouse,  !(fHouse.value||'').trim());
+      highlight(fZip,    !(fZip.value||'').trim());
+      highlight(fCity,   !(fCity.value||'').trim());
+
+      const requireAccept = (step2.style.display !== 'none');
+      const requiredOk = fSchool.value && fPersons.value && start && end && phoneOk && addrOk && fEmail.validity.valid && (!requireAccept || fAccept.checked);
+      btnSubmit.disabled = !(ok && requiredOk);
+      updatePricePreview(); 
+      updateSticky();
+      return ok && requiredOk;
     }
 
-    function parseLocalDT(str) {
-      if (!str) return null;
-      return new Date(str);
-    }
-
-    function debounce(fn, delay) {
-      let timer;
-      return function(...args) {
-        clearTimeout(timer);
-        timer = setTimeout(() => fn.apply(this, args), delay);
-      };
-    }
-
-    function isTouchDevice() {
-      return 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-    }
-
-    /* Terms Helper Function */
-    function getTermsForSchool(lang, key){
-      const base = (I18N[lang] || I18N.de).terms.slice();
-
-      if (key === 'WA') {
-        // For Wassertorplatz: NO Parallel events rule
-        const filtered = base.filter(t => !/Parallel/i.test(t));
-
-        // Add key handover rule
-        const extraDe = "Schlüssel-Übergabe und -Rückgabe sind vorab mit der Mitarbeiter*in vor Ort abzustimmen.";
-        const extraEn = "Key handover and return must be arranged in advance with the staff on site.";
-
-        filtered.push(lang === 'en' ? extraEn : extraDe);
-        return filtered;
+    function selectAllowFn(selectInfo){
+      const selStart = selectInfo.start, selEnd = selectInfo.end;
+      for(const ev of busyEvents){
+        const bS = new Date(ev.start), bE = new Date(ev.end || ev.start);
+        if(overlaps(selStart, selEnd, bS, bE)) return false;
       }
-
-      // Default: unchanged
-      return base;
+      if((selEnd - selStart)/60000 < 30) return false;
+      return true;
     }
 
-    /* Price Updates */
+    function desiredView(){ const w = calendarEl.clientWidth || window.innerWidth; return (w < 700) ? 'timeGridDay' : 'timeGridWeek'; }
+    function applyResponsiveView(){ if(!calendar) return; const want = desiredView(); if(calendar.view && calendar.view.type !== want) calendar.changeView(want); }
+
+    /* ===== Wizard & sticky bar ===== */
+    function goStep(n){
+      if(n===1){ step1.style.display='block'; step2.style.display='none'; }
+      else { step1.style.display='none'; step2.style.display='block'; }
+
+      // show/hide final controls
+      const agreeWrap = document.getElementById('fAccept').closest('.checkline');
+      if(agreeWrap){ agreeWrap.style.display = (n===2 ? 'inline-flex' : 'none'); }
+      btnSubmit.style.display = (n===2 ? 'inline-flex' : 'none');
+
+      sendHeightThrottled();
+    }
+
+    function updateSticky(){
+      stickyPrice.textContent = priceValue.textContent || '–';
+      const s = parseLocalDT(fFrom.value), e = parseLocalDT(fTo.value);
+      stickyWhen.textContent = (s&&e)? `${formatDT(s, langSelect.value)} – ${formatDT(e, langSelect.value)}` : '–';
+      stickyPersons.textContent = fPersons.value ? `${fPersons.value} Pers.` : '';
+    }
+
+    btnToStep2.addEventListener('click', ()=>{ 
+      // Valideer alleen stap 1 velden
+      const start = parseLocalDT(fFrom.value);
+      const end   = parseLocalDT(fTo.value);
+      
+      let ok = true;
+      if(!(start && end)) ok = false;
+      if(ok && end <= start) ok = false;
+      if(ok && (end - start) < 30*60000) ok = false;
+      
+      if(ok){
+        for(const ev of busyEvents){
+          const bS = new Date(ev.start), bE = new Date(ev.end || ev.start);
+          if(overlaps(start, end, bS, bE)){ ok = false; break; }
+        }
+      }
+      
+      const showConflict = !ok && (fFrom.dataset.touched==='1' && fTo.dataset.touched==='1');
+      alertConflict.style.display = showConflict ? 'block':'none';
+      alertConflict.textContent = (I18N[langSelect.value]||I18N.de).conflict;
+      
+      if(start && start < minStartDate()) { 
+        alertShort.style.display='block'; 
+        alertShort.innerHTML = (I18N[langSelect.value]||I18N.de).shortTermWarning; 
+      } else { 
+        alertShort.style.display='none'; 
+      }
+      
+      // Check alleen personen voor stap 1
+      highlight(fPersons, !fPersons.value);
+      
+      if(ok && fPersons.value) {
+        goStep(2);
+      } else {
+        // Zet touched op true zodat errors zichtbaar worden
+        fFrom.dataset.touched = '1';
+        fTo.dataset.touched = '1';
+        fPersons.dataset.touched = '1';
+        validateTimes();
+      }
+    });
+    btnBackStep1.addEventListener('click', ()=> goStep(1));
+    btnCloseX.addEventListener('click', closeModal);
+
+    priceToggle.addEventListener('click', ()=>{
+      priceBreakdown.style.display = priceBreakdown.style.display==='none' ? 'block':'none';
+      sendHeightThrottled();
+    });
+
+    /* ===== Focus trap ===== */
+    function trapFocus(container){
+      const FOCUS = 'a,button,input,select,textarea,[tabindex]:not([tabindex="-1"])';
+      const nodes=()=>Array.from(container.querySelectorAll(FOCUS)).filter(el=>!el.disabled && el.offsetParent!==null);
+      function onKey(e){
+        if(e.key!=='Tab') return;
+        const a = nodes(); if(!a.length) return;
+        const first=a[0], last=a[a.length-1];
+        if(e.shiftKey && document.activeElement===first){ e.preventDefault(); last.focus(); }
+        else if(!e.shiftKey && document.activeElement===last){ e.preventDefault(); first.focus(); }
+      }
+      container.addEventListener('keydown', onKey);
+      return ()=>container.removeEventListener('keydown', onKey);
+    }
+
+    function openModal(prefill){
+      fSchool.value = prefill.school;
+      fFrom.value = toInputLocal(prefill.start);
+      fTo.value   = toInputLocal(prefill.end);
+      alertConflict.style.display = 'none';
+      alertShort.style.display = 'none';
+      fAccept.checked = false;
+      btnSubmit.disabled = true;
+      formatAddress();
+      renderExtrasForSchool(currentKey || 'WE');
+      updatePricePreview();
+      goStep(1);
+      modalBack.style.display = 'flex';
+      validateTimes();
+      if(untrap) untrap(); 
+      untrap = trapFocus(modalBack);
+    }
+
+    function closeModal(){
+      modalBack.style.display = 'none';
+      form.reset();
+      fSchool.value = '';
+      alertConflict.style.display = 'none';
+      alertShort.style.display = 'none';
+      btnSubmit.disabled = true;
+      priceValue.textContent = '–';
+      priceBreakdown.style.display = 'none';
+      hidePopover();
+      if(untrap) untrap();
+    }
+
+    /* ===== Utils ===== */
+    function debounce(fn, ms=300){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a), ms); }; }
+
+    async function nominatim(q){
+      if(!q || q.length < 3) return [];
+      const url = `https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&limit=6&countrycodes=de&q=${encodeURIComponent(q)}`;
+      const res = await fetch(url, {headers:{'Accept':'application/json'}});
+      if(!res.ok) return [];
+      return res.json();
+    }
+
+    const updateStreetHints = debounce(async ()=>{
+      const base=(fStreet.value||'').trim();
+      const city=(fCity.value||'').trim();
+      const q = (base+' '+city).trim();
+      if(q.replace(/\s+/g,' ').length < 3) return;
+      
+      const data = await nominatim(q);
+      const hints = new Set();
+      data.forEach(r=>{
+        const a = r.address||{};
+        const street = a.road || a.pedestrian || a.footway || a.path || '';
+        if(street) hints.add(street);
+      });
+      addrHintHelp.style.display = hints.size ? 'block' : 'none';
+      addrHintHelp.textContent = hints.size ? 'Tipp: Vorschläge nutzen' : '';
+    }, 450);
+
+    const updateCityHints = debounce(async ()=>{
+      const q=(fCity.value||'').trim();
+      if(q.length<3) return;
+      
+      const data = await nominatim(q);
+      const hints = new Set();
+      data.forEach(r=>{
+        const a = r.address||{};
+        const plz  = a.postcode || '';
+        const city = a.city || a.town || a.village || a.suburb || '';
+        if(plz && city) hints.add(`${plz} ${city}`);
+      });
+    }, 450);
+
+    fStreet.addEventListener('input', updateStreetHints);
+    fCity.addEventListener('input', updateCityHints);
+
+    [fZip,fCity].forEach(el=>{ 
+      el.addEventListener('input', ()=>{ formatAddress(); validateTimes(); }); 
+      el.addEventListener('blur', ()=>{ el.dataset.touched='1'; validateTimes(); }); 
+    });
+
+    [fFrom,fTo,fPersons,fEmail,fPhoneNat,fAccept].forEach(el=>{
+      el.addEventListener('change', validateTimes);
+      el.addEventListener('input', validateTimes);
+    });
+
+    [fFrom,fTo,fPersons,fEmail,fPhoneNat,fStreet,fHouse,fZip,fCity].forEach(el=>{
+      el.addEventListener('blur', ()=>{ el.dataset.touched = '1'; validateTimes(); });
+    });
+
+    fPhoneNat.addEventListener('input', ()=>{
+      const cur = fPhoneNat.selectionStart;
+      fPhoneNat.value = (fPhoneNat.value || '').replace(/[^\d]/g,'');
+      fPhoneNat.setSelectionRange(cur, cur);
+    });
+
+    function formatDT(dt, lang){
+      const d = (dt instanceof Date) ? dt : new Date(dt);
+      return d.toLocaleString(lang === 'en' ? 'en-GB' : 'de-DE', {year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit'});
+    }
+
+    function toInputLocal(date){
+      const d = (date instanceof Date) ? date : new Date(date);
+      const pad = n => String(n).padStart(2,'0');
+      return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    }
+
+    function parseLocalDT(v){
+      if(!v) return null;
+      const [date, time] = v.split('T'); if(!date || !time) return null;
+      const [y,m,d] = date.split('-').map(Number);
+      const [hh,mm] = time.split(':').map(Number);
+      return new Date(y, (m-1), d, hh, mm, 0, 0);
+    }
+
+    function euro(n){ return new Intl.NumberFormat('de-DE',{style:'currency',currency:'EUR', maximumFractionDigits:2}).format(n); }
+
+    function esc(s){ return String(s||"").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+    /* ===== Calendar loading ===== */
+    schoolSelect.addEventListener('change', (e)=> {
+      const key = e.target.value;
+      if(!availability[key]?.ok) return;
+      currentKey = key;
+      loadCalendar(key);
+    });
+
+    langSelect.addEventListener('change', applyI18n);
+
+    mobileAdd.addEventListener('click', ()=>{
+      const start = new Date(); start.setDate(start.getDate()+7); start.setHours(10,0,0,0);
+      const end = new Date(start.getTime() + DEFAULT_TAP_MINUTES*60000);
+      openModal({ school: SCHOOLS[currentKey]?.name || '', start, end });
+    });
+
+    async function loadCalendar(key){
+      if(!availability[key]?.ok) return;
+      currentKey = key;
+      calendarLoading.style.display = 'block';
+      if(calendar) calendar.destroy();
+
+      // booked/busy from JSON
+      const raw = await fetchJson(SCHOOLS[key].file);
+      busyEvents = normalizeEvents(raw);
+
+      // holds from Apps Script
+      let holdEvents = [];
+      try {
+        const r = await fetch(`${APPS_SCRIPT_URL}?type=holds&school=${encodeURIComponent(key)}&v=${Date.now()}`);
+        if (r.ok) {
+          const arr = await r.json();
+          if (Array.isArray(arr)) {
+            holdEvents = arr.map(h => ({
+              title: (langSelect.value==='en'
+                ? 'Tentative — awaiting confirmation'
+                : 'Vorläufig reserviert — Bestätigung ausstehend'),
+              start: new Date(h.start),
+              end:   new Date(h.end),
+              editable: false,
+              overlap: true,
+              classNames: (h.classNames && h.classNames.includes('tentative')) ? ['tentative'] : ['tentative']
+            }));
+          }
+        }
+      } catch(_) {}
+
+      calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: (calendarEl.clientWidth || window.innerWidth) < 700 ? 'timeGridDay' : 'timeGridWeek',
+        firstDay: 1,
+        locale: langSelect.value === 'en' ? 'en-gb' : 'de',
+        timeZone: 'local',
+        slotMinTime: '12:00:00',
+        slotMaxTime: '22:00:00',
+        height: 'auto',
+        expandRows: true,
+        allDaySlot: false,
+        nowIndicator: false,
+        selectMirror: true,
+        longPressDelay: 120,
+        unselectAuto: true,
+        selectOverlap: true,
+        
+        selectable: !isTouchDevice(),
+        selectMinDistance: 8,
+        longPressDelay: 300,
+        selectLongPressDelay: 300,
+
+        selectAllow: selectAllowFn,
+        events: busyEvents,
+        windowResize: () => applyResponsiveView(),
+        select: (info)=>{
+          openModal({ school: SCHOOLS[currentKey].name, start: info.start, end: info.end });
+          calendar.unselect();
+        },
+        dateClick: (arg)=>{
+          if(arg.allDay) return;
+          const start = arg.date;
+          const end = new Date(start.getTime() + DEFAULT_TAP_MINUTES*60000);
+          openModal({ school: SCHOOLS[currentKey].name, start, end });
+        }
+      });
+
+      calendar.render();
+      
+      // voeg de eerste lading holds los toe
+      holdEvents.forEach(ev => calendar.addEvent(ev));
+      mobileAdd.style.display = isTouchDevice() ? 'block' : 'none';
+      applyResponsiveView();
+      calendarLoading.style.display = 'none';
+      calendarEl.classList.add('loaded');
+      fSchool.value = SCHOOLS[currentKey].name;
+      renderExtrasForSchool(key);
+      updatePricePreview();
+    }
+
+    /* ===== Price calculation ===== */
     function updatePricePreview(){
       const L = I18N[langSelect.value] || I18N.de;
-      const start   = parseLocalDT(fFrom.value);
-      const end     = parseLocalDT(fTo.value);
+      const start = parseLocalDT(fFrom.value);
+      const end   = parseLocalDT(fTo.value);
       const persons = Number(fPersons.value || 0);
       CURRENT_PRICE = null;
 
-      // reset UI
-      const showPriceOnReq = ()=> {
-        priceValue.textContent = L.priceOnReq;
-        bdBaseLabel.textContent = (langSelect.value==='en' ? 'Base' : 'Basis');
-        bdBase.textContent = '–';
-        bdPersonsLabel.textContent = (langSelect.value==='en' ? 'People tier' : 'Personen-Staffel');
-        bdPersons.textContent = (langSelect.value==='en' ? '€0.00' : '0,00 €');
-        bdTime.textContent = (langSelect.value==='en' ? '€0.00' : '0,00 €');
-        bdExtras.textContent = (L.bdNoExtras || (langSelect.value==='en' ? 'none' : 'keine'));
-        bdTotal.textContent = '–';
-        // deposit
-        if (bdDepositRow) bdDepositRow.style.display = 'none';
-        priceBreakdown.style.display = 'block';
-        updateSticky();
-      };
-
-      if (!(start && end) || end <= start){
+      if(!(start && end) || end <= start){
         priceValue.textContent = '–';
         priceBreakdown.style.display = 'none';
         hidePopover();
@@ -920,102 +1570,21 @@
 
       const cfg = PRICING[currentKey] || PRICING.WE;
 
-      // ======= Path A: customPrice (e.g. WA) =======
-      if (typeof cfg.customPrice === 'function') {
-        const out = cfg.customPrice(start, end, persons);
-
-        if (!out || out.price === null) {
-          // >16h for WA => price on request, but show deposit (if calculated)
-          showPriceOnReq();
-          if (cfg.cautionFn) {
-            const depo = cfg.cautionFn(persons);
-            if (depo && bdDepositRow) {
-              bdDeposit.textContent = euro(depo);
-              bdDepositRow.style.display = '';
-            }
-          }
-          CURRENT_PRICE = {
-            currency: 'EUR',
-            tierHours: out?.tierLabel || '',
-            personsMultiplier: 1,
-            personsLabel: out?.personsLabel || '',
-            base: null,
-            personsDelta: 0,
-            timeSurcharge: 0,
-            extrasCount: 0,
-            extrasCost: 0,
-            total: null,
-            extrasSelected: [],
-            caution: out?.caution ?? (cfg.cautionFn ? cfg.cautionFn(persons) : null)
-          };
-          updateSticky();
-          return;
-        }
-
-        // WA has no extras; time surcharge = 0
-        const total = out.price;
-
-        priceValue.textContent = euro(total);
-        bdBaseLabel.textContent = (langSelect.value==='en'
-          ? `Base (${out.tierLabel || ''})`
-          : `Basis (${out.tierLabel || ''})`);
-        bdBase.textContent = euro(out.base ?? total);
-
-        bdPersonsLabel.textContent = (langSelect.value==='en'
-          ? `People tier (${out.personsLabel || ''})`
-          : `Personen-Staffel (${out.personsLabel || ''})`);
-        bdPersons.textContent = (langSelect.value==='en' ? '€0.00' : '0,00 €');
-
-        bdTime.textContent = (langSelect.value==='en' ? '€0.00' : '0,00 €');
-
-        // extras
-        bdExtras.textContent = (L.bdNoExtras || (langSelect.value==='en' ? 'none' : 'keine'));
-
-        bdTotal.textContent = euro(total);
-
-        // Show deposit (not added to total)
-        if (cfg.cautionFn || typeof out.caution !== 'undefined') {
-          const depo = (typeof out.caution !== 'undefined') ? out.caution : cfg.cautionFn(persons);
-          if (depo && bdDepositRow) {
-            bdDeposit.textContent = euro(depo);
-            bdDepositRow.style.display = '';
-          } else if (bdDepositRow) {
-            bdDepositRow.style.display = 'none';
-          }
-        }
-
-        CURRENT_PRICE = {
-          currency: 'EUR',
-          tierHours: out.tierLabel || '',
-          personsMultiplier: 1,
-          personsLabel: out.personsLabel || '',
-          base: Number(out.base ?? total),
-          personsDelta: 0,
-          timeSurcharge: 0,
-          extrasCount: 0,
-          extrasCost: 0,
-          total: Number(total),
-          extrasSelected: [],
-          caution: (typeof out.caution !== 'undefined') ? out.caution : (cfg.cautionFn ? cfg.cautionFn(persons) : null)
-        };
-
-        priceBreakdown.style.display = 'block';
-        updateSticky();
-        return;
-      }
-
-      // ======= Path B: generic tiers/personTiers (WE/WI) =======
-      // (unchanged logic – your existing code, slightly condensed)
+      // tier by minutes
       const totalMin = Math.round((end - start) / 60000);
       const tier = (cfg.tiers || []).find(t => totalMin <= t.maxMin) || null;
 
+      // person multiplier
       let mult = null, pplLabel = ">100";
       for (const pt of (cfg.personTiers || [])){
         if (persons <= pt.max){ mult = pt.mult; pplLabel = pt.label; break; }
       }
 
       if(!tier || mult === null){
-        showPriceOnReq();
+        priceValue.textContent = L.priceOnReq;
+        priceBreakdown.style.display = 'none';
+        hidePopover();
+        updateSticky();
         return;
       }
 
@@ -1024,7 +1593,7 @@
       const personsDelta = basePlusPersons - base;
       const timeAdd = typeof cfg.surcharge === 'function' ? cfg.surcharge(start, end) : 0;
 
-      // extras
+      // extras (dynamic)
       const checked = Array.from(document.querySelectorAll('#extrasContainer input:checked'));
       const extrasCost = checked.reduce((sum, el)=> sum + Number(el.dataset.price||0), 0);
       const extrasSelected = checked.map(el => (langSelect.value==='en' ? el.dataset.labelEn : el.dataset.labelDe) || '');
@@ -1037,12 +1606,13 @@
       bdBase.textContent = euro(base);
       bdPersonsLabel.textContent = (langSelect.value==='en' ? I18N.en.bdPersons(pplLabel) : I18N.de.bdPersons(pplLabel));
       bdPersons.textContent = personsDelta === 0 ? (langSelect.value==='en' ? "€0.00" : "0,00 €") : euro(personsDelta);
+      bdTimeLabel.textContent = L.bdTime;
       bdTime.textContent = timeAdd ? euro(timeAdd) : (langSelect.value==='en' ? "€0.00" : "0,00 €");
+      bdExtrasLabel.textContent = L.bdExtras;
       bdExtras.textContent = extrasCost ? euro(extrasCost) : (L.bdNoExtras || (langSelect.value==='en' ? "none" : "keine"));
+      bdTotalLabel.textContent = L.bdTotal;
       bdTotal.textContent = euro(total);
-
-      // No deposit for WE/WI
-      if (bdDepositRow) bdDepositRow.style.display = 'none';
+      timePopover.textContent = L.bdTimeInfo;
 
       CURRENT_PRICE = {
         currency: 'EUR',
@@ -1061,608 +1631,200 @@
       priceBreakdown.style.display = 'block';
       updateSticky();
 
+      // Small running hint (optional)
       const extrasRunning = document.getElementById('extrasRunning');
       if (extrasRunning) extrasRunning.textContent = `Extras: ${euro(extrasCost)}`;
     }
 
-    function updateSticky() {
-      if (CURRENT_PRICE && CURRENT_PRICE.total !== null) {
-        stickyTotal.textContent = euro(CURRENT_PRICE.total);
-      } else {
-        stickyTotal.textContent = '–';
-      }
+    /* ===== Popover help ===== */
+    function togglePopover(){ const isOpen = timePopover.classList.contains('show'); if(isOpen){ hidePopover(); return; } showPopover(); }
+    function showPopover(){
+      timePopover.classList.add('show'); timePopover.setAttribute('aria-hidden','false'); timeInfoIcon.setAttribute('aria-expanded','true');
+      const rect = timePopover.getBoundingClientRect();
+      if(rect.right > window.innerWidth - 12){ timePopover.style.left = 'auto'; timePopover.style.right = '0'; }
+      else { timePopover.style.left = '0'; timePopover.style.right = 'auto'; }
     }
-
-    function renderExtrasForSchool(key) {
-      const container = document.getElementById('extrasContainer');
-      const cfg = PRICING[key] || PRICING.WE;
-      
-      container.innerHTML = '';
-      
-      if (cfg.extras && cfg.extras.length > 0) {
-        cfg.extras.forEach((extra, i) => {
-          const label = document.createElement('label');
-          label.className = 'badge';
-          
-          const input = document.createElement('input');
-          input.type = 'checkbox';
-          input.dataset.price = extra.price;
-          input.dataset.labelDe = extra.label;
-          input.dataset.labelEn = extra.labelEn || extra.label;
-          input.addEventListener('change', updatePricePreview);
-          
-          const span = document.createElement('span');
-          span.textContent = langSelect.value === 'en' ? (extra.labelEn || extra.label) : extra.label;
-          
-          const price = document.createElement('span');
-          price.className = 'price';
-          price.textContent = euro(extra.price);
-          
-          label.appendChild(input);
-          label.appendChild(span);
-          label.appendChild(price);
-          container.appendChild(label);
-        });
-      }
-      
-      // Show/hide extras field
-      document.querySelector('.field--extras').style.display =
-        (cfg.extras && cfg.extras.length) ? '' : 'none';
+    function hidePopover(){
+      timePopover.classList.remove('show'); timePopover.setAttribute('aria-hidden','true'); timeInfoIcon.setAttribute('aria-expanded','false');
     }
+    document.addEventListener('click', (e)=>{ if(!timePopover.classList.contains('show')) return; const within = e.target.closest('.tooltip-wrap'); if(!within) hidePopover(); });
+    document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') hidePopover(); if((e.key === 'Enter' || e.key === ' ') && document.activeElement === timeInfoIcon){ e.preventDefault(); togglePopover(); } });
+    timeInfoIcon.addEventListener('click', (e)=>{ e.stopPropagation(); togglePopover(); });
+    timeInfoIcon.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); togglePopover(); } });
 
-    /* Calendar Functions */
-    async function discoverSchools() {
-      try {
-        const response = await fetch(`${APPS_SCRIPT_URL}?type=schools`);
-        const schools = await response.json();
-        
-        schoolSelect.innerHTML = '<option value="">' + 
-          (I18N[langSelect.value] || I18N.de).schoolSelectPlaceholder + 
-          '</option>';
-        
-        schools.forEach(school => {
-          const option = document.createElement('option');
-          option.value = school.key;
-          option.textContent = school.name;
-          if (school.disabled) {
-            option.disabled = true;
-            option.className = 'disabled';
-          }
-          schoolSelect.appendChild(option);
-        });
-      } catch (error) {
-        console.error('Error loading schools:', error);
-      }
-    }
-
-    async function loadCalendar(key) {
-      currentKey = key;
-      const calendarDiv = document.getElementById('calendar');
-      
-      if (!key) {
-        calendarDiv.innerHTML = '<div id="calendarLoading" class="loading">' +
-          (I18N[langSelect.value] || I18N.de).loadingCalendar + 
-          '</div>';
-        if (calendar) {
-          calendar.destroy();
-          calendar = null;
-        }
-        return;
-      }
-
-      calendarDiv.innerHTML = '<div id="calendarLoading" class="loading">' +
-        (I18N[langSelect.value] || I18N.de).loadingCalendar + 
-        '</div>';
-
-      try {
-        const response = await fetch(`${APPS_SCRIPT_URL}?type=calendar&school=${encodeURIComponent(key)}`);
-        const events = await response.json();
-
-        if (calendar) {
-          calendar.destroy();
-        }
-
-        calendar = new FullCalendar.Calendar(calendarDiv, {
-          initialView: 'timeGridWeek',
-          locale: langSelect.value,
-          height: 'auto',
-          headerToolbar: {
-            left: 'prev,next today',
-            center: 'title',
-            right: 'dayGridMonth,timeGridWeek,timeGridDay'
-          },
-          slotMinTime: '08:00',
-          slotMaxTime: '22:00',
-          allDaySlot: false,
-          selectable: true,
-          selectMirror: true,
-          events: events.map(event => ({
-            ...event,
-            classNames: event.status === 'busy' ? ['busy'] : []
-          })),
-          select: function(info) {
-            openModal(info.start, info.end);
-            calendar.unselect();
-          },
-          eventClick: function(info) {
-            if (!info.event.classNames.includes('busy')) {
-              openModal(info.event.start, info.event.end);
-            }
-          }
-        });
-
-        calendar.render();
-        calendarDiv.classList.add('loaded');
-
-        // Load holds
-        const holdsResponse = await fetch(`${APPS_SCRIPT_URL}?type=holds&school=${encodeURIComponent(key)}`);
-        if (holdsResponse.ok) {
-          const holds = await holdsResponse.json();
-          holds.forEach(hold => {
-            calendar.addEvent({
-              title: langSelect.value === 'en' 
-                ? 'Tentative — awaiting confirmation' 
-                : 'Vorläufig reserviert — Bestätigung ausstehend',
-              start: new Date(hold.start),
-              end: new Date(hold.end),
-              editable: false,
-              overlap: true,
-              classNames: ['tentative']
-            });
-          });
-        }
-
-      } catch (error) {
-        console.error('Error loading calendar:', error);
-        calendarDiv.innerHTML = '<div class="loading">Fehler beim Laden des Kalenders</div>';
-      }
-
-      // Render extras and update pricing for this school
-      renderExtrasForSchool(key);
-      updatePricePreview();
-
-      // Refresh terms for the selected school
-      (function refreshTerms(){
-        const termsList = document.getElementById('termsList');
-        if (!termsList) return;
-        const L = I18N[langSelect.value] || I18N.de;
-        document.getElementById('termsSummary').textContent = L.termsSummary;
-        termsList.innerHTML = "";
-        getTermsForSchool(langSelect.value, currentKey).forEach(t => {
-          const li = document.createElement('li'); 
-          li.textContent = t; 
-          termsList.appendChild(li);
-        });
-      })();
-    }
-
-    /* Modal Functions */
-    function openModal(start, end) {
-      // Set default date/time values
-      if (start) {
-        fFrom.value = start.toISOString().slice(0, 16);
-      }
-      if (end) {
-        fTo.value = end.toISOString().slice(0, 16);
-      }
-
-      // Reset form
-      resetForm();
-      
-      // Show step 1
-      showStep(1);
-      
-      // Show modal
-      modalBack.style.display = 'flex';
-      document.body.style.overflow = 'hidden';
-      
-      // Update pricing
-      updatePricePreview();
-    }
-
-    function closeModal() {
-      modalBack.style.display = 'none';
-      document.body.style.overflow = '';
-      resetForm();
-      hidePopover();
-    }
-
-    function resetForm() {
-      // Clear form fields
-      fPersons.value = '';
-      fTitle.value = '';
-      fFirstName.value = '';
-      fLastName.value = '';
-      fEmail.value = '';
-      fDialCode.value = '+49';
-      fPhone.value = '';
-      fEventType.value = '';
-      fBikes.value = '';
-      fMessage.value = '';
-      fTerms.checked = false;
-      stickyTerms.checked = false;
-
-      // Clear extras
-      document.querySelectorAll('#extrasContainer input:checked').forEach(input => {
-        input.checked = false;
-      });
-
-      // Reset pricing
-      CURRENT_PRICE = null;
-      updatePricePreview();
-    }
-
-    function showStep(step) {
+    /* ===== Success overlay ===== */
+    function showSuccessOverlay(payload){
       const L = I18N[langSelect.value] || I18N.de;
-      
-      if (step === 1) {
-        step1.style.display = 'grid';
-        step2.style.display = 'none';
-        btnBack.style.display = 'none';
-        btnNext.style.display = 'inline-block';
-        btnSubmit.style.display = 'none';
-        document.getElementById('stepsText').textContent = L.step1of2;
-        
-        // Hide sticky bar elements in step 1
-        stickyBar.querySelector('.checkline').style.display = 'none';
-        stickyBar.querySelector('#btnSubmit').style.display = 'none';
-      } else {
-        step1.style.display = 'none';
-        step2.style.display = 'block';
-        btnBack.style.display = 'inline-block';
-        btnNext.style.display = 'none';
-        btnSubmit.style.display = 'inline-block';
-        document.getElementById('stepsText').textContent = L.step2of2;
-        
-        // Show sticky bar elements in step 2
-        stickyBar.querySelector('.checkline').style.display = 'flex';
-        stickyBar.querySelector('#btnSubmit').style.display = 'inline-block';
-      }
-    }
+      successTitle.textContent = L.successTitle;
+      successLead.textContent  = L.successLead;
+      btnBackToCalendar.textContent = L.successBack;
 
-    function validateStep1() {
-      const start = parseLocalDT(fFrom.value);
-      const end = parseLocalDT(fTo.value);
-      const persons = Number(fPersons.value);
+      const labels = L.successSummaryLabels;
+      const extrasText = (CURRENT_PRICE && CURRENT_PRICE.extrasSelected && CURRENT_PRICE.extrasSelected.length)
+        ? CURRENT_PRICE.extrasSelected
+        : [];
 
-      if (!start || !end) {
-        alert(langSelect.value === 'en' ? 'Please select start and end times.' : 'Bitte wählen Sie Start- und Endzeit.');
-        return false;
-      }
+      const start = parseLocalDT(payload.from);
+      const end   = parseLocalDT(payload.to);
 
-      if (end <= start) {
-        alert(langSelect.value === 'en' ? 'End time must be after start time.' : 'Endzeit muss nach der Startzeit liegen.');
-        return false;
-      }
-
-      if (!persons || persons < 1) {
-        alert(langSelect.value === 'en' ? 'Please enter the number of people.' : 'Bitte geben Sie die Anzahl der Personen an.');
-        return false;
-      }
-
-      return true;
-    }
-
-    function validateStep2() {
-      const required = [fTitle, fFirstName, fLastName, fEmail, fPhone];
-      
-      for (const field of required) {
-        if (!field.value.trim()) {
-          field.focus();
-          alert(langSelect.value === 'en' ? 'Please fill in all required fields.' : 'Bitte füllen Sie alle Pflichtfelder aus.');
-          return false;
-        }
-      }
-
-      if (!fTerms.checked && !stickyTerms.checked) {
-        alert(langSelect.value === 'en' ? 'Please accept the terms.' : 'Bitte akzeptieren Sie die Bedingungen.');
-        return false;
-      }
-
-      return true;
-    }
-
-    /* I18N */
-    function applyI18n() {
-      const L = I18N[langSelect.value] || I18N.de;
-      
-      // Header
-      document.getElementById('headerTitle').textContent = L.headerTitle;
-      document.getElementById('langLabel').textContent = L.langLabel;
-      document.getElementById('schoolLabel').textContent = L.schoolLabel;
-      document.getElementById('schoolSelectPlaceholder').textContent = L.schoolSelectPlaceholder;
-
-      // Intro
-      document.getElementById('introText').textContent = L.introText;
-
-      // Modal
-      document.getElementById('modalTitle').textContent = L.modalTitle;
-      document.getElementById('modalDesc').textContent = L.modalDesc;
-
-      // Form labels
-      document.getElementById('labelFrom').textContent = L.labelFrom;
-      document.getElementById('labelTo').textContent = L.labelTo;
-      document.getElementById('labelPersons').textContent = L.labelPersons;
-      document.getElementById('labelExtras').textContent = L.labelExtras;
-      document.getElementById('labelTitle').textContent = L.labelTitle;
-      document.getElementById('labelFirstName').textContent = L.labelFirstName;
-      document.getElementById('labelLastName').textContent = L.labelLastName;
-      document.getElementById('labelEmail').textContent = L.labelEmail;
-      document.getElementById('labelDialCode').textContent = L.labelDialCode;
-      document.getElementById('labelPhone').textContent = L.labelPhone;
-      document.getElementById('labelEventType').textContent = L.labelEventType;
-      document.getElementById('labelBikes').textContent = L.labelBikes;
-      document.getElementById('labelMessage').textContent = L.labelMessage;
-      document.getElementById('labelTerms').textContent = L.labelTerms;
-
-      // Buttons
-      document.getElementById('btnBack').textContent = L.btnBack;
-      document.getElementById('btnNext').textContent = L.btnNext;
-      document.getElementById('stickyTermsLabel').textContent = L.labelTerms;
-
-      // Price breakdown
-      document.getElementById('bdTimeLabel').textContent = L.bdTimeLabel;
-      document.getElementById('bdExtrasLabel').textContent = L.bdExtrasLabel;
-      document.getElementById('bdTotalLabel').textContent = L.bdTotalLabel;
-
-      // Update terms using helper function
-      const termsList = document.getElementById('termsList');
-      termsList.innerHTML = "";
-      const termsToRender = getTermsForSchool(langSelect.value, currentKey);
-      termsToRender.forEach(t => {
-        const li = document.createElement('li');
-        li.textContent = t;
-        termsList.appendChild(li);
-      });
-
-      // Update extras labels if any
-      document.querySelectorAll('#extrasContainer .badge').forEach((badge, i) => {
-        const input = badge.querySelector('input');
-        const span = badge.querySelector('span:not(.price)');
-        if (input && span) {
-          span.textContent = langSelect.value === 'en' ? input.dataset.labelEn : input.dataset.labelDe;
-        }
-      });
-
-      // Update calendar if exists
-      if (calendar) {
-        calendar.setOption('locale', langSelect.value);
-      }
-
-      // Update loading text
-      const loading = document.getElementById('calendarLoading');
-      if (loading) {
-        loading.firstChild.nodeValue = L.loadingCalendar;
-      }
-
-      // Update pricing
-      updatePricePreview();
-
-      // Update submit button text
-      const submitBtns = document.querySelectorAll('#btnSubmit');
-      submitBtns.forEach(btn => {
-        btn.textContent = L.btnSend;
-      });
-    }
-
-    /* Submission */
-    async function submitForm() {
-      if (!validateStep2()) return;
-
-      const submitBtns = document.querySelectorAll('#btnSubmit');
-      submitBtns.forEach(btn => {
-        btn.classList.add('loading');
-        btn.disabled = true;
-      });
-
-      try {
-        const payload = {
-          school: currentKey,
-          from: fFrom.value,
-          to: fTo.value,
-          persons: fPersons.value,
-          title: fTitle.value,
-          firstName: fFirstName.value,
-          lastName: fLastName.value,
-          email: fEmail.value,
-          phone: fDialCode.value + fPhone.value,
-          eventType: fEventType.value,
-          bikes: fBikes.value,
-          message: fMessage.value,
-          pricing: CURRENT_PRICE,
-          extras: Array.from(document.querySelectorAll('#extrasContainer input:checked')).map(input => ({
-            label: langSelect.value === 'en' ? input.dataset.labelEn : input.dataset.labelDe,
-            price: Number(input.dataset.price)
-          })),
-          language: langSelect.value
-        };
-
-        const response = await fetch(APPS_SCRIPT_URL, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(payload)
-        });
-
-        if (response.ok) {
-          showSuccessOverlay(payload);
-          closeModal();
-        } else {
-          throw new Error('Submission failed');
-        }
-      } catch (error) {
-        console.error('Submission error:', error);
-        alert(langSelect.value === 'en' ? 'Error sending request. Please try again.' : 'Fehler beim Senden der Anfrage. Bitte versuchen Sie es erneut.');
-      } finally {
-        submitBtns.forEach(btn => {
-          btn.classList.remove('loading');
-          btn.disabled = false;
-        });
-      }
-    }
-
-    function showSuccessOverlay(payload) {
-      const L = I18N[langSelect.value] || I18N.de;
-      
-      document.getElementById('successTitle').textContent = L.successTitle;
-      document.getElementById('successMessage').textContent = L.successMessage;
-      document.getElementById('successOk').textContent = L.successOk;
-
-      // Create summary
-      const summary = document.getElementById('successSummary');
-      const start = new Date(payload.from);
-      const end = new Date(payload.to);
-      
-      const formatDateTime = (date) => {
-        return date.toLocaleDateString(langSelect.value === 'en' ? 'en-GB' : 'de-DE') + 
-               ' ' + date.toLocaleTimeString(langSelect.value === 'en' ? 'en-GB' : 'de-DE', {
-                 hour: '2-digit',
-                 minute: '2-digit'
-               });
-      };
-
-      let messageRow = "";
-      if (payload.message) {
-        messageRow = `<div><strong>${langSelect.value === 'en' ? 'Message' : 'Nachricht'}:</strong> ${payload.message}</div>`;
-      }
-
-      let depositRow = "";
-      if (CURRENT_PRICE && CURRENT_PRICE.caution) {
-        depositRow = `<div><strong>Kaution:</strong> ${euro(CURRENT_PRICE.caution)}</div>`;
-      }
-
-      summary.innerHTML = `
-        <div><strong>${langSelect.value === 'en' ? 'Location' : 'Standort'}:</strong> ${schoolSelect.options[schoolSelect.selectedIndex].text}</div>
-        <div><strong>${langSelect.value === 'en' ? 'Date & Time' : 'Datum & Zeit'}:</strong> ${formatDateTime(start)} - ${formatDateTime(end)}</div>
-        <div><strong>${langSelect.value === 'en' ? 'People' : 'Personen'}:</strong> ${payload.persons}</div>
-        <div><strong>${langSelect.value === 'en' ? 'Contact' : 'Kontakt'}:</strong> ${payload.firstName} ${payload.lastName}</div>
-        <div><strong>E-Mail:</strong> ${payload.email}</div>
-        <div><strong>${langSelect.value === 'en' ? 'Phone' : 'Telefon'}:</strong> ${payload.phone}</div>
+      const messageRow = payload.message ? `<div><strong>${labels.message}:</strong> ${esc(payload.message)}</div>` : "";
+      successSummary.innerHTML = `
+        <div><strong>${labels.school}:</strong> ${esc(payload.school || "")}</div>
+        <div><strong>${labels.from}:</strong> ${formatDT(start, langSelect.value)}</div>
+        <div><strong>${labels.to}:</strong> ${formatDT(end,   langSelect.value)}</div>
+        ${payload.persons ? `<div><strong>${labels.persons}:</strong> ${esc(payload.persons)}</div>` : ""}
+        <div><strong>${labels.extras}:</strong> ${extrasText.length ? esc(extrasText.join(", ")) : (L.bdNoExtras)}</div>
         ${messageRow}
-        ${depositRow}
-        <div><strong>${langSelect.value === 'en' ? 'Total' : 'Gesamtpreis'}:</strong> ${CURRENT_PRICE && CURRENT_PRICE.total !== null ? euro(CURRENT_PRICE.total) : L.priceOnReq}</div>
       `;
 
       successOverlay.style.display = 'flex';
+      btnBackToCalendar.focus();
+
+      const escKeyHandler = (e)=>{ if(e.key === 'Escape') hideSuccessOverlay(); };
+      document.addEventListener('keydown', escKeyHandler, { once:true });
+
+      btnBackToCalendar.onclick = hideSuccessOverlay;
     }
 
-    /* Popover Functions */
-    function showPopover() {
-      const info = document.getElementById('timeInfo');
-      const popover = document.getElementById('timeInfoPopover');
-      
-      if (!info || !popover) return;
+    function hideSuccessOverlay(){ successOverlay.style.display = 'none'; }
 
-      const L = I18N[langSelect.value] || I18N.de;
-      popover.textContent = langSelect.value === 'en' 
-        ? 'Additional charge for bookings before 8 AM or after 6 PM'
-        : 'Zuschlag für Buchungen vor 8 Uhr oder nach 18 Uhr';
-
-      const rect = info.getBoundingClientRect();
-      popover.style.left = rect.left + 'px';
-      popover.style.top = (rect.bottom + 5) + 'px';
-      popover.style.display = 'block';
-      
-      info.setAttribute('aria-expanded', 'true');
-      popover.setAttribute('aria-hidden', 'false');
+    function showToast(text){
+      successText.textContent = text;
+      successMsg.classList.add('show');
+      setTimeout(()=> successMsg.classList.remove('show'), 3000);
     }
 
-    function hidePopover() {
-      const info = document.getElementById('timeInfo');
-      const popover = document.getElementById('timeInfoPopover');
-      
-      if (!info || !popover) return;
+    /* ===== Submit naar Apps Script - ENHANCED VERSION ===== */
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby-fC-flM6XSCbtO6hZ8ZXJQkJc4olINKwUUhtqU7zhYK1GEQVSwofkIx6s395vCCo9/exec";
+    const SECRET = "kidbike_0d2e1f8d3a7c4b9e5f2a1c8d7b4e3f";
 
-      popover.style.display = 'none';
-      info.setAttribute('aria-expanded', 'false');
-      popover.setAttribute('aria-hidden', 'true');
-    }
+    form.addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      wasSubmitted = true;
 
-    function applyResponsiveView() {
-      if (calendar) {
-        const width = window.innerWidth;
-        if (width < 768) {
-          calendar.changeView('timeGridDay');
-        } else {
-          calendar.changeView('timeGridWeek');
+      const errBox = document.getElementById('submitError');
+      errBox.style.display = 'none';
+      errBox.textContent = '';
+
+      if(!validateTimes()) {
+        const firstErr = [fPersons,fFrom,fTo,fEmail,fPhoneNat,fStreet,fHouse,fZip,fCity]
+          .find(el=>el.classList.contains('error'));
+        if(firstErr) firstErr.focus();
+        return;
+      }
+
+      btnSubmit.classList.add('loading');
+      btnSubmit.disabled = true;
+      btnSubmit.textContent = (langSelect.value==='en'?'Sending…':'Senden…');
+
+      // timeout guard zodat een hanging fetch niet "stil" blijft
+      const ctl = new AbortController();
+      const t = setTimeout(()=>ctl.abort(), 15000);
+
+      try {
+        const nameCombined = [fSalutation.value, fFirstName.value, fLastName.value].filter(Boolean).join(' ').trim();
+        const phoneCombined = [fPhoneCountry.value, (fPhoneNat.value||'').trim()].filter(Boolean).join(' ');
+
+        const extrasChecked = Array.from(document.querySelectorAll('#extrasContainer input:checked'));
+        const extrasList = extrasChecked.map(el =>
+          (langSelect.value === 'en' ? el.dataset.labelEn : el.dataset.labelDe) || el.id.replace(/^x_/, '')
+        );
+
+        const payload = {
+          secret: SECRET,
+          school:  fSchool.value,              // let op: dit is de NAAM, niet de key (WE/WI/WA)
+          from:    fFrom.value,
+          to:      fTo.value,
+          persons: fPersons.value,
+          type_free: fTypeFree.value,
+          bikes:   fBikes.value,
+          salutation: fSalutation.value,
+          first_name: fFirstName.value,
+          last_name:  fLastName.value,
+          name:    nameCombined || (fFirstName.value + ' ' + fLastName.value).trim(),
+          email:   fEmail.value,
+          phone_country: fPhoneCountry.value,
+          phone_national: fPhoneNat.value,
+          phone:   phoneCombined,
+          street:  fStreet.value,
+          house:   fHouse.value,
+          zip:     fZip.value,
+          city:    fCity.value,
+          zipcity: fZipCity.value,
+          address: formatAddress(),
+          message: fMsg.value,
+          extras:  extrasList,
+          lang:    langSelect.value || 'de',
+          price:   CURRENT_PRICE,
+          priceText: priceValue.textContent,
+          accepted_terms: !!fAccept.checked
+        };
+
+        // ——— de fetch met maximale 'zichtbaarheid' van wat er terugkomt
+        const res = await fetch(APPS_SCRIPT_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // voorkomt preflight
+          body: JSON.stringify(payload),
+          redirect: 'follow',
+          signal: ctl.signal
+        }).catch(err => {
+          // netwerk/CORS error (bij CORS faalt fetch en kom je hier)
+          throw new Error('Netwerk- of CORS-fehler: ' + String(err && err.message ? err.message : err));
+        });
+
+        clearTimeout(t);
+
+        // Let op: bij CORS-issues kan res.type/ok/status afwijkend zijn
+        console.log('[submit] res.type:', res.type, 'status:', res.status, 'ok:', res.ok, 'url:', res.url);
+
+        const text = await res.text().catch(()=> '');
+        console.log('[submit] raw response text (first 1k):\n', text.slice(0,1000));
+
+        if (!res.ok) {
+          // 4xx/5xx of opaque zonder CORS
+          errBox.textContent = `Serverfehler (HTTP ${res.status}):\n` + text.slice(0,1000);
+          errBox.style.display = 'block';
+          throw new Error('HTTP '+res.status);
         }
-      }
-    }
 
-    /* Event Listeners */
-    
-    // Language & School Selection
-    langSelect.addEventListener('change', () => {
-      applyI18n();
-      if (currentKey) {
-        loadCalendar(currentKey);
-      }
-    });
+        // Probeer JSON te parsen; als het HTML/redirect is, tonen we dat
+        let out;
+        try {
+          out = JSON.parse(text);
+        } catch {
+          errBox.textContent = 'Serverantwort ist KEINE JSON (vermutlich HTML/Redirect):\n' + text.slice(0,1000);
+          errBox.style.display = 'block';
+          throw new Error('Non-JSON response');
+        }
 
-    schoolSelect.addEventListener('change', (e) => {
-      loadCalendar(e.target.value);
-    });
+        console.log('[submit] parsed JSON:', out);
 
-    // Modal Controls
-    modalClose.addEventListener('click', closeModal);
-    mobileAddBtn.addEventListener('click', () => openModal());
+        if (!out.ok) {
+          const msg = out.error || 'Unbekannter Fehler (ok:false).';
+          errBox.textContent = msg;
+          errBox.style.display = 'block';
+          throw new Error(msg);
+        }
 
-    modalBack.addEventListener('click', (e) => {
-      if (e.target === modalBack) closeModal();
-    });
+        // 🎉 success
+        showSuccessOverlay({
+          school: payload.school,
+          from:   payload.from,
+          to:     payload.to,
+          persons: payload.persons,
+          message: payload.message
+        });
+        closeModal();
 
-    // Navigation
-    btnNext.addEventListener('click', () => {
-      if (validateStep1()) {
-        showStep(2);
-      }
-    });
-
-    btnBack.addEventListener('click', () => {
-      showStep(1);
-    });
-
-    // Submit
-    document.querySelectorAll('#btnSubmit').forEach(btn => {
-      btn.addEventListener('click', submitForm);
-    });
-
-    // Success overlay
-    successOk.addEventListener('click', () => {
-      successOverlay.style.display = 'none';
-    });
-
-    // Form field updates
-    [fFrom, fTo, fPersons].forEach(field => {
-      field.addEventListener('input', updatePricePreview);
-    });
-
-    // Terms sync
-    fTerms.addEventListener('change', () => {
-      stickyTerms.checked = fTerms.checked;
-    });
-
-    stickyTerms.addEventListener('change', () => {
-      fTerms.checked = stickyTerms.checked;
-    });
-
-    // Popover
-    document.getElementById('timeInfo')?.addEventListener('click', (e) => {
-      e.stopPropagation();
-      showPopover();
-    });
-
-    document.getElementById('timeInfo')?.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        showPopover();
-      }
-    });
-
-    document.addEventListener('click', (e) => {
-      if (!e.target.closest('#timeInfo')) {
-        hidePopover();
+      } catch(err){
+        console.error('Submit failed:', err);
+        // Geen alert meer; alles staat in errBox. Desnoods nog zachtjes:
+        // alert('Senden fehlgeschlagen: ' + (err.message || err));
+      } finally {
+        clearTimeout(t);
+        btnSubmit.classList.remove('loading');
+        btnSubmit.disabled = false;
+        btnSubmit.textContent = (I18N[langSelect.value]||I18N.de).btnSend || 'Anfrage senden';
       }
     });
 
@@ -1707,7 +1869,7 @@
                 classNames: ['tentative']
               }));
               
-              // 1) Remove only existing 'tentative' events
+              // 1) Verwijder alleen bestaande 'tentative' events
               if (Array.isArray(holdEvents) && holdEvents.length) {
                 calendar.getEvents()
                   .filter(ev => (ev.classNames || []).includes('tentative'))
@@ -1742,7 +1904,7 @@
                   classNames: ['tentative']
                 }));
                 
-                // 1) Remove only existing 'tentative' events
+                // 1) Verwijder alleen bestaande 'tentative' events
                 if (Array.isArray(holdEvents) && holdEvents.length) {
                   calendar.getEvents()
                     .filter(ev => (ev.classNames || []).includes('tentative'))
