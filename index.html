@@ -1731,62 +1731,7 @@ if (currentKey === 'WA' && cfg.usePersonBands) {
 }
 
 
-        // WA: geen extras, geen tijdtoeslag
-        const total = out.price;
 
-        // Toon huurprijs + Kaution los naast elkaar (Kaution niet in Summe)
-        if (currentKey === 'WA' && (out.caution ?? cfg.cautionFn?.(persons))) {
-          const depo = (typeof out.caution !== 'undefined') ? out.caution : cfg.cautionFn(persons);
-          priceValue.textContent = `${euro(total)} + ${euro(depo)} Kaution`;
-        } else {
-         priceValue.textContent = euro(total);
-        }
-
-        bdBaseLabel.textContent = (langSelect.value==='en'
-          ? `Base (${out.tierLabel || ''})`
-          : `Basis (${out.tierLabel || ''})`);
-        bdBase.textContent = euro(out.base ?? total);
-
-        bdPersonsLabel.textContent = (langSelect.value==='en'
-          ? `People tier (${out.personsLabel || ''})`
-          : `Personen-Staffel (${out.personsLabel || ''})`);
-        bdPersons.textContent = (langSelect.value==='en' ? '€0.00' : '0,00 €');
-
-        bdTime.textContent = (langSelect.value==='en' ? '€0.00' : '0,00 €');
-
-        bdExtras.textContent = (L.bdNoExtras || (langSelect.value==='en' ? 'none' : 'keine'));
-
-        bdTotal.textContent = euro(total);
-
-        // Kaution tonen (niet optellen bij Summe)
-        if (cfg.cautionFn || typeof out.caution !== 'undefined') {
-          const depo = (typeof out.caution !== 'undefined') ? out.caution : cfg.cautionFn(persons);
-          if (depo && bdDepositRow) {
-            bdDeposit.textContent = euro(depo);
-            bdDepositRow.style.display = '';
-          } else if (bdDepositRow) {
-            bdDepositRow.style.display = 'none';
-          }
-        }
-
-        CURRENT_PRICE = {
-          currency: 'EUR',
-          tierHours: out.tierLabel || '',
-          personsMultiplier: 1,
-          personsLabel: out.personsLabel || '',
-          base: Number(out.base ?? total),
-          personsDelta: 0,
-          timeSurcharge: 0,
-          extrasCount: 0,
-          extrasCost: 0,
-          total: Number(total),
-          extrasSelected: [],
-          caution: (typeof out.caution !== 'undefined') ? out.caution : (cfg.cautionFn ? cfg.cautionFn(persons) : null)
-        };
-
-        priceBreakdown.style.display = 'block';
-        updateSticky();
-        return;
       }
 
       // ===== B) generiek pad (WE/WI) =====
