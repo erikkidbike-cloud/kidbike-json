@@ -223,6 +223,7 @@
     .breakdown .row{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:1px 0;}
     .breakdown .muted{color:#6b7280}
     .breakdown .total{font-weight:800;border-top:1px dashed var(--border);padding-top:6px;margin-top:6px}
+    .breakdown .grand{font-weight:800;border-top:1px dashed var(--border);padding-top:6px;margin-top:6px}
 
     .tooltip-wrap{position:relative;display:inline-flex;align-items:center}
     .tooltip-icon{cursor:pointer;font-weight:bold;margin-left:6px;user-select:none;background:var(--brand);color:white;border-radius:50%;width:16px;height:16px;
@@ -503,12 +504,18 @@
             </div>
             <div class="row"><span id="bdExtrasLabel" class="muted">Extras</span><span id="bdExtras">–</span></div>
 
-            <!-- ➕ NIEUW: Kaution (alleen zichtbaar bij WA; telt niet mee in Summe) -->
+            <!-- Summe (zonder Kaution) -->
+            <div class="row total"><span id="bdTotalLabel">Summe</span><span id="bdTotal">–</span></div>
+
+            <!-- Kaution NA de Summe -->
             <div class="row" id="bdDepositRow" style="display:none">
               <span class="muted">Kaution</span><span id="bdDeposit">–</span>
             </div>
 
-            <div class="row total"><span id="bdTotalLabel">Summe</span><span id="bdTotal">–</span></div>
+            <!-- NIEUW: Summe inkl. Kaution -->
+            <div class="row grand" id="bdGrandTotalRow" style="display:none">
+              <span id="bdGrandTotalLabel">Summe inkl. Kaution</span><span id="bdGrandTotal">–</span>
+            </div>
           </div>
 
           <div class="modal-actions">
@@ -1033,6 +1040,11 @@
     const bdDepositRow = document.getElementById('bdDepositRow');
     const bdDeposit    = document.getElementById('bdDeposit');
 
+    // ➕ NIEUW: Grand total (Summe inkl. Kaution) refs
+    const bdGrandTotalRow = document.getElementById('bdGrandTotalRow');
+    const bdGrandTotalLabel = document.getElementById('bdGrandTotalLabel');
+    const bdGrandTotal = document.getElementById('bdGrandTotal');
+
     const DEFAULT_TAP_MINUTES = 120;
     const MAX_EVENT_HOURS   = 24;
     const FALLBACK_MINUTES  = 120;
@@ -1084,6 +1096,10 @@
       document.getElementById('bdTimeLabel').textContent = L.bdTime;
       document.getElementById('bdExtrasLabel').textContent = L.bdExtras;
       document.getElementById('bdTotalLabel').textContent = L.bdTotal;
+      
+      bdGrandTotalLabel.textContent = (langSelect.value==='en')
+        ? 'Total incl. deposit'
+        : 'Summe inkl. Kaution';
 
       btnSubmit.textContent = L.btnSend;
 
@@ -1608,6 +1624,7 @@ stickyPrice.textContent = stickyText;
         bdExtras.textContent = (L.bdNoExtras || (langSelect.value==='en' ? 'none' : 'keine'));
         bdTotal.textContent = '–';
         if (bdDepositRow) bdDepositRow.style.display = 'none';
+        if (bdGrandTotalRow) bdGrandTotalRow.style.display = 'none';
         priceBreakdown.style.display = 'block';
         updateSticky();
       };
@@ -1647,6 +1664,8 @@ if (currentKey === 'WA' && cfg.usePersonBands) {
       if (depo) { bdDeposit.textContent = euro(depo); bdDepositRow.style.display = ''; }
       else { bdDepositRow.style.display = 'none'; }
     }
+    
+    if (bdGrandTotalRow) bdGrandTotalRow.style.display = 'none'; // geen totaal te rekenen
 
     CURRENT_PRICE = {
       currency: 'EUR',
@@ -1704,6 +1723,18 @@ if (currentKey === 'WA' && cfg.usePersonBands) {
   if (bdDepositRow) {
     if (depo) { bdDeposit.textContent = euro(depo); bdDepositRow.style.display = ''; }
     else { bdDepositRow.style.display = 'none'; }
+  }
+
+  // NIEUW: Summe inkl. Kaution
+  if (bdGrandTotalRow) {
+    if (depo) {
+      bdGrandTotalLabel.textContent = (langSelect.value==='en')
+        ? 'Total incl. deposit' : 'Summe inkl. Kaution';
+      bdGrandTotal.textContent = euro(total + depo);
+      bdGrandTotalRow.style.display = '';
+    } else {
+      bdGrandTotalRow.style.display = 'none';
+    }
   }
 
   CURRENT_PRICE = {
@@ -1767,6 +1798,7 @@ if (currentKey === 'WA' && cfg.usePersonBands) {
       bdTotal.textContent = euro(total);
 
       if (bdDepositRow) bdDepositRow.style.display = 'none';
+      if (bdGrandTotalRow) bdGrandTotalRow.style.display = 'none';
 
       CURRENT_PRICE = {
         currency: 'EUR',
