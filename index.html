@@ -799,6 +799,8 @@
       WI: { name: "Verkehrsschule Wiener Straße",     short:"Wiener Straße",  file: "events-wi.json", address: "Wiener Str. 59c, 10999 Berlin" },
       WE: { name: "Verkehrsschule Weinstraße",        short:"Weinstraße",     file: "events-we.json", address: "Weinstraße 2, 10249 Berlin" }
     };
+    // Forceer tijdelijk offline status per locatie (true = offline)
+    const FORCE_OFFLINE = { WA: true };
 
     /* ===== Surcharge helper (WE/WI) ===== */
     function defaultSurcharge30(start, end){
@@ -1161,13 +1163,20 @@
     async function discoverSchools(){
       const keys = Object.keys(SCHOOLS);
       for(const key of keys){
-        try{ const data = await fetchJson(SCHOOLS[key].file); availability[key]={ok:Array.isArray(data)}; }
-        catch(_e){ availability[key]={ok:false}; }
+        try{
+          const data = await fetchJson(SCHOOLS[key].file);
+         availability[key] = { ok: Array.isArray(data) };
+        } catch(_e){
+         availability[key] = { ok: false };
+        }
+        // >>> toevoeging: forceer offline indien gewenst
+       if (FORCE_OFFLINE[key]) availability[key].ok = false;
       }
-      renderSchoolSelectOptions();
+     renderSchoolSelectOptions();
       renderStartCards();
       startOverlay.style.display = 'flex';
     }
+
 
     function renderSchoolSelectOptions(){
       const L = I18N[langSelect.value] || I18N.de;
