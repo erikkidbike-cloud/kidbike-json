@@ -1075,7 +1075,7 @@
       labelFrom.textContent = L.from;
       labelTo.textContent = L.to;
       labelType.textContent = L.type;
-      labelBikes.textContent = L.bikes;
+      if (labelBikes) labelBikes.textContent = L.bikes;
       labelEmail.textContent = L.email;
       labelPhone.textContent = (langSelect.value==='en'?'Phone number *':'Telefon *');
       labelPhoneCountry.textContent = L.phoneCountry;
@@ -1931,7 +1931,6 @@ if (currentKey === 'WA' && cfg.usePersonBands) {
         );
 
         const payload = {
-          secret: SECRET,
           school:  fSchool.value,              // naam, niet de key
           from:    fFrom.value,
           to:      fTo.value,
