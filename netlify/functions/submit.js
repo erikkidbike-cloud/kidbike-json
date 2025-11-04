@@ -1,8 +1,8 @@
 // netlify/functions/submit.js  (Functions v2, ESM)
 export default async (request, context) => {
-  const ORIGIN = process.env.ORIGIN || '*';     // bv. "https://chipper-horse-0661c0.netlify.app"
-  const GAS_URL = process.env.GAS_URL;          // bv. jouw Apps Script Web App URL (exec)
-  const SECRET  = process.env.SECRET;           // zelfde waarde als Script Property SECRET in GAS
+  const ORIGIN  = process.env.CORS_ORIGIN || process.env.ORIGIN || '*';
+  const GAS_URL = process.env.GAS_URL;
+  const SECRET  = process.env.SECRET || process.env.SUBMIT_SHARED_SECRET; // ← accepteert beide
 
   const cors = {
     'Access-Control-Allow-Origin': ORIGIN,
@@ -17,30 +17,30 @@ export default async (request, context) => {
   }
 
   if (request.method === 'OPTIONS') {
-    // CORS preflight
     return new Response('', { status: 204, headers: cors });
   }
 
   try {
     if (request.method === 'GET') {
-      // Proxy voor holds: voeg ?t=<SECRET> toe
-      const inUrl = new URL(request.url);
+      // Proxy voor holds → voeg ?t=<SECRET> toe
+      const inUrl  = new URL(request.url);
       const outUrl = new URL(GAS_URL);
-      // kopieer query
-      for (const [k,v] of inUrl.searchParams.entries()) outUrl.searchParams.set(k, v);
-      // voeg secret toe zoals jouw GAS accepteert
+      for (const [k, v] of inUrl.searchParams.entries()) outUrl.searchParams.set(k, v);
       outUrl.searchParams.set('t', SECRET);
 
       const r = await fetch(outUrl.toString(), { method: 'GET' });
       const txt = await r.text();
       return new Response(txt, {
         status: r.status,
-        headers: { ...cors, 'content-type': r.headers.get('content-type') || 'application/json' }
+        headers: {
+          ...cors,
+          'content-type': r.headers.get('content-type') || 'application/json'
+        }
       });
     }
 
     if (request.method === 'POST') {
-      // Lees JSON van frontend, voeg secret toe in body
+      // JSON lezen en secret toevoegen
       const raw = await request.text();
       let payload;
       try {
@@ -54,14 +54,17 @@ export default async (request, context) => {
 
       const gasRes = await fetch(GAS_URL, {
         method: 'POST',
-        headers: { 'content-type': 'text/plain;charset=utf-8' }, // geen preflight
+        headers: { 'content-type': 'text/plain;charset=utf-8' }, // voorkomt preflight
         body: JSON.stringify(payload),
       });
       const gasTxt = await gasRes.text();
 
       return new Response(gasTxt, {
         status: gasRes.status,
-        headers: { ...cors, 'content-type': 'application/json' }
+        headers: {
+          ...cors,
+          'content-type': gasRes.headers.get('content-type') || 'application/json'
+        }
       });
     }
 
