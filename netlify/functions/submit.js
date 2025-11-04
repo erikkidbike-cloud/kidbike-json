@@ -1,54 +1,76 @@
-export default async (req, res) => {
-  if (req.method === "OPTIONS") {
-    return res.status(204).set({
-      "Access-Control-Allow-Origin": process.env.CORS_ORIGIN || "*",
-      "Access-Control-Allow-Methods": "POST, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type",
-      "Access-Control-Max-Age": "86400",
-    }).end();
-  }
-  if (req.method !== "POST") {
-    return res.status(405).json({ ok:false, error:"METHOD_NOT_ALLOWED" });
+// netlify/functions/submit.js  (Functions v2, ESM)
+export default async (request, context) => {
+  const ORIGIN = process.env.ORIGIN || '*';     // bv. "https://chipper-horse-0661c0.netlify.app"
+  const GAS_URL = process.env.GAS_URL;          // bv. jouw Apps Script Web App URL (exec)
+  const SECRET  = process.env.SECRET;           // zelfde waarde als Script Property SECRET in GAS
+
+  const cors = {
+    'Access-Control-Allow-Origin': ORIGIN,
+    'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type',
+  };
+
+  if (!GAS_URL || !SECRET) {
+    return new Response(JSON.stringify({ ok:false, error:'Missing GAS_URL or SECRET env' }), {
+      status: 500, headers: { ...cors, 'content-type':'application/json' }
+    });
   }
 
-  const allowOrigin = process.env.CORS_ORIGIN || "*";
-  const target = process.env.APPS_SCRIPT_URL;      // eindigt op /exec
-  const secret = process.env.SUBMIT_SHARED_SECRET; // lange random string
-
-  if (!target || !secret) {
-    return res.status(500).set("Access-Control-Allow-Origin", allowOrigin)
-      .json({ ok:false, error:"MISSING_SERVER_CONFIG" });
+  if (request.method === 'OPTIONS') {
+    // CORS preflight
+    return new Response('', { status: 204, headers: cors });
   }
 
   try {
-    const body = await readJson(req);
+    if (request.method === 'GET') {
+      // Proxy voor holds: voeg ?t=<SECRET> toe
+      const inUrl = new URL(request.url);
+      const outUrl = new URL(GAS_URL);
+      // kopieer query
+      for (const [k,v] of inUrl.searchParams.entries()) outUrl.searchParams.set(k, v);
+      // voeg secret toe zoals jouw GAS accepteert
+      outUrl.searchParams.set('t', SECRET);
 
-    // Secret NIET in payload; voeg toe als queryparameter t=...
-    const url = new URL(target);
-    url.searchParams.set("t", secret);
+      const r = await fetch(outUrl.toString(), { method: 'GET' });
+      const txt = await r.text();
+      return new Response(txt, {
+        status: r.status,
+        headers: { ...cors, 'content-type': r.headers.get('content-type') || 'application/json' }
+      });
+    }
 
-    const resp = await fetch(url.toString(), {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),     // payload blijft ongewijzigd
+    if (request.method === 'POST') {
+      // Lees JSON van frontend, voeg secret toe in body
+      const raw = await request.text();
+      let payload;
+      try {
+        payload = JSON.parse(raw || '{}');
+      } catch {
+        return new Response(JSON.stringify({ ok:false, error:'Invalid JSON' }), {
+          status: 400, headers: { ...cors, 'content-type':'application/json' }
+        });
+      }
+      payload.secret = SECRET;
+
+      const gasRes = await fetch(GAS_URL, {
+        method: 'POST',
+        headers: { 'content-type': 'text/plain;charset=utf-8' }, // geen preflight
+        body: JSON.stringify(payload),
+      });
+      const gasTxt = await gasRes.text();
+
+      return new Response(gasTxt, {
+        status: gasRes.status,
+        headers: { ...cors, 'content-type': 'application/json' }
+      });
+    }
+
+    return new Response(JSON.stringify({ ok:false, error:'Method Not Allowed' }), {
+      status: 405, headers: { ...cors, 'content-type':'application/json' }
     });
-
-    const text = await resp.text();
-    let out; try { out = JSON.parse(text); } catch { out = { ok: resp.ok, raw: text }; }
-
-    return res.status(resp.status)
-      .set("Access-Control-Allow-Origin", allowOrigin)
-      .json(out);
-
   } catch (err) {
-    return res.status(500)
-      .set("Access-Control-Allow-Origin", allowOrigin)
-      .json({ ok:false, error:String(err && err.message || err) });
+    return new Response(JSON.stringify({ ok:false, error: String(err && err.message || err) }), {
+      status: 502, headers: { ...cors, 'content-type':'application/json' }
+    });
   }
 };
-
-async function readJson(req){
-  const chunks=[]; for await (const c of req) chunks.push(c);
-  const text = Buffer.concat(chunks).toString("utf8") || "{}";
-  return JSON.parse(text);
-}
