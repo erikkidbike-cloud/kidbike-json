@@ -156,6 +156,13 @@
     .fc .fc-toolbar-title{font-weight:700;font-size:15px}
     .fc-timegrid-slot{min-height:20px;}
     .fc-event.busy{background:var(--busy)!important;border:1px solid #045983!important;color:#fff;}
+    
+    /* Frauenprojekt-Slots Wassertorplatz: orange blokken */
+    .fc-event.busy.frauenprojekt {
+      background:#f97316 !important;   /* oranje */
+      border:1px solid #ea580c !important;
+      color:#fff !important;
+    }
 
     /* Tentative holds: duidelijke arcering + dashed rand */
     .fc-event.tentative {
@@ -1136,12 +1143,12 @@
 
     /* ===== Events normalize ===== */
     function normalizeEvents(raw){
-      if(!Array.isArray(raw)) return [];
+     if(!Array.isArray(raw)) return [];
       const MS_PER_MIN = 60000, MS_PER_HOUR = 3600000, MS_24H = 24*MS_PER_HOUR;
       const isValidDate = (d)=> d instanceof Date && !isNaN(d.getTime());
 
-      return raw.map(ev=>{
-        const s = new Date(ev.start);
+     return raw.map(ev=>{
+       const s = new Date(ev.start);
         let e = ev.end ? new Date(ev.end) : null;
 
         if(!isValidDate(s)) return { __drop:true };
@@ -1152,12 +1159,31 @@
         }
         if((e - s) > MS_24H) e = new Date(s.getTime() + MS_24H);
 
+        // <<< NIEUW: frauenprojekt herkennen >>>
+        const isFrauen = String(ev.frauenprojekt || '').toLowerCase() === 'true';
+
+        const classNames = Array.isArray(ev.classNames) ? [...ev.classNames, 'busy'] : ['busy'];
+        if (isFrauen) classNames.push('frauenprojekt');
+
+        const title = isFrauen
+          ? "Fahrradfahren lernen/üben für Frauen* und Kinder. Klicke für mehr informationen"
+          : (ev.title || 'Belegt');
+
+        const url = isFrauen
+          ? "https://www.kidbike.de/Frauen"
+          : ev.url;
+
         return {
-          ...ev, start: s, end: e, title: ev.title || 'Belegt',
-          classNames: Array.isArray(ev.classNames) ? [...ev.classNames, 'busy'] : ['busy']
-        };
+         ...ev,
+         start: s,
+          end: e,
+         title,
+          classNames,
+         url
+       };
       }).filter(ev => !ev.__drop && ev.start instanceof Date && !isNaN(ev.start) && ev.end instanceof Date && !isNaN(ev.end));
     }
+
 
     /* ===== Discover schools (online/offline) ===== */
     async function discoverSchools(){
@@ -1565,30 +1591,41 @@ stickyPrice.textContent = stickyText;
         expandRows: true,
         allDaySlot: false,
         nowIndicator: false,
-        selectMirror: true,
-        longPressDelay: 120,
-        unselectAuto: true,
-        selectOverlap: true,
-        
+       selectMirror: true,
+       longPressDelay: 120,
+       unselectAuto: true,
+       selectOverlap: true,
+  
         selectable: !isTouchDevice(),
-        selectMinDistance: 8,
-        longPressDelay: 300,
+       selectMinDistance: 8,
+       longPressDelay: 300,
         selectLongPressDelay: 300,
 
         selectAllow: selectAllowFn,
-        events: busyEvents,
-        windowResize: () => applyResponsiveView(),
-        select: (info)=>{
-          openModal({ school: SCHOOLS[currentKey].name, start: info.start, end: info.end });
-          calendar.unselect();
-        },
-        dateClick: (arg)=>{
-          if(arg.allDay) return;
-          const start = arg.date;
-          const end = new Date(start.getTime() + DEFAULT_TAP_MINUTES*60000);
-          openModal({ school: SCHOOLS[currentKey].name, start, end });
-        }
-      });
+       events: busyEvents,
+       windowResize: () => applyResponsiveView(),
+
+      // <<< NIEUW: klik op frauenprojekt-blok opent Frauen-website in nieuwe tab >>>
+      eventClick: (info) => {
+        const ev = info.event;
+        if ((ev.classNames || []).includes('frauenprojekt') && ev.url) {
+          info.jsEvent.preventDefault();           // voorkom standaardgedrag
+         window.open(ev.url, '_blank', 'noopener');
+       }
+     },
+
+     select: (info)=>{
+        openModal({ school: SCHOOLS[currentKey].name, start: info.start, end: info.end });
+        calendar.unselect();
+     },
+     dateClick: (arg)=>{
+       if(arg.allDay) return;
+       const start = arg.date;
+       const end = new Date(start.getTime() + DEFAULT_TAP_MINUTES*60000);
+       openModal({ school: SCHOOLS[currentKey].name, start, end });
+      }
+    });
+
 
       calendar.render();
 
