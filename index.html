@@ -174,12 +174,10 @@
     }
 
     /* ==== WI-mode Specifieke Styling ==== */
-    /* De achtergrond standaard 'bezet' maken (gearceerd) voor WI */
     .fc.is-wi-mode .fc-timegrid-col, 
     .fc.is-wi-mode .fc-daygrid-day-frame {
       background: repeating-linear-gradient(45deg, #f1f5f9, #f1f5f9 10px, #e2e8f0 10px, #e2e8f0 20px) !important;
     }
-    /* De FREI-blokken groen maken */
     .fc-event.frei {
       background: #16a34a !important;
       border: 1px solid #14532d !important;
@@ -192,7 +190,6 @@
       font-size: 13px;
       padding: 4px;
     }
-    /* =========================================== */
 
     .loading{display:flex;align-items:center;justify-content:center;padding:32px;color:var(--muted);}
     .loading::after{content:'';width:18px;height:18px;margin-left:8px;border:2px solid var(--border);border-top:2px solid var(--brand);
@@ -274,7 +271,12 @@
     .start-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:12px;}
     .school-card{border:1px solid var(--border);border-radius:12px;padding:14px;background:#fff;display:flex;flex-direction:column;gap:8px;transition:transform .12s, box-shadow .12s, border-color .12s;}
     .school-card:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(0,0,0,.06);border-color:#cbd5e1;}
+    
     .school-card .status{font-size:12px;color:#065f46;background:#ecfdf5;border:1px solid #a7f3d0;padding:4px 8px;border-radius:999px;width:max-content;}
+    
+    /* ==== NIEUW: Oranje label voor Telefonisch Buchbar ==== */
+    .school-card .status.phone{color:#c2410c;background:#ffedd5;border-color:#fdba74;}
+    
     .school-card.disabled{opacity:.55;filter:grayscale(0.2);background:var(--disabled-bg);}
     .school-card.disabled .status{color:#92400e;background:#fef3c7;border-color:#fde68a;}
 
@@ -718,6 +720,7 @@
         startLead: "Einige Standorte sind ggf. noch nicht online buchbar.",
         startHint: "Sie können den Standort später oben im Auswahlfeld wechseln.",
         onlineBookable: "Online buchbar",
+        phoneBookable: "Telefonisch buchbar",
         notOnline: "Derzeit nicht online buchbar",
         choose: "Auswählen",
         
@@ -797,6 +800,7 @@
         startLead: "Some locations may not yet be available for online booking.",
         startHint: "You can change the location later from the selector above.",
         onlineBookable: "Bookable online",
+        phoneBookable: "Bookable by phone",
         notOnline: "Currently not online bookable",
         choose: "Choose",
         
@@ -1251,9 +1255,21 @@
         opt.value = key;
         const ok = availability[key]?.ok;
         const name = SCHOOLS[key].name;
-        opt.textContent = ok ? `${name}` : `${name} — ${L.notOnline}`;
-        opt.className = ok ? '' : 'disabled';
-        opt.disabled = !ok;
+        
+        if (!ok) {
+          opt.textContent = `${name} — ${L.notOnline}`;
+          opt.className = 'disabled';
+          opt.disabled = true;
+        } else if (key === 'WI') {
+          opt.textContent = `${name} — ${L.phoneBookable}`;
+          opt.className = '';
+          opt.disabled = false;
+        } else {
+          opt.textContent = `${name}`;
+          opt.className = '';
+          opt.disabled = false;
+        }
+        
         schoolSelect.appendChild(opt);
       }
       if(currentKey) schoolSelect.value = currentKey;
@@ -1265,12 +1281,25 @@
       for(const key of Object.keys(SCHOOLS)){
         const { name, address } = SCHOOLS[key];
         const ok = availability[key]?.ok;
+        
+        let statusText = '';
+        let statusClass = 'status';
+        
+        if (!ok) {
+          statusText = L.notOnline;
+        } else if (key === 'WI') {
+          statusText = L.phoneBookable;
+          statusClass = 'status phone';
+        } else {
+          statusText = L.onlineBookable;
+        }
+
         const card = document.createElement('div');
         card.className = 'school-card' + (ok ? '' : ' disabled');
         card.innerHTML = `
           <h3 style="margin:0;font-size:16px;">${name}</h3>
           <p style="margin:0;color:#374151;font-size:13px;">${address}</p>
-          <span class="status">${ ok ? L.onlineBookable : L.notOnline }</span>
+          <span class="${statusClass}">${statusText}</span>
           <div class="choose" style="margin-top:auto">
             <button class="btn ${ok ? 'primary' : ''}" ${ ok ? '' : 'disabled' }>${L.choose}</button>
           </div>`;
