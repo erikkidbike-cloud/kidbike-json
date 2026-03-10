@@ -80,26 +80,31 @@
     /* 2) Always show price details in Step 1 (no "Details" button) */
     #priceToggle{display:none!important;}
 
-    /* 3) Fix extras "bubbles" layout/size - make them even more compact */
+    /* 3) Fix extras "bubbles" layout/size - make them even more compact AND fix english wrap issues */
     .extras .badge{
       display:inline-flex; align-items:center; gap:6px;
       padding:4px 10px; min-height:32px; border-radius:999px;
-      border:1px solid var(--border); background:#f8fafc; font-size:12px
+      border:1px solid var(--border); background:#f8fafc; font-size:12px;
+      white-space: nowrap; /* Voorkom lelijk teruglopen in Engels */
     }
-    .extras .badge input{margin-right:6px}
+    .extras .badge input[type="checkbox"]{
+      margin-right:6px;
+      flex-shrink: 0; /* Zorg dat checkbox niet kleiner/groter wordt */
+      width: 14px; height: 14px;
+    }
     .extras .badge .price{font-weight:600;opacity:.7;font-size:11px}
 
-    /* 4) Make Step 2 more compact + put "Art der Feier" and "Nutzung Fahrräder" side-by-side */
+    /* 4) Make Step 2 more compact + put "Art der Feier" side-by-side */
     .row.cols-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
     @media (max-width:720px){ .row.cols-2{grid-template-columns:1fr} }
 
     /* 5) Reduce vertical spacing a bit (both steps) */
-    .grid{gap:10px}                 /* was 12px */
-    .row{gap:6px}                   /* was 8px */
-    .field{margin-bottom:8px}       /* was 10px */
-    .field label{margin-bottom:3px} /* was 4px */
+    .grid{gap:10px}                 
+    .row{gap:6px}                   
+    .field{margin-bottom:8px}       
+    .field label{margin-bottom:3px} 
 
-    /* 7) Hide sticky controls initially */
+    /* Hide sticky controls initially */
     #stickyBar .checkline, #btnSubmit { display:none; }
 
     /* Name row sizing: short select + two flexible inputs */
@@ -452,8 +457,8 @@
 
             <div class="field field--persons">
               <label id="labelPersons">Anzahl Personen *</label>
-              <input id="fPersons" name="persons" type="number" min="1" step="1" placeholder="z. B. 30" required>
-              <div class="error-msg">Bitte Anzahl eingeben</div>
+              <input id="fPersons" name="persons" type="number" min="1" step="1" placeholder="z. B. 30" required aria-describedby="err-persons">
+              <div class="error-msg" id="err-persons">Bitte Anzahl eingeben</div>
             </div>
 
             <div class="field field--from">
@@ -539,8 +544,8 @@
             <div class="row cols-contact" style="grid-column:1/-1">
               <div class="field">
                 <label id="labelEmail">E-Mail *</label>
-                <input id="fEmail" name="email" type="email" required placeholder="name@example.org" autocomplete="email">
-                <div class="error-msg">Gültige E-Mail-Adresse erforderlich</div>
+                <input id="fEmail" name="email" type="email" required placeholder="name@example.org" autocomplete="email" aria-describedby="err-email">
+                <div class="error-msg" id="err-email">Gültige E-Mail-Adresse erforderlich</div>
               </div>
               <div class="field sm">
                 <label id="labelPhoneCountry">Vorwahl</label>
@@ -553,8 +558,8 @@
               </div>
               <div class="field">
                 <label id="labelPhone">Telefon *</label>
-                <input id="fPhoneNat" name="phone_national" type="tel" inputmode="tel" placeholder="z. B. 1512345678" required autocomplete="tel-national">
-                <div class="error-msg">Bitte eine gültige Nummer angeben</div>
+                <input id="fPhoneNat" name="phone_national" type="tel" inputmode="tel" placeholder="z. B. 1512345678" required autocomplete="tel-national" aria-describedby="err-phone">
+                <div class="error-msg" id="err-phone">Bitte eine gültige Nummer angeben</div>
               </div>
             </div>
 
@@ -574,8 +579,24 @@
             </div>
 
             <div class="field" id="bikesWrapper" style="grid-column:1/-1; display:none;">
-              <label id="labelBikes">Nutzung Fahrräder (kostenlos): Anzahl & Größen/Alter</label>
-              <input id="fBikes" name="bikes" type="text" placeholder="z. B. 6 Räder: 2×14'', 2×16'', 2×20'' / Alter 5–9">
+              <fieldset style="border:none; padding:0; margin:0;">
+                <legend id="labelBikesQuestion" style="font-size:13px; font-weight:600; margin-bottom:6px;">Möchten Sie die Kinderfahrräder der Verkehrsschule nutzen? *</legend>
+                <div style="display:flex; flex-wrap:wrap; gap:16px; margin-bottom: 8px;">
+                  <label style="display:flex; align-items:center; gap:6px; font-weight:normal; cursor:pointer;">
+                    <input type="radio" name="bikes_choice" value="yes" id="fBikesYes"> <span id="labelBikesYes">Ja, ich möchte Fahrräder nutzen</span>
+                  </label>
+                  <label style="display:flex; align-items:center; gap:6px; font-weight:normal; cursor:pointer;">
+                    <input type="radio" name="bikes_choice" value="no" id="fBikesNo"> <span id="labelBikesNo">Nein, brauche keine / bringe eigene mit</span>
+                  </label>
+                </div>
+                <div class="error-msg" id="err-bikeschoice" style="margin-top:-4px; margin-bottom:8px;">Bitte auswählen</div>
+              </fieldset>
+
+              <div id="bikesDetailsWrapper" style="display:none; margin-top:4px;">
+                <label id="labelBikesDetails" for="fBikesDetails">Anzahl Fahrräder & Alter der Kinder *</label>
+                <input id="fBikesDetails" name="bikes_details" type="text" placeholder="z. B. 6 Räder, Alter 5–9" aria-describedby="err-bikesdetails">
+                <div class="error-msg" id="err-bikesdetails">Bitte Details angeben</div>
+              </div>
             </div>
 
             <div class="field" style="grid-column:1/-1">
@@ -639,7 +660,13 @@
         phone: "Telefon",
         address: "Anschrift",
         type: "Art der Feier",
-        bikes: "Nutzung Fahrräder (kostenlos): Anzahl & Größen/Alter",
+        bikesQuestion: "Möchten Sie die Kinderfahrräder der Verkehrsschule nutzen? *",
+        bikesYes: "Ja, ich möchte Fahrräder nutzen",
+        bikesNo: "Nein, brauche keine / bringe eigene mit",
+        bikesDetails: "Anzahl Fahrräder & Alter der Kinder *",
+        errBikesChoice: "Bitte eine Option auswählen",
+        errBikesDetails: "Bitte geben Sie die Details an",
+        phBikes: "z. B. 6 Räder, Alter 5–9",
         extras: "Extras",
         extraParcours: "Fahrradparcours",
         extraGrill: "Grill",
@@ -667,7 +694,6 @@
         btnSend: "Anfrage senden",
         phPersons: "z. B. 30",
         phType: "z. B. Kindergeburtstag, Jubiläum, …",
-        phBikes: "z. B. 6 Räder: 2×14'', 2×16'', 2×20'' / Alter 5–9",
         bdBase: (tier)=>`Basis (bis ${tier} Std.)`,
         bdPersons: (label)=>`Personen-Staffel (${label})`,
         bdTime: "Zeit-Zuschlag",
@@ -709,7 +735,13 @@
         phone: "Phone number",
         address: "Address",
         type: "Type of event",
-        bikes: "Use of bikes (free): quantity & sizes/ages",
+        bikesQuestion: "Would you like to use the traffic school's kids' bikes? *",
+        bikesYes: "Yes, I want to use the bikes",
+        bikesNo: "No, I don't need bikes / will bring my own",
+        bikesDetails: "Number of bikes & ages of children *",
+        errBikesChoice: "Please select an option",
+        errBikesDetails: "Please provide details",
+        phBikes: "e.g. 6 bikes, ages 5–9",
         extras: "Extras",
         extraParcours: "Bike course",
         extraGrill: "Grill",
@@ -737,7 +769,6 @@
         btnSend: "Send request",
         phPersons: "e.g. 30",
         phType: "e.g. kids' birthday, anniversary …",
-        phBikes: "e.g. 6 bikes: 2×14'', 2×16'', 2×20'' / ages 5–9",
         bdBase: (tier)=>`Base (up to ${tier} h)`,
         bdPersons: (label)=>`People tier (${label})`,
         bdTime: "Time surcharge",
@@ -950,8 +981,20 @@
     const fAddressFull = document.getElementById('fAddressFull');
 
     const fTypeFree = document.getElementById('fTypeFree');
-    const fBikes    = document.getElementById('fBikes');
-    const bikesWrapper = document.getElementById('bikesWrapper'); // Nieuwe ref
+    
+    // Nieuwe Bikes UI Elementen
+    const bikesWrapper = document.getElementById('bikesWrapper');
+    const labelBikesQuestion = document.getElementById('labelBikesQuestion');
+    const labelBikesYes = document.getElementById('labelBikesYes');
+    const labelBikesNo = document.getElementById('labelBikesNo');
+    const fBikesYes = document.getElementById('fBikesYes');
+    const fBikesNo = document.getElementById('fBikesNo');
+    const errBikesChoice = document.getElementById('err-bikeschoice');
+    const bikesDetailsWrapper = document.getElementById('bikesDetailsWrapper');
+    const labelBikesDetails = document.getElementById('labelBikesDetails');
+    const fBikesDetails = document.getElementById('fBikesDetails');
+    const errBikesDetails = document.getElementById('err-bikesdetails');
+
     const fMsg      = document.getElementById('fMsg');
 
     const labelFormSchool = document.getElementById('labelFormSchool');
@@ -959,7 +1002,6 @@
     const labelFrom = document.getElementById('labelFrom');
     const labelTo = document.getElementById('labelTo');
     const labelType = document.getElementById('labelType');
-    const labelBikes = document.getElementById('labelBikes');
     const labelEmail = document.getElementById('labelEmail');
     const labelPhone = document.getElementById('labelPhone');
     const labelPhoneCountry = document.getElementById('labelPhoneCountry');
@@ -1043,7 +1085,16 @@
       labelFrom.textContent = L.from;
       labelTo.textContent = L.to;
       labelType.textContent = L.type;
-      if (labelBikes) labelBikes.textContent = L.bikes;
+      
+      // Bikes I18N
+      if(labelBikesQuestion) labelBikesQuestion.textContent = L.bikesQuestion;
+      if(labelBikesYes) labelBikesYes.textContent = L.bikesYes;
+      if(labelBikesNo) labelBikesNo.textContent = L.bikesNo;
+      if(labelBikesDetails) labelBikesDetails.textContent = L.bikesDetails;
+      if(errBikesChoice) errBikesChoice.textContent = L.errBikesChoice;
+      if(errBikesDetails) errBikesDetails.textContent = L.errBikesDetails;
+      if(fBikesDetails) fBikesDetails.placeholder = L.phBikes || '';
+
       labelEmail.textContent = L.email;
       labelPhone.textContent = (langSelect.value==='en'?'Phone number *':'Telefon *');
       labelPhoneCountry.textContent = L.phoneCountry;
@@ -1075,7 +1126,6 @@
 
       fPersons.placeholder = L.phPersons;
       fTypeFree.placeholder = L.phType;
-      if (fBikes) fBikes.placeholder = L.phBikes || ''; // Update placeholder
 
       successTitle.textContent = L.successTitle;
       successLead.textContent  = L.successLead;
@@ -1230,6 +1280,13 @@
     function highlight(el, on){
       const shouldShow = on && (wasSubmitted || el.dataset.touched === '1');
       el.classList.toggle('error', !!shouldShow);
+      
+      if(shouldShow) {
+        el.setAttribute('aria-invalid', 'true');
+      } else {
+        el.removeAttribute('aria-invalid');
+      }
+      
       const msg = el.parentElement.querySelector('.error-msg');
       if (msg) msg.style.display = shouldShow ? 'block' : 'none';
     }
@@ -1268,8 +1325,26 @@
       highlight(fZip,    !(fZip.value||'').trim());
       highlight(fCity,   !(fCity.value||'').trim());
 
+      let bikesOk = true;
+      if (currentKey === 'WE') {
+        const isBikesTouched = fBikesYes.dataset.touched === '1' || fBikesNo.dataset.touched === '1';
+        if (!fBikesYes.checked && !fBikesNo.checked) {
+          bikesOk = false;
+          errBikesChoice.style.display = (wasSubmitted || isBikesTouched) ? 'block' : 'none';
+        } else {
+          errBikesChoice.style.display = 'none';
+          if (fBikesYes.checked) {
+            const detailsOk = !!(fBikesDetails.value || '').trim();
+            if (!detailsOk) bikesOk = false;
+            highlight(fBikesDetails, !detailsOk);
+          } else {
+            highlight(fBikesDetails, false);
+          }
+        }
+      }
+
       const requireAccept = (step2.style.display !== 'none');
-      const requiredOk = fSchool.value && fPersons.value && start && end && phoneOk && addrOk && fEmail.validity.valid && (!requireAccept || fAccept.checked);
+      const requiredOk = fSchool.value && fPersons.value && start && end && phoneOk && addrOk && bikesOk && fEmail.validity.valid && (!requireAccept || fAccept.checked);
       btnSubmit.disabled = !(ok && requiredOk);
       updatePricePreview(); 
       updateSticky();
@@ -1391,11 +1466,18 @@
       fAccept.checked = false;
       btnSubmit.disabled = true;
 
-      // Fietsenveld alleen tonen bij 'WE' en leegmaken
       if (bikesWrapper) {
-        bikesWrapper.style.display = (currentKey === 'WE') ? 'flex' : 'none';
+        bikesWrapper.style.display = (currentKey === 'WE') ? 'block' : 'none';
       }
-      if (fBikes) fBikes.value = '';
+      fBikesYes.checked = false;
+      fBikesNo.checked = false;
+      fBikesYes.dataset.touched = '0';
+      fBikesNo.dataset.touched = '0';
+      fBikesDetails.value = '';
+      fBikesDetails.dataset.touched = '0';
+      bikesDetailsWrapper.style.display = 'none';
+      errBikesChoice.style.display = 'none';
+      highlight(fBikesDetails, false);
 
       formatAddress();
       renderExtrasForSchool(currentKey || 'WE');
@@ -1466,6 +1548,17 @@
       el.addEventListener('change', validateTimes);
       el.addEventListener('input', validateTimes);
     });
+
+    // Bikes Event Listeners
+    [fBikesYes, fBikesNo].forEach(el => {
+      el.addEventListener('change', () => {
+        el.dataset.touched = '1';
+        bikesDetailsWrapper.style.display = fBikesYes.checked ? 'block' : 'none';
+        validateTimes();
+      });
+    });
+    fBikesDetails.addEventListener('input', validateTimes);
+    fBikesDetails.addEventListener('blur', () => { fBikesDetails.dataset.touched = '1'; validateTimes(); });
 
     [fFrom,fTo,fPersons,fEmail,fPhoneNat,fStreet,fHouse,fZip,fCity].forEach(el=>{
       el.addEventListener('blur', ()=>{ el.dataset.touched = '1'; validateTimes(); });
@@ -1894,8 +1987,8 @@
       errBox.textContent = '';
 
       if(!validateTimes()) {
-        const firstErr = [fPersons,fFrom,fTo,fEmail,fPhoneNat,fStreet,fHouse,fZip,fCity]
-          .find(el=>el.classList.contains('error'));
+        const firstErr = [fPersons,fFrom,fTo,fEmail,fPhoneNat,fStreet,fHouse,fZip,fCity,fBikesDetails]
+          .find(el=>el && el.classList && el.classList.contains('error'));
         if(firstErr) firstErr.focus();
         return;
       }
@@ -1916,13 +2009,19 @@
           (langSelect.value === 'en' ? el.dataset.labelEn : el.dataset.labelDe) || el.id.replace(/^x_/, '')
         );
 
+        let bikesValue = '';
+        if (currentKey === 'WE') {
+          if (fBikesYes.checked) bikesValue = 'Ja: ' + fBikesDetails.value.trim();
+          else if (fBikesNo.checked) bikesValue = 'Nein';
+        }
+
         const payload = {
           school:  fSchool.value,             
           from:    fFrom.value,
           to:      fTo.value,
           persons: fPersons.value,
           type_free: fTypeFree.value,
-          bikes:   fBikes.value,
+          bikes:   bikesValue,
           salutation: fSalutation.value,
           first_name: fFirstName.value,
           last_name:  fLastName.value,
