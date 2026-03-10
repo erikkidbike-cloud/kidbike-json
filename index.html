@@ -74,43 +74,35 @@
     /* focus trap hint (niet zichtbaar) */
     .visually-hidden{position:absolute!important;height:1px;width:1px;overflow:hidden;clip:rect(1px,1px,1px,1px)}
 
-    /* 1) Remove "Extras: 0 €" */
     #extrasRunning{display:none!important;}
-
-    /* 2) Always show price details in Step 1 (no "Details" button) */
     #priceToggle{display:none!important;}
 
-    /* 3) Fix extras "bubbles" layout/size - make them even more compact AND fix english wrap issues */
+    /* Extras layout */
     .extras .badge{
       display:inline-flex; align-items:center; gap:6px;
       padding:4px 10px; min-height:32px; border-radius:999px;
       border:1px solid var(--border); background:#f8fafc; font-size:12px;
-      white-space: nowrap; /* Voorkom lelijk teruglopen in Engels */
+      white-space: nowrap;
     }
     .extras .badge input[type="checkbox"]{
       margin-right:6px;
-      flex-shrink: 0; /* Zorg dat checkbox niet kleiner/groter wordt */
+      flex-shrink: 0; 
       width: 14px; height: 14px;
     }
     .extras .badge .price{font-weight:600;opacity:.7;font-size:11px}
 
-    /* 4) Make Step 2 more compact + put "Art der Feier" side-by-side */
     .row.cols-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
     @media (max-width:720px){ .row.cols-2{grid-template-columns:1fr} }
 
-    /* 5) Reduce vertical spacing a bit (both steps) */
     .grid{gap:10px}                 
     .row{gap:6px}                   
     .field{margin-bottom:8px}       
     .field label{margin-bottom:3px} 
 
-    /* Hide sticky controls initially */
     #stickyBar .checkline, #btnSubmit { display:none; }
+    #labelBikes,[for="fBikes"]{display:none!important;}
 
-    /* Name row sizing: short select + two flexible inputs */
     .row.cols-3{display:grid;grid-template-columns:120px 1fr 1fr;gap:10px}
-
-    /* Contact row: email gets more space, dial code is narrow, phone flexes */
     .row.cols-contact{
       display:grid;
       grid-template-columns: 2fr 120px 1.4fr;
@@ -158,14 +150,14 @@
     .fc-timegrid-slot{min-height:20px;}
     .fc-event.busy{background:var(--busy)!important;border:1px solid #045983!important;color:#fff;}
     
-    /* Frauenprojekt-Slots Wassertorplatz: orange blokken */
+    /* Frauenprojekt-Slots */
     .fc-event.busy.frauenprojekt {
-      background:#f97316 !important;   /* oranje */
+      background:#f97316 !important;
       border:1px solid #ea580c !important;
       color:#fff !important;
     }
 
-    /* Tentative holds: duidelijke arcering + dashed rand */
+    /* Tentative holds */
     .fc-event.tentative {
       background: repeating-linear-gradient(
         45deg,
@@ -180,6 +172,27 @@
       font-weight: 800;
       letter-spacing: .2px;
     }
+
+    /* ==== WI-mode Specifieke Styling ==== */
+    /* De achtergrond standaard 'bezet' maken (gearceerd) voor WI */
+    .fc.is-wi-mode .fc-timegrid-col, 
+    .fc.is-wi-mode .fc-daygrid-day-frame {
+      background: repeating-linear-gradient(45deg, #f1f5f9, #f1f5f9 10px, #e2e8f0 10px, #e2e8f0 20px) !important;
+    }
+    /* De FREI-blokken groen maken */
+    .fc-event.frei {
+      background: #16a34a !important;
+      border: 1px solid #14532d !important;
+      color: #fff !important;
+      cursor: pointer;
+    }
+    .fc-event.frei .fc-event-title {
+      font-weight: bold;
+      white-space: normal;
+      font-size: 13px;
+      padding: 4px;
+    }
+    /* =========================================== */
 
     .loading{display:flex;align-items:center;justify-content:center;padding:32px;color:var(--muted);}
     .loading::after{content:'';width:18px;height:18px;margin-left:8px;border:2px solid var(--border);border-top:2px solid var(--brand);
@@ -265,17 +278,18 @@
     .school-card.disabled{opacity:.55;filter:grayscale(0.2);background:var(--disabled-bg);}
     .school-card.disabled .status{color:#92400e;background:#fef3c7;border-color:#fde68a;}
 
-    /* --- compactere rijen --- */
+    /* Fix voor radiobuttons */
+    .field input[type="radio"] {
+      width: 16px;
+      min-height: 16px;
+      margin: 0;
+      box-shadow: none;
+    }
+
     .row.cols-3b{grid-template-columns: 1fr 120px 1fr;} 
-
-    /* small form controls */
     .field.sm select,.field.sm input{padding:8px 10px}
-
-    /* checkbox-rij compacter en duidelijk */
     .checkline{display:inline-flex;align-items:center;gap:8px;font-weight:600}
     .checkline input[type="checkbox"]{margin:0}
-
-    /* foutmelding alleen tonen als .error gezet is (zie JS) */
     .field .error-msg{display:none}
     .field input.error + .error-msg,
     .field select.error + .error-msg{display:block}
@@ -294,10 +308,9 @@
       .fc .fc-button{ min-height:40px; }
     }
 
-    /* === Always place labels above inputs === */
     .field{
       display:flex;
-      flex-direction:column;      /* label on top */
+      flex-direction:column;      
       align-items:stretch;
     }
     .field label{
@@ -307,8 +320,6 @@
       line-height:1.2;
       margin:0 0 6px 0;
     }
-
-    /* Consistent control sizing */
     .field input,
     .field select,
     .field textarea{
@@ -320,7 +331,6 @@
     }
     input[type="datetime-local"]{ line-height:normal; }
 
-    /* === Step 1 grid with clear areas === */
     .form-grid{
       display:grid;
       grid-template-columns: 1fr 1fr;
@@ -351,25 +361,6 @@
       }
     }
 
-    /* === Step 2 column logic === */
-    .row.cols-3{
-      display:grid;
-      grid-template-columns: 140px 1fr 1fr;  /* Anrede fixed, names flexible */
-      gap:12px;
-    }
-    .row.cols-contact{
-      display:grid;
-      grid-template-columns: 2fr 120px 1.4fr; /* email wide, dial code narrow, phone flexible */
-      gap:12px;
-    }
-    @media (max-width:720px){
-      .row.cols-3,
-      .row.cols-contact{ grid-template-columns:1fr; }
-    }
-
-    /* Extras chips layout */
-    .extras{ display:flex; flex-wrap:wrap; gap:8px; }
-
     /* Error box styling */
     #submitError{
       display:none;
@@ -381,13 +372,6 @@
       border-radius:8px;
       font-size:13px;
       white-space:pre-wrap;
-    }
-     /* Fix voor gigantische radiobuttons bij de fietsen-optie */
-    .field input[type="radio"] {
-      width: 16px;
-      min-height: 16px;
-      margin: 0;
-      box-shadow: none;
     }
   </style>
 </head>
@@ -446,7 +430,8 @@
   <button id="mobileAdd" class="mobile-add" title="Zeitslot hinzufügen" aria-label="Zeitslot hinzufügen">+</button>
 
   <div id="modalBackdrop" class="modal-backdrop">
-    <div class="modal" role="dialog" aria-modal="true">
+    
+    <div class="modal" id="bookingModal" role="dialog" aria-modal="true">
       <h3 id="modalTitle">Anfrage Nutzung Verkehrsschule</h3>
       <button type="button" class="close-x" id="btnCloseX" aria-label="Schließen">×</button>
 
@@ -601,7 +586,7 @@
 
               <div id="bikesDetailsWrapper" style="display:none; margin-top:4px;">
                 <label id="labelBikesDetails" for="fBikesDetails">Anzahl Fahrräder & Alter der Kinder *</label>
-                <input id="fBikesDetails" name="bikes_details" type="text" placeholder="z. B. 6 Räder, Alter 5–9; 3 Räder, Alter 10-12" aria-describedby="err-bikesdetails">
+                <input id="fBikesDetails" name="bikes_details" type="text" placeholder="z. B. 6 Räder, Alter 5–9" aria-describedby="err-bikesdetails">
                 <div class="error-msg" id="err-bikesdetails">Bitte Details angeben</div>
               </div>
             </div>
@@ -639,7 +624,22 @@
         </noscript>
       </form>
     </div>
-  </div>
+
+    <div class="modal" id="wiInfoModal" role="dialog" aria-modal="true" style="display:none; max-width: 480px; text-align: center;">
+      <h3 id="wiInfoTitle">Buchung Verkehrsschule Wiener Straße</h3>
+      <button type="button" class="close-x" id="btnWiCloseX" aria-label="Schließen">×</button>
+      
+      <p style="margin: 18px 0; line-height: 1.6;" id="wiInfoText">
+        Die Verkehrsschule Wiener Straße kann <strong>nicht online</strong> gebucht werden.<br><br>
+        Grüne Blöcke im Kalender sind voraussichtlich frei. Bitte rufen Sie uns an, um Details zu besprechen und Ihre Buchung vorzunehmen: <br><br>
+        <strong style="font-size: 18px; color: var(--brand);"><a href="tel:+493022502486" style="color: inherit; text-decoration: none;">030 22502486</a></strong>
+      </p>
+      
+      <div class="modal-actions" style="justify-content: center;">
+        <button type="button" class="btn primary" id="btnWiOk">Verstanden</button>
+      </div>
+    </div>
+    </div>
 
   <script>
     /* ================================
@@ -719,7 +719,11 @@
         startHint: "Sie können den Standort später oben im Auswahlfeld wechseln.",
         onlineBookable: "Online buchbar",
         notOnline: "Derzeit nicht online buchbar",
-        choose: "Auswählen"
+        choose: "Auswählen",
+        
+        wiInfoTitle: "Buchung Verkehrsschule Wiener Straße",
+        wiInfoText: `Die Verkehrsschule Wiener Straße kann <strong>nicht online</strong> gebucht werden.<br><br>Grüne Blöcke im Kalender sind voraussichtlich frei. Bitte rufen Sie uns an, um Details zu besprechen und Ihre Buchung vorzunehmen: <br><br><strong style="font-size: 18px; color: var(--brand);"><a href="tel:+493022502486" style="color: inherit; text-decoration: none;">030 22502486</a></strong>`,
+        wiInfoOk: "Verstanden"
       },
       en: {
         appTitle: "Traffic School Availability",
@@ -794,14 +798,16 @@
         startHint: "You can change the location later from the selector above.",
         onlineBookable: "Bookable online",
         notOnline: "Currently not online bookable",
-        choose: "Choose"
+        choose: "Choose",
+        
+        wiInfoTitle: "Booking Traffic School Wiener Straße",
+        wiInfoText: `The Wiener Straße traffic school <strong>cannot be booked online</strong>.<br><br>Green blocks in the calendar are likely available. Please call us to discuss the details and to make a booking: <br><br><strong style="font-size: 18px; color: var(--brand);"><a href="tel:+493022502486" style="color: inherit; text-decoration: none;">030 22502486</a></strong>`,
+        wiInfoOk: "Got it"
       }
     };
 
-    /* ===== Per-school Terms ===== */
     function getTermsForSchool(lang, key){
       const base = (I18N[lang] || I18N.de).terms.slice();
-
       if (key === 'WA') {
         const filtered = base.filter(t => !/Parallel/i.test(t));
         const extraDe = "Schlüssel-Übergabe und -Rückgabe sind vorab mit der Mitarbeiter*in vor Ort abzustimmen.";
@@ -812,7 +818,6 @@
       return base;
     }
 
-    /* ===== Locations ===== */
     const SCHOOLS = {
       WA: { name: "Verkehrsschule am Wassertorplatz", short:"Wassertorplatz", file: "events-wa.json", address: "Wassertorplatz 1, 10999 Berlin" },
       WI: { name: "Verkehrsschule Wiener Straße",     short:"Wiener Straße",  file: "events-wi.json", address: "Wiener Str. 59c, 10999 Berlin" },
@@ -820,7 +825,6 @@
     };
     const FORCE_OFFLINE = {};
 
-    /* ===== Surcharge helper (WE/WI) ===== */
     function defaultSurcharge30(start, end){
       const between9_18 = (dt)=> {
         const m = dt.getHours()*60 + dt.getMinutes();
@@ -837,7 +841,6 @@
       return (bothOutside || touchesWeekend(start,end)) ? 30 : 0;
     }
 
-    /* === Per-school pricing & extras config === */
     const PRICING = {
       WE: {
         tiers: [
@@ -903,12 +906,10 @@
       }
     };
 
-    /* Touch detection */
     function isTouchDevice(){
       return window.matchMedia('(pointer: coarse)').matches || navigator.maxTouchPoints > 0;
     }
 
-    /* Render extras per school (veld verbergen als geen extras) */
     function renderExtrasForSchool(key){
       const container = document.getElementById('extrasContainer');
       container.innerHTML = '';
@@ -935,7 +936,6 @@
       }
     }
 
-    /* ===== DOM refs ===== */
     const schoolSelect = document.getElementById('schoolSelect');
     const langSelect   = document.getElementById('langSelect');
     const calendarEl   = document.getElementById('calendar');
@@ -955,6 +955,13 @@
     const startGrid = startOverlay.querySelector('.start-grid');
 
     const modalBack    = document.getElementById('modalBackdrop');
+    const bookingModal = document.getElementById('bookingModal');
+    const wiInfoModal  = document.getElementById('wiInfoModal');
+    const wiInfoTitle  = document.getElementById('wiInfoTitle');
+    const wiInfoText   = document.getElementById('wiInfoText');
+    const btnWiOk      = document.getElementById('btnWiOk');
+    const btnWiCloseX  = document.getElementById('btnWiCloseX');
+
     const modalTitle   = document.getElementById('modalTitle');
     const form         = document.getElementById('requestForm');
 
@@ -989,7 +996,6 @@
 
     const fTypeFree = document.getElementById('fTypeFree');
     
-    // Nieuwe Bikes UI Elementen
     const bikesWrapper = document.getElementById('bikesWrapper');
     const labelBikesQuestion = document.getElementById('labelBikesQuestion');
     const labelBikesYes = document.getElementById('labelBikesYes');
@@ -1040,6 +1046,7 @@
     const bdExtras    = document.getElementById('bdExtras');
     const bdTotalLabel= document.getElementById('bdTotalLabel');
     const bdTotal     = document.getElementById('bdTotal');
+    const extrasRunning = document.getElementById('extrasRunning');
 
     const btnSubmit   = document.getElementById('btnSubmit');
 
@@ -1093,7 +1100,6 @@
       labelTo.textContent = L.to;
       labelType.textContent = L.type;
       
-      // Bikes I18N
       if(labelBikesQuestion) labelBikesQuestion.textContent = L.bikesQuestion;
       if(labelBikesYes) labelBikesYes.textContent = L.bikesYes;
       if(labelBikesNo) labelBikesNo.textContent = L.bikesNo;
@@ -1142,6 +1148,11 @@
       startLead.textContent = L.startLead;
       startHintBelow.textContent = L.startHint;
 
+      // WI-specific texts
+      wiInfoTitle.textContent = L.wiInfoTitle;
+      wiInfoText.innerHTML = L.wiInfoText;
+      btnWiOk.textContent = L.wiInfoOk;
+
       if(calendar) calendar.setOption('locale', langSelect.value === 'en' ? 'en-gb' : 'de');
 
       renderExtrasForSchool(currentKey || 'WE');
@@ -1161,12 +1172,12 @@
 
     /* ===== Events normalize ===== */
     function normalizeEvents(raw){
-     if(!Array.isArray(raw)) return [];
+      if(!Array.isArray(raw)) return [];
       const MS_PER_MIN = 60000, MS_PER_HOUR = 3600000, MS_24H = 24*MS_PER_HOUR;
       const isValidDate = (d)=> d instanceof Date && !isNaN(d.getTime());
 
-     return raw.map(ev=>{
-       const s = new Date(ev.start);
+      return raw.map(ev=>{
+        const s = new Date(ev.start);
         let e = ev.end ? new Date(ev.end) : null;
 
         if(!isValidDate(s)) return { __drop:true };
@@ -1178,26 +1189,33 @@
         if((e - s) > MS_24H) e = new Date(s.getTime() + MS_24H);
 
         const isFrauen = String(ev.frauenprojekt || '').toLowerCase() === 'true';
+        // Check of dit een speciaal 'FREI' blok is voor de Wiener Straße
+        const isFrei = String(ev.isFrei || '').toLowerCase() === 'true';
 
-        const classNames = Array.isArray(ev.classNames) ? [...ev.classNames, 'busy'] : ['busy'];
-        if (isFrauen) classNames.push('frauenprojekt');
+        let classNames = Array.isArray(ev.classNames) ? [...ev.classNames] : [];
+        let title = ev.title || 'Belegt';
+        let url = ev.url;
 
-        const title = isFrauen
-          ? "Fahrradfahren lernen/üben für Frauen* und Kinder. Klicke für mehr informationen."
-          : (ev.title || 'Belegt');
-
-        const url = isFrauen
-          ? "https://www.kidbike.de/Frauen"
-          : ev.url;
+        if (isFrei) {
+          classNames.push('frei');
+          title = (langSelect.value === 'en') ? "Probably free - Tap to call" : "Voraussichtlich frei - Bitte anrufen";
+        } else {
+          classNames.push('busy');
+          if (isFrauen) {
+            classNames.push('frauenprojekt');
+            title = "Fahrradfahren lernen/üben für Frauen* und Kinder. Klicke für mehr informationen.";
+            url = "https://www.kidbike.de/Frauen";
+          }
+        }
 
         return {
-         ...ev,
-         start: s,
+          ...ev,
+          start: s,
           end: e,
-         title,
+          title,
           classNames,
-         url
-       };
+          url
+        };
       }).filter(ev => !ev.__drop && ev.start instanceof Date && !isNaN(ev.start) && ev.end instanceof Date && !isNaN(ev.end));
     }
 
@@ -1309,6 +1327,8 @@
 
       if(ok){
         for(const ev of busyEvents){
+          // We testen alleen overlap met ECHTE busy events, niet met FREI
+          if (ev.isFrei) continue;
           const bS = new Date(ev.start), bE = new Date(ev.end || ev.start);
           if(overlaps(start, end, bS, bE)){ ok = false; break; }
         }
@@ -1361,6 +1381,7 @@
     function selectAllowFn(selectInfo){
       const selStart = selectInfo.start, selEnd = selectInfo.end;
       for(const ev of busyEvents){
+        if (ev.isFrei) continue; // FREI blokkeert de selectie niet
         const bS = new Date(ev.start), bE = new Date(ev.end || ev.start);
         if(overlaps(selStart, selEnd, bS, bE)) return false;
       }
@@ -1414,6 +1435,7 @@
       
       if(ok){
         for(const ev of busyEvents){
+          if (ev.isFrei) continue;
           const bS = new Date(ev.start), bE = new Date(ev.end || ev.start);
           if(overlaps(start, end, bS, bE)){ ok = false; break; }
         }
@@ -1443,6 +1465,8 @@
     });
     btnBackStep1.addEventListener('click', ()=> goStep(1));
     btnCloseX.addEventListener('click', closeModal);
+    btnWiCloseX.addEventListener('click', closeModal);
+    btnWiOk.addEventListener('click', closeModal);
 
     priceToggle.addEventListener('click', ()=>{
       priceBreakdown.style.display = priceBreakdown.style.display==='none' ? 'block':'none';
@@ -1464,7 +1488,25 @@
       return ()=>container.removeEventListener('keydown', onKey);
     }
 
+    // Aparte functie voor WI popup
+    function openWiInfo(){
+      bookingModal.style.display = 'none';
+      wiInfoModal.style.display = 'block';
+      modalBack.style.display = 'flex';
+      if(untrap) untrap(); 
+      untrap = trapFocus(wiInfoModal);
+    }
+
     function openModal(prefill){
+      // Als de Wiener Straße geselecteerd is, gooi een custom popup open
+      if (currentKey === 'WI') {
+        openWiInfo();
+        return;
+      }
+
+      bookingModal.style.display = 'block';
+      wiInfoModal.style.display = 'none';
+
       fSchool.value = prefill.school;
       fFrom.value = toInputLocal(prefill.start);
       fTo.value   = toInputLocal(prefill.end);
@@ -1493,7 +1535,7 @@
       modalBack.style.display = 'flex';
       validateTimes();
       if(untrap) untrap(); 
-      untrap = trapFocus(modalBack);
+      untrap = trapFocus(bookingModal);
     }
 
     function closeModal(){
@@ -1556,7 +1598,6 @@
       el.addEventListener('input', validateTimes);
     });
 
-    // Bikes Event Listeners
     [fBikesYes, fBikesNo].forEach(el => {
       el.addEventListener('change', () => {
         el.dataset.touched = '1';
@@ -1610,6 +1651,10 @@
     langSelect.addEventListener('change', applyI18n);
 
     mobileAdd.addEventListener('click', ()=>{
+      if (currentKey === 'WI') {
+        openWiInfo();
+        return;
+      }
       const start = new Date(); start.setDate(start.getDate()+7); start.setHours(10,0,0,0);
       const end = new Date(start.getTime() + DEFAULT_TAP_MINUTES*60000);
       openModal({ school: SCHOOLS[currentKey]?.name || '', start, end });
@@ -1620,6 +1665,13 @@
       currentKey = key;
       calendarLoading.style.display = 'block';
       if(calendar) calendar.destroy();
+
+      // CSS Klasse toevoegen als het WI is (zodat de kalender gearceerd is)
+      if (currentKey === 'WI') {
+        calendarEl.classList.add('is-wi-mode');
+      } else {
+        calendarEl.classList.remove('is-wi-mode');
+      }
 
       const raw = await fetchJson(SCHOOLS[key].file);
       busyEvents = normalizeEvents(raw);
@@ -1655,39 +1707,55 @@
         expandRows: true,
         allDaySlot: false,
         nowIndicator: false,
-       selectMirror: true,
-       longPressDelay: 120,
-       unselectAuto: true,
-       selectOverlap: true,
+        selectMirror: true,
+        longPressDelay: 120,
+        unselectAuto: true,
+        selectOverlap: true,
   
         selectable: !isTouchDevice(),
-       selectMinDistance: 8,
-       longPressDelay: 300,
+        selectMinDistance: 8,
+        longPressDelay: 300,
         selectLongPressDelay: 300,
 
         selectAllow: selectAllowFn,
-       events: busyEvents,
-       windowResize: () => applyResponsiveView(),
+        events: busyEvents,
+        windowResize: () => applyResponsiveView(),
 
-     eventClick: (info) => {
-        const ev = info.event;
-        if ((ev.classNames || []).includes('frauenprojekt') && ev.url) {
-          info.jsEvent.preventDefault();
-         window.open(ev.url, '_blank', 'noopener');
-       }
-     },
+        eventClick: (info) => {
+           const ev = info.event;
+           
+           if (currentKey === 'WI') {
+             info.jsEvent.preventDefault();
+             openWiInfo();
+             return;
+           }
 
-     select: (info)=>{
-        openModal({ school: SCHOOLS[currentKey].name, start: info.start, end: info.end });
-        calendar.unselect();
-     },
-     dateClick: (arg)=>{
-       if(arg.allDay) return;
-       const start = arg.date;
-       const end = new Date(start.getTime() + DEFAULT_TAP_MINUTES*60000);
-       openModal({ school: SCHOOLS[currentKey].name, start, end });
-      }
-    });
+           if ((ev.classNames || []).includes('frauenprojekt') && ev.url) {
+             info.jsEvent.preventDefault();           
+             window.open(ev.url, '_blank', 'noopener');
+           }
+        },
+
+        select: (info)=>{
+           if (currentKey === 'WI') {
+             calendar.unselect();
+             openWiInfo();
+             return;
+           }
+           openModal({ school: SCHOOLS[currentKey].name, start: info.start, end: info.end });
+           calendar.unselect();
+        },
+        dateClick: (arg)=>{
+           if (currentKey === 'WI') {
+             openWiInfo();
+             return;
+           }
+           if(arg.allDay) return;
+           const start = arg.date;
+           const end = new Date(start.getTime() + DEFAULT_TAP_MINUTES*60000);
+           openModal({ school: SCHOOLS[currentKey].name, start, end });
+        }
+      });
 
       calendar.render();
 
@@ -1752,6 +1820,7 @@
 
         if (!tier) {
           const depo = cfg.cautionFn ? cfg.cautionFn(persons) : null;
+
           priceValue.textContent = depo
             ? `${L.priceOnReq} + ${euro(depo)} Kaution`
             : L.priceOnReq;
@@ -1768,7 +1837,8 @@
             if (depo) { bdDeposit.textContent = euro(depo); bdDepositRow.style.display = ''; }
             else { bdDepositRow.style.display = 'none'; }
           }
-          if (bdGrandTotalRow) bdGrandTotalRow.style.display = 'none'; 
+          
+          if (bdGrandTotalRow) bdGrandTotalRow.style.display = 'none';
 
           CURRENT_PRICE = {
             currency: 'EUR',
@@ -1913,7 +1983,6 @@
       priceBreakdown.style.display = 'block';
       updateSticky();
 
-      const extrasRunning = document.getElementById('extrasRunning');
       if (extrasRunning) extrasRunning.textContent = `Extras: ${euro(extrasCost)}`;
     }
 
@@ -2023,7 +2092,7 @@
         }
 
         const payload = {
-          school:  fSchool.value,             
+          school:  fSchool.value,              
           from:    fFrom.value,
           to:      fTo.value,
           persons: fPersons.value,
@@ -2094,7 +2163,7 @@
           message: payload.message
         });
         closeModal();
-        reloadCalendarAfterSubmission();
+        reloadCalendarAfterSubmission(); 
 
       } catch(err){
         console.error('Submit failed:', err);
@@ -2199,15 +2268,12 @@
 
     /* ===== Keyboard shortcuts ===== */
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && modalBack.style.display === 'flex') {
-        closeModal();
+      if (e.key === 'Escape') {
+         if (modalBack.style.display === 'flex') closeModal();
       }
-      
       if ((e.ctrlKey && e.key === 'r') || e.key === 'F5') {
         e.preventDefault();
-        if (currentKey) {
-          loadCalendar(currentKey);
-        }
+        if (currentKey) loadCalendar(currentKey);
       }
     });
 
@@ -2221,31 +2287,17 @@
           }, 150);
         }
       });
-
       let lastTouchEnd = 0;
       document.addEventListener('touchend', (e) => {
         const now = (new Date()).getTime();
-        if (now - lastTouchEnd <= 300) {
-          e.preventDefault();
-        }
+        if (now - lastTouchEnd <= 300) e.preventDefault();
         lastTouchEnd = now;
       }, false);
     }
 
     /* ===== Error handling and user feedback ===== */
-    window.addEventListener('error', (event) => {
-      console.error('Application error:', event.error);
-    });
-
-    window.addEventListener('unhandledrejection', (event) => {
-      console.error('Unhandled promise rejection:', event.reason);
-      event.preventDefault();
-    });
-
-    /* ===== Performance monitoring ===== */
-    if ('performance' in window && 'mark' in performance) {
-      performance.mark('app-init-complete');
-    }
+    window.addEventListener('error', (event) => { console.error('Application error:', event.error); });
+    window.addEventListener('unhandledrejection', (event) => { console.error('Unhandled promise rejection:', event.reason); event.preventDefault(); });
 
     /* ===== Accessibility enhancements ===== */
     function announceToScreenReader(message) {
@@ -2255,24 +2307,14 @@
       announcement.className = 'visually-hidden';
       announcement.textContent = message;
       document.body.appendChild(announcement);
-      
-      setTimeout(() => {
-        document.body.removeChild(announcement);
-      }, 1000);
+      setTimeout(() => { document.body.removeChild(announcement); }, 1000);
     }
 
     const _origShowSuccessOverlay = showSuccessOverlay;
     showSuccessOverlay = function(payload) {
       _origShowSuccessOverlay(payload);
-      announceToScreenReader(
-        langSelect.value === 'en' 
-          ? 'Request submitted successfully'
-          : 'Anfrage erfolgreich gesendet'
-      );
+      announceToScreenReader( langSelect.value === 'en' ? 'Request submitted successfully' : 'Anfrage erfolgreich gesendet' );
     };
-
   </script>
 </body>
 </html>
-
-
