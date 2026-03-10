@@ -5,7 +5,6 @@
   <title>Belegung Verkehrsschulen</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <!-- FullCalendar -->
   <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
 
@@ -102,9 +101,6 @@
 
     /* 7) Hide sticky controls initially */
     #stickyBar .checkline, #btnSubmit { display:none; }
-
-    /* Hide bikes-related UI completely */
-    #labelBikes,[for="fBikes"]{display:none!important;}
 
     /* Name row sizing: short select + two flexible inputs */
     .row.cols-3{display:grid;grid-template-columns:120px 1fr 1fr;gap:10px}
@@ -384,12 +380,10 @@
   </style>
 </head>
 <body>
-  <!-- Toast -->
   <div id="successMsg" class="success-msg" role="status" aria-live="polite">
     <span id="successText">Anfrage erfolgreich gesendet!</span>
   </div>
 
-  <!-- Success overlay -->
   <div id="successOverlay" class="success-overlay" role="dialog" aria-modal="true" aria-labelledby="successTitle">
     <div class="success-card">
       <h2 id="successTitle">Anfrage gesendet</h2>
@@ -401,7 +395,6 @@
     </div>
   </div>
 
-  <!-- Start overlay -->
   <div id="startOverlay" class="start-overlay" role="dialog" aria-modal="true" aria-labelledby="startTitle">
     <div class="start-card">
       <h2 id="startTitle">Bitte wählen Sie Ihre Verkehrsschule</h2>
@@ -411,7 +404,6 @@
     </div>
   </div>
 
-  <!-- Header -->
   <header>
     <div class="left">
       <img src="logo.webp" alt="Logo" style="display:none;" id="logoImg">
@@ -431,19 +423,16 @@
     </div>
   </header>
 
-  <!-- Intro -->
   <div class="intro">
     <p id="introLine1">Wählen Sie oben Ihre Verkehrsschule. Blaue Blöcke sind bereits belegt. Tippen oder ziehen Sie im Kalender, um einen Zeitraum auszuwählen und eine Anfrage zu senden.</p>
     <p id="introHint" class="hint">Hinweis: Ihre Anfrage ist unverbindlich. Wir melden uns per E-Mail mit einer Bestätigung.</p>
   </div>
 
-  <!-- Calendar -->
   <div id="calendarLoading" class="loading">Lade Kalender...</div>
   <div id="calendar"></div>
 
   <button id="mobileAdd" class="mobile-add" title="Zeitslot hinzufügen" aria-label="Zeitslot hinzufügen">+</button>
 
-  <!-- Modal -->
   <div id="modalBackdrop" class="modal-backdrop">
     <div class="modal" role="dialog" aria-modal="true">
       <h3 id="modalTitle">Anfrage Nutzung Verkehrsschule</h3>
@@ -454,7 +443,6 @@
 
       <form id="requestForm" name="requestForm" novalidate>
         
-        <!-- STEP 1 -->
         <div id="step1">
           <div class="form-grid">
             <div class="field field--school">
@@ -490,14 +478,12 @@
             </div>
           </div>
 
-          <!-- Prijs: compact, met toggle -->
           <div id="priceBox" class="price" aria-live="polite">
             <span class="pill"><strong id="priceTitle">Vorläufige Preisindikation:</strong> <span id="priceValue">–</span></span>
             <span id="priceToggle" class="toggle">Details</span>
           </div>
           <div id="priceHint" class="hint">(unverbindlich; endgültige Bestätigung und ggf. Anpassungen vorbehalten)</div>
 
-          <!-- === PRICE BREAKDOWN (met Kaution-rij) === -->
           <div id="priceBreakdown" class="breakdown">
             <div class="row"><span id="bdBaseLabel" class="muted">Basis</span><span id="bdBase">–</span></div>
             <div class="row"><span id="bdPersonsLabel" class="muted">Personen-Staffel</span><span id="bdPersons">–</span></div>
@@ -511,15 +497,12 @@
             </div>
             <div class="row"><span id="bdExtrasLabel" class="muted">Extras</span><span id="bdExtras">–</span></div>
 
-            <!-- Summe (zonder Kaution) -->
             <div class="row total"><span id="bdTotalLabel">Summe</span><span id="bdTotal">–</span></div>
 
-            <!-- Kaution NA de Summe -->
             <div class="row" id="bdDepositRow" style="display:none">
               <span class="muted">Kaution</span><span id="bdDeposit">–</span>
             </div>
 
-            <!-- NIEUW: Summe inkl. Kaution -->
             <div class="row grand" id="bdGrandTotalRow" style="display:none">
               <span id="bdGrandTotalLabel">Summe inkl. Kaution</span><span id="bdGrandTotal">–</span>
             </div>
@@ -530,10 +513,8 @@
           </div>
         </div>
 
-        <!-- STEP 2 -->
         <div id="step2" style="display:none">
           <div class="grid">
-            <!-- Persoonsgegevens: anrede | voornaam | achternaam -->
             <div class="row cols-3" style="grid-column:1/-1">
               <div class="field sm">
                 <label id="labelSalutation">Anrede</label>
@@ -555,7 +536,6 @@
               </div>
             </div>
 
-            <!-- Contact row: email | dial code | phone -->
             <div class="row cols-contact" style="grid-column:1/-1">
               <div class="field">
                 <label id="labelEmail">E-Mail *</label>
@@ -564,7 +544,6 @@
               </div>
               <div class="field sm">
                 <label id="labelPhoneCountry">Vorwahl</label>
-                <!-- free input with suggestions; default +49 -->
                 <input id="fPhoneCountry" name="phone_country" type="text" value="+49" inputmode="tel" pattern="^\+\d{1,4}$" list="dialCodes" placeholder="+49">
                 <datalist id="dialCodes">
                   <option value="+49"><option value="+43"><option value="+41"><option value="+44"><option value="+33">
@@ -579,7 +558,6 @@
               </div>
             </div>
 
-            <!-- Adres (met suggesties) - SPLITS PLZ/Ort -->
             <div class="field" style="grid-column:1/-1">
               <label id="labelAddress">Anschrift *</label>
               <div class="row-compact">
@@ -595,17 +573,17 @@
               <div class="hint" id="addrHintHelp" style="margin-top:6px;display:none"></div>
             </div>
 
-            <!-- Bikes UI verborgen; veld blijft voor compat -->
-            <input id="fBikes" name="bikes" type="hidden" value="">
+            <div class="field" id="bikesWrapper" style="grid-column:1/-1; display:none;">
+              <label id="labelBikes">Nutzung Fahrräder (kostenlos): Anzahl & Größen/Alter</label>
+              <input id="fBikes" name="bikes" type="text" placeholder="z. B. 6 Räder: 2×14'', 2×16'', 2×20'' / Alter 5–9">
+            </div>
 
-            <!-- Bericht -->
             <div class="field" style="grid-column:1/-1">
               <label id="labelMsg">Nachricht (optional)</label>
               <textarea id="fMsg" name="message" rows="3" placeholder="Weitere Hinweise…"></textarea>
             </div>
           </div>
 
-          <!-- Wesentliche Bedingungen -->
           <details class="summarybox">
             <summary id="termsSummary">Wesentliche Bedingungen (Kurzfassung)</summary>
             <ul id="termsList" style="margin:8px 0 0 16px;padding:0"></ul>
@@ -616,7 +594,6 @@
           </div>
         </div>
 
-        <!-- Sticky verzendbalk -->
         <div class="sticky-bar" id="stickyBar">
           <div class="sum" id="stickySum">
             <b id="stickyPrice">–</b> · <span id="stickyWhen">–</span> · <span id="stickyPersons">–</span>
@@ -627,7 +604,6 @@
           <button type="submit" class="btn primary" id="btnSubmit" disabled>Anfrage senden</button>
         </div>
 
-        <!-- Error box for submission errors -->
         <div id="submitError"></div>
 
         <noscript>
@@ -637,7 +613,6 @@
     </div>
   </div>
 
-  <!-- SCRIPT volgt in deel 2 -->
   <script>
     /* ================================
        I18N
@@ -790,7 +765,6 @@
       const base = (I18N[lang] || I18N.de).terms.slice();
 
       if (key === 'WA') {
-        // Wassertorplatz: verwijder parallel-gebruik en voeg sleutel-über-/rückgabe toe
         const filtered = base.filter(t => !/Parallel/i.test(t));
         const extraDe = "Schlüssel-Übergabe und -Rückgabe sind vorab mit der Mitarbeiter*in vor Ort abzustimmen.";
         const extraEn = "Key handover and return must be arranged in advance with the staff on site.";
@@ -806,7 +780,6 @@
       WI: { name: "Verkehrsschule Wiener Straße",     short:"Wiener Straße",  file: "events-wi.json", address: "Wiener Str. 59c, 10999 Berlin" },
       WE: { name: "Verkehrsschule Weinstraße",        short:"Weinstraße",     file: "events-we.json", address: "Weinstraße 2, 10249 Berlin" }
     };
-    // Forceer tijdelijk offline status per locatie (true = offline)
     const FORCE_OFFLINE = {};
 
     /* ===== Surcharge helper (WE/WI) ===== */
@@ -826,7 +799,7 @@
       return (bothOutside || touchesWeekend(start,end)) ? 30 : 0;
     }
 
-    /* === Per-school pricing & extras config (incl. WA customPrice + Kaution) === */
+    /* === Per-school pricing & extras config === */
     const PRICING = {
       WE: {
         tiers: [
@@ -852,7 +825,6 @@
           { id: "tisch",     price: 10, labelDe: "Tischtennisplatte",labelEn: "Table tennis" },
         ]
       },
-
       WI: {
         tiers: [
           { maxMin: 240, hoursLabel: 4,  base: 100 },
@@ -873,31 +845,24 @@
         surcharge: defaultSurcharge30,
         extras: []
       },
-
       WA: {
-  // Duur-gebonden basis (personenonafhankelijk)
-  tiers: [
-    { maxMin: 720, hoursLabel: 12, base: 140 }, // bis 12 Std.
-    { maxMin: 960, hoursLabel: 16, base: 200 }, // 12–16 Std.
-  ],
-  // Personen-banden als vaste opslag bovenop de basis
-  usePersonBands: true,
-  personBands: [
-    { max: 45,   addByTier: { 12: 0,  16: 0   },  label: "≤45" },
-    { max: 9999, addByTier: { 12: 80, 16: 110 },  label: "≥46" }
-  ],
-  // Geen tijdtoeslag bij WA
-  surcharge: () => 0,
-  // Geen extras boekbaar bij WA
-  extras: [],
-  // Kaution: 50 € ≤45 Pers., anders 70 €
-  cautionFn(persons){
-    const p = Number(persons || 0);
-    if (!p) return null;
-    return (p <= 45) ? 50 : 70;
-  }
-}
-
+        tiers: [
+          { maxMin: 720, hoursLabel: 12, base: 140 },
+          { maxMin: 960, hoursLabel: 16, base: 200 },
+        ],
+        usePersonBands: true,
+        personBands: [
+          { max: 45,   addByTier: { 12: 0,  16: 0   },  label: "≤45" },
+          { max: 9999, addByTier: { 12: 80, 16: 110 },  label: "≥46" }
+        ],
+        surcharge: () => 0,
+        extras: [],
+        cautionFn(persons){
+          const p = Number(persons || 0);
+          if (!p) return null;
+          return (p <= 45) ? 50 : 70;
+        }
+      }
     };
 
     /* Touch detection */
@@ -922,12 +887,10 @@
         container.appendChild(wrap);
       });
 
-      // Re-bind change listeners to recalc price
       container.querySelectorAll('input[type="checkbox"]').forEach(el=>{
         el.addEventListener('change', ()=>{ updatePricePreview(); });
       });
 
-      // Hele veld tonen/verbergen op basis van beschikbaarheid extras
       const extrasField = document.querySelector('.field--extras');
       if (extrasField) {
         extrasField.style.display = (cfg.extras && cfg.extras.length) ? '' : 'none';
@@ -988,6 +951,7 @@
 
     const fTypeFree = document.getElementById('fTypeFree');
     const fBikes    = document.getElementById('fBikes');
+    const bikesWrapper = document.getElementById('bikesWrapper'); // Nieuwe ref
     const fMsg      = document.getElementById('fMsg');
 
     const labelFormSchool = document.getElementById('labelFormSchool');
@@ -1027,7 +991,6 @@
     const bdExtras    = document.getElementById('bdExtras');
     const bdTotalLabel= document.getElementById('bdTotalLabel');
     const bdTotal     = document.getElementById('bdTotal');
-    const extrasRunning = document.getElementById('extrasRunning');
 
     const btnSubmit   = document.getElementById('btnSubmit');
 
@@ -1045,11 +1008,9 @@
 
     const addrHintHelp = document.getElementById('addrHintHelp');
 
-    // ➕ NIEUW: Deposit (Kaution) refs
     const bdDepositRow = document.getElementById('bdDepositRow');
     const bdDeposit    = document.getElementById('bdDeposit');
 
-    // ➕ NIEUW: Grand total (Summe inkl. Kaution) refs
     const bdGrandTotalRow = document.getElementById('bdGrandTotalRow');
     const bdGrandTotalLabel = document.getElementById('bdGrandTotalLabel');
     const bdGrandTotal = document.getElementById('bdGrandTotal');
@@ -1066,7 +1027,7 @@
     let CURRENT_PRICE = null;
     let untrap = null;
 
-    /* ===== I18N apply (incl. per-school terms) ===== */
+    /* ===== I18N apply ===== */
     function applyI18n(){
       const L = I18N[langSelect.value] || I18N.de;
       titleApp.textContent = L.appTitle;
@@ -1114,7 +1075,7 @@
 
       fPersons.placeholder = L.phPersons;
       fTypeFree.placeholder = L.phType;
-      // fBikes blijft verborgen; placeholder kan blijven bestaan
+      if (fBikes) fBikes.placeholder = L.phBikes || ''; // Update placeholder
 
       successTitle.textContent = L.successTitle;
       successLead.textContent  = L.successLead;
@@ -1159,7 +1120,6 @@
         }
         if((e - s) > MS_24H) e = new Date(s.getTime() + MS_24H);
 
-        // <<< NIEUW: frauenprojekt herkennen >>>
         const isFrauen = String(ev.frauenprojekt || '').toLowerCase() === 'true';
 
         const classNames = Array.isArray(ev.classNames) ? [...ev.classNames, 'busy'] : ['busy'];
@@ -1195,7 +1155,6 @@
         } catch(_e){
          availability[key] = { ok: false };
         }
-        // >>> toevoeging: forceer offline indien gewenst
        if (FORCE_OFFLINE[key]) availability[key].ok = false;
       }
      renderSchoolSelectOptions();
@@ -1345,7 +1304,6 @@
     function updateSticky(){
       let stickyText = '–';
       if (currentKey === 'WA' && CURRENT_PRICE && CURRENT_PRICE.total != null) {
-        // Bij WA: toon huur + Kaution los
         if (CURRENT_PRICE.caution) {
           stickyText = `${euro(CURRENT_PRICE.total)} + ${euro(CURRENT_PRICE.caution)} Kaution`;
         } else {
@@ -1356,7 +1314,7 @@
       } else if (priceValue.textContent) {
         stickyText = priceValue.textContent;
       }
-stickyPrice.textContent = stickyText;
+      stickyPrice.textContent = stickyText;
 
       const s = parseLocalDT(fFrom.value), e = parseLocalDT(fTo.value);
       stickyWhen.textContent = (s&&e)? `${formatDT(s, langSelect.value)} – ${formatDT(e, langSelect.value)}` : '–';
@@ -1423,6 +1381,7 @@ stickyPrice.textContent = stickyText;
       container.addEventListener('keydown', onKey);
       return ()=>container.removeEventListener('keydown', onKey);
     }
+
     function openModal(prefill){
       fSchool.value = prefill.school;
       fFrom.value = toInputLocal(prefill.start);
@@ -1431,6 +1390,13 @@ stickyPrice.textContent = stickyText;
       alertShort.style.display = 'none';
       fAccept.checked = false;
       btnSubmit.disabled = true;
+
+      // Fietsenveld alleen tonen bij 'WE' en leegmaken
+      if (bikesWrapper) {
+        bikesWrapper.style.display = (currentKey === 'WE') ? 'flex' : 'none';
+      }
+      if (fBikes) fBikes.value = '';
+
       formatAddress();
       renderExtrasForSchool(currentKey || 'WE');
       updatePricePreview();
@@ -1485,7 +1451,7 @@ stickyPrice.textContent = stickyText;
     const updateCityHints = debounce(async ()=>{
       const q=(fCity.value||'').trim();
       if(q.length<3) return;
-      await nominatim(q); // we gebruiken hier alleen rate-limiting/‘warming’
+      await nominatim(q);
     }, 450);
 
     fStreet.addEventListener('input', updateStreetHints);
@@ -1555,11 +1521,9 @@ stickyPrice.textContent = stickyText;
       calendarLoading.style.display = 'block';
       if(calendar) calendar.destroy();
 
-      // geboekte/blokkeerde events uit JSON
       const raw = await fetchJson(SCHOOLS[key].file);
       busyEvents = normalizeEvents(raw);
 
-      // (optioneel) holds ophalen
       let holdEvents = [];
       try {
         const r = await fetch(`${APPS_SCRIPT_URL}?type=holds&school=${encodeURIComponent(key)}&v=${Date.now()}`);
@@ -1605,11 +1569,10 @@ stickyPrice.textContent = stickyText;
        events: busyEvents,
        windowResize: () => applyResponsiveView(),
 
-      // <<< NIEUW: klik op frauenprojekt-blok opent Frauen-website in nieuwe tab >>>
-      eventClick: (info) => {
+     eventClick: (info) => {
         const ev = info.event;
         if ((ev.classNames || []).includes('frauenprojekt') && ev.url) {
-          info.jsEvent.preventDefault();           // voorkom standaardgedrag
+          info.jsEvent.preventDefault();
          window.open(ev.url, '_blank', 'noopener');
        }
      },
@@ -1626,10 +1589,8 @@ stickyPrice.textContent = stickyText;
       }
     });
 
-
       calendar.render();
 
-      // voeg holds toe
       holdEvents.forEach(ev => calendar.addEvent(ev));
       mobileAdd.style.display = isTouchDevice() ? 'block' : 'none';
       applyResponsiveView();
@@ -1638,7 +1599,6 @@ stickyPrice.textContent = stickyText;
       fSchool.value = SCHOOLS[currentKey].name;
       renderExtrasForSchool(key);
 
-      // terms opnieuw opbouwen voor deze school
       (function refreshTerms(){
         const termsList = document.getElementById('termsList');
         if (!termsList) return;
@@ -1652,7 +1612,8 @@ stickyPrice.textContent = stickyText;
 
       updatePricePreview();
     }
-    /* ===== Price calculation (incl. WA customPrice + Kaution) ===== */
+    
+    /* ===== Price calculation ===== */
     function updatePricePreview(){
       const L = I18N[langSelect.value] || I18N.de;
       const start   = parseLocalDT(fFrom.value);
@@ -1685,130 +1646,120 @@ stickyPrice.textContent = stickyText;
 
       const cfg = PRICING[currentKey] || PRICING.WE;
 
-      // ===== A) WA: basis per duur + aparte Personen-Staffel + Kaution =====
-if (currentKey === 'WA' && cfg.usePersonBands) {
-  const totalMin = Math.round((end - start) / 60000);
-  const tier = (cfg.tiers || []).find(t => totalMin <= t.maxMin) || null;
+      if (currentKey === 'WA' && cfg.usePersonBands) {
+        const totalMin = Math.round((end - start) / 60000);
+        const tier = (cfg.tiers || []).find(t => totalMin <= t.maxMin) || null;
 
-  // >16h => Preis auf Anfrage (Kaution los tonen)
-  if (!tier) {
-    const depo = cfg.cautionFn ? cfg.cautionFn(persons) : null;
+        if (!tier) {
+          const depo = cfg.cautionFn ? cfg.cautionFn(persons) : null;
+          priceValue.textContent = depo
+            ? `${L.priceOnReq} + ${euro(depo)} Kaution`
+            : L.priceOnReq;
 
-    priceValue.textContent = depo
-      ? `${L.priceOnReq} + ${euro(depo)} Kaution`
-      : L.priceOnReq;
+          bdBaseLabel.textContent    = (langSelect.value==='en' ? 'Base' : 'Basis');
+          bdBase.textContent         = '–';
+          bdPersonsLabel.textContent = (langSelect.value==='en' ? 'People tier' : 'Personen-Staffel');
+          bdPersons.textContent      = (langSelect.value==='en' ? '€0.00' : '0,00 €');
+          bdTime.textContent         = (langSelect.value==='en' ? '€0.00' : '0,00 €');
+          bdExtras.textContent       = (L.bdNoExtras || (langSelect.value==='en' ? 'none' : 'keine'));
+          bdTotal.textContent        = '–';
 
-    bdBaseLabel.textContent    = (langSelect.value==='en' ? 'Base' : 'Basis');
-    bdBase.textContent         = '–';
-    bdPersonsLabel.textContent = (langSelect.value==='en' ? 'People tier' : 'Personen-Staffel');
-    bdPersons.textContent      = (langSelect.value==='en' ? '€0.00' : '0,00 €');
-    bdTime.textContent         = (langSelect.value==='en' ? '€0.00' : '0,00 €');
-    bdExtras.textContent       = (L.bdNoExtras || (langSelect.value==='en' ? 'none' : 'keine'));
-    bdTotal.textContent        = '–';
+          if (bdDepositRow) {
+            if (depo) { bdDeposit.textContent = euro(depo); bdDepositRow.style.display = ''; }
+            else { bdDepositRow.style.display = 'none'; }
+          }
+          if (bdGrandTotalRow) bdGrandTotalRow.style.display = 'none'; 
 
-    if (bdDepositRow) {
-      if (depo) { bdDeposit.textContent = euro(depo); bdDepositRow.style.display = ''; }
-      else { bdDepositRow.style.display = 'none'; }
-    }
-    
-    if (bdGrandTotalRow) bdGrandTotalRow.style.display = 'none'; // geen totaal te rekenen
+          CURRENT_PRICE = {
+            currency: 'EUR',
+            tierHours: 'über 16',
+            personsMultiplier: 1,
+            personsLabel: persons ? (persons <= 45 ? '≤45' : '≥46') : '',
+            base: null,
+            personsDelta: 0,
+            timeSurcharge: 0,
+            extrasCount: 0,
+            extrasCost: 0,
+            total: null,        
+            extrasSelected: [],
+            caution: depo
+          };
 
-    CURRENT_PRICE = {
-      currency: 'EUR',
-      tierHours: 'über 16',
-      personsMultiplier: 1,
-      personsLabel: persons ? (persons <= 45 ? '≤45' : '≥46') : '',
-      base: null,
-      personsDelta: 0,
-      timeSurcharge: 0,
-      extrasCount: 0,
-      extrasCost: 0,
-      total: null,        // heel belangrijk: GEEN Kaution hierin
-      extrasSelected: [],
-      caution: depo
-    };
+          priceBreakdown.style.display = 'block';
+          updateSticky();
+          timePopover.textContent = (langSelect.value === 'en')
+            ? 'No time surcharge at Wassertorplatz.'
+            : 'Kein Zeit-Zuschlag am Wassertorplatz.';
+          return;
+        }
 
-    priceBreakdown.style.display = 'block';
-    updateSticky();
-    timePopover.textContent = (langSelect.value === 'en')
-      ? 'No time surcharge at Wassertorplatz.'
-      : 'Kein Zeit-Zuschlag am Wassertorplatz.';
-    return;
-  }
+        const base = tier.base;                  
+        const tierHours = tier.hoursLabel;       
+        const band = (cfg.personBands || []).find(b => persons <= b.max) || null;
+        const personsAdd = band ? (band.addByTier?.[tierHours] ?? 0) : 0;
+        const personsLabel = band ? band.label : (persons ? '≥46' : '');
+        const total = base + personsAdd;         
 
-  // ≤16h: basis + personen-opslag, GEEN tijdtoeslag, GEEN extras
-  const base = tier.base;                  // <-- alleen duur
-  const tierHours = tier.hoursLabel;       // 12 of 16
-  const band = (cfg.personBands || []).find(b => persons <= b.max) || null;
-  const personsAdd = band ? (band.addByTier?.[tierHours] ?? 0) : 0;
-  const personsLabel = band ? band.label : (persons ? '≥46' : '');
-  const total = base + personsAdd;         // <-- TOTAAL ZONDER KAUTION
+        const depo = cfg.cautionFn ? cfg.cautionFn(persons) : null;
 
-  const depo = cfg.cautionFn ? cfg.cautionFn(persons) : null;
+        priceValue.textContent = depo
+          ? `${euro(total)} + ${euro(depo)} Kaution`
+          : euro(total);
 
-  // Pill (en sticky) tonen "huur zonder Kaution + Kaution"
-  priceValue.textContent = depo
-    ? `${euro(total)} + ${euro(depo)} Kaution`
-    : euro(total);
+        const baseLabel = (langSelect.value==='en')
+          ? (tierHours === 12 ? 'Base (up to 12 h)' : 'Base (12–16 h)')
+          : (tierHours === 12 ? 'Basis (bis 12 Std.)' : 'Basis (12–16 Std.)');
 
-  const baseLabel = (langSelect.value==='en')
-    ? (tierHours === 12 ? 'Base (up to 12 h)' : 'Base (12–16 h)')
-    : (tierHours === 12 ? 'Basis (bis 12 Std.)' : 'Basis (12–16 Std.)');
+        bdBaseLabel.textContent    = baseLabel;
+        bdBase.textContent         = euro(base);            
+        bdPersonsLabel.textContent = (langSelect.value==='en'
+          ? `People tier (${personsLabel || ''})`
+          : `Personen-Staffel (${personsLabel || ''})`);
+        bdPersons.textContent      = personsAdd ? euro(personsAdd) : (langSelect.value==='en' ? '€0.00' : '0,00 €');
+        bdTime.textContent         = (langSelect.value==='en' ? '€0.00' : '0,00 €');
+        bdExtras.textContent       = (L.bdNoExtras || (langSelect.value==='en' ? 'none' : 'keine'));
+        bdTotal.textContent        = euro(total);           
 
-  // BELANGRIJK: deze rijen altijd als losse bedragen tonen
-  bdBaseLabel.textContent    = baseLabel;
-  bdBase.textContent         = euro(base);            // <-- NIET total
-  bdPersonsLabel.textContent = (langSelect.value==='en'
-    ? `People tier (${personsLabel || ''})`
-    : `Personen-Staffel (${personsLabel || ''})`);
-  bdPersons.textContent      = personsAdd ? euro(personsAdd) : (langSelect.value==='en' ? '€0.00' : '0,00 €');
-  bdTime.textContent         = (langSelect.value==='en' ? '€0.00' : '0,00 €');
-  bdExtras.textContent       = (L.bdNoExtras || (langSelect.value==='en' ? 'none' : 'keine'));
-  bdTotal.textContent        = euro(total);           // <-- ZONDER Kaution
+        if (bdDepositRow) {
+          if (depo) { bdDeposit.textContent = euro(depo); bdDepositRow.style.display = ''; }
+          else { bdDepositRow.style.display = 'none'; }
+        }
 
-  if (bdDepositRow) {
-    if (depo) { bdDeposit.textContent = euro(depo); bdDepositRow.style.display = ''; }
-    else { bdDepositRow.style.display = 'none'; }
-  }
+        if (bdGrandTotalRow) {
+          if (depo) {
+            bdGrandTotalLabel.textContent = (langSelect.value==='en')
+              ? 'Total incl. deposit' : 'Summe inkl. Kaution';
+            bdGrandTotal.textContent = euro(total + depo);
+            bdGrandTotalRow.style.display = '';
+          } else {
+            bdGrandTotalRow.style.display = 'none';
+          }
+        }
 
-  // NIEUW: Summe inkl. Kaution
-  if (bdGrandTotalRow) {
-    if (depo) {
-      bdGrandTotalLabel.textContent = (langSelect.value==='en')
-        ? 'Total incl. deposit' : 'Summe inkl. Kaution';
-      bdGrandTotal.textContent = euro(total + depo);
-      bdGrandTotalRow.style.display = '';
-    } else {
-      bdGrandTotalRow.style.display = 'none';
-    }
-  }
+        CURRENT_PRICE = {
+          currency: 'EUR',
+          tierHours,
+          personsMultiplier: 1,
+          personsLabel,
+          base: Number(base),
+          personsDelta: Number(personsAdd),
+          timeSurcharge: 0,
+          extrasCount: 0,
+          extrasCost: 0,
+          total: Number(total),  
+          extrasSelected: [],
+          caution: depo          
+        };
 
-  CURRENT_PRICE = {
-    currency: 'EUR',
-    tierHours,
-    personsMultiplier: 1,
-    personsLabel,
-    base: Number(base),
-    personsDelta: Number(personsAdd),
-    timeSurcharge: 0,
-    extrasCount: 0,
-    extrasCost: 0,
-    total: Number(total),  // <-- ZONDER Kaution
-    extrasSelected: [],
-    caution: depo          // <-- Kaution los
-  };
+        timePopover.textContent = (langSelect.value === 'en')
+          ? 'No time surcharge at Wassertorplatz.'
+          : 'Kein Zeit-Zuschlag am Wassertorplatz.';
 
-  timePopover.textContent = (langSelect.value === 'en')
-    ? 'No time surcharge at Wassertorplatz.'
-    : 'Kein Zeit-Zuschlag am Wassertorplatz.';
+        priceBreakdown.style.display = 'block';
+        updateSticky();
+        return;
+      }
 
-  priceBreakdown.style.display = 'block';
-  updateSticky();
-  return;
-}
-
-
-      // ===== B) generiek pad (WE/WI) =====
       const totalMin = Math.round((end - start) / 60000);
       const tier = (cfg.tiers || []).find(t => totalMin <= t.maxMin) || null;
 
@@ -1827,7 +1778,6 @@ if (currentKey === 'WA' && cfg.usePersonBands) {
       const personsDelta = basePlusPersons - base;
       const timeAdd = typeof cfg.surcharge === 'function' ? cfg.surcharge(start, end) : 0;
 
-      // extras
       const checked = Array.from(document.querySelectorAll('#extrasContainer input:checked'));
       const extrasCost = checked.reduce((sum, el)=> sum + Number(el.dataset.price||0), 0);
       const extrasSelected = checked.map(el => (langSelect.value==='en' ? el.dataset.labelEn : el.dataset.labelDe) || '');
@@ -1883,7 +1833,7 @@ if (currentKey === 'WA' && cfg.usePersonBands) {
     timeInfoIcon.addEventListener('click', (e)=>{ e.stopPropagation(); togglePopover(); });
     timeInfoIcon.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); togglePopover(); } });
 
-    /* ===== Success overlay (met optionele Kaution-regel) ===== */
+    /* ===== Success overlay ===== */
     function showSuccessOverlay(payload){
       const L = I18N[langSelect.value] || I18N.de;
       successTitle.textContent = L.successTitle;
@@ -1900,7 +1850,6 @@ if (currentKey === 'WA' && cfg.usePersonBands) {
 
       const messageRow = payload.message ? `<div><strong>${labels.message}:</strong> ${esc(payload.message)}</div>` : "";
 
-      // ➕ Optioneel: toon Kaution als berekend
       let depositRow = "";
       if (CURRENT_PRICE && CURRENT_PRICE.caution) {
         depositRow = `<div><strong>Kaution:</strong> ${euro(CURRENT_PRICE.caution)}</div>`;
@@ -1968,7 +1917,7 @@ if (currentKey === 'WA' && cfg.usePersonBands) {
         );
 
         const payload = {
-          school:  fSchool.value,              // naam, niet de key
+          school:  fSchool.value,             
           from:    fFrom.value,
           to:      fTo.value,
           persons: fPersons.value,
@@ -1998,7 +1947,7 @@ if (currentKey === 'WA' && cfg.usePersonBands) {
 
         const res = await fetch(APPS_SCRIPT_URL, {
           method: 'POST',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // geen preflight
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
           body: JSON.stringify(payload),
           redirect: 'follow',
           signal: ctl.signal
@@ -2039,7 +1988,7 @@ if (currentKey === 'WA' && cfg.usePersonBands) {
           message: payload.message
         });
         closeModal();
-        reloadCalendarAfterSubmission(); // na succes: holds verversen
+        reloadCalendarAfterSubmission();
 
       } catch(err){
         console.error('Submit failed:', err);
@@ -2050,6 +1999,7 @@ if (currentKey === 'WA' && cfg.usePersonBands) {
         btnSubmit.textContent = (I18N[langSelect.value]||I18N.de).btnSend || 'Anfrage senden';
       }
     });
+
     /* ===== embed-size throttle ===== */
     function _sendHeight(){
       var doc=document.documentElement, body=document.body;
@@ -2091,16 +2041,13 @@ if (currentKey === 'WA' && cfg.usePersonBands) {
                 classNames: ['tentative']
               }));
               
-              // Verwijder bestaande 'tentative' events en voeg nieuwe toe
               calendar.getEvents()
                 .filter(ev => (ev.classNames || []).includes('tentative'))
                 .forEach(ev => ev.remove());
               holdEvents.forEach(ev => calendar.addEvent(ev));
             }
           }
-        } catch(_) {
-          // Stil falen
-        }
+        } catch(_) {}
       }
     }, 30000);
 
@@ -2130,9 +2077,7 @@ if (currentKey === 'WA' && cfg.usePersonBands) {
                 holdEvents.forEach(ev => calendar.addEvent(ev));
               }
             }
-          } catch(_) {
-            // Silently fail
-          }
+          } catch(_) {}
         }, 1000);
       }
     }
@@ -2148,12 +2093,10 @@ if (currentKey === 'WA' && cfg.usePersonBands) {
 
     /* ===== Keyboard shortcuts ===== */
     document.addEventListener('keydown', (e) => {
-      // ESC to close modal
       if (e.key === 'Escape' && modalBack.style.display === 'flex') {
         closeModal();
       }
       
-      // CTRL+R or F5 to refresh calendar
       if ((e.ctrlKey && e.key === 'r') || e.key === 'F5') {
         e.preventDefault();
         if (currentKey) {
@@ -2173,7 +2116,6 @@ if (currentKey === 'WA' && cfg.usePersonBands) {
         }
       });
 
-      // Prevent zoom on double-tap for better UX
       let lastTouchEnd = 0;
       document.addEventListener('touchend', (e) => {
         const now = (new Date()).getTime();
@@ -2213,7 +2155,6 @@ if (currentKey === 'WA' && cfg.usePersonBands) {
       }, 1000);
     }
 
-    // Alleen toegankelijkheidsmelding toevoegen na succes (geen extra reload hier)
     const _origShowSuccessOverlay = showSuccessOverlay;
     showSuccessOverlay = function(payload) {
       _origShowSuccessOverlay(payload);
