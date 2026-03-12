@@ -47,8 +47,6 @@ jobs:
           # check structuur, maar fail niet hard: geef nette fout + stop zonder error
           if ! jq -e 'has("files") and (.files|type=="array")' payload.json >/dev/null 2>&1; then
             echo "WARN: payload heeft geen .files-array; er wordt niets geschreven."
-            echo "Inhoud payload:"
-            cat payload.json
             echo "CHANGES=0" >> $GITHUB_ENV
             exit 0
           fi
@@ -59,39 +57,30 @@ jobs:
             B64=$(echo "$row" | jq -r '.content_b64')
 
             if [ -z "$PATH_" ] || [ -z "$B64" ] || [ "$PATH_" = "null" ] || [ "$B64" = "null" ]; then
-              echo "WARN: oversla item met lege path/content_b64"
               continue
             fi
 
             mkdir -p "$(dirname "$PATH_")"
             TMP=$(mktemp)
-            echo "$B64" | base64 --decode > "$TMP" || {
-              echo "ERROR: base64 decode faalde voor $PATH_"
-              exit 1
-            }
-            # normaliseer line endings
+            echo "$B64" | base64 --decode > "$TMP" || exit 1
+            
             dos2unix -q "$TMP" 2>/dev/null || true
 
-            # optioneel: valideer JSON
             if ! jq -e type "$TMP" >/dev/null 2>&1; then
-              echo "ERROR: geschreven content is geen geldige JSON voor $PATH_"
-              head -c 500 "$TMP"
               exit 1
             fi
 
             if [ -f "$PATH_" ] && cmp -s "$TMP" "$PATH_"; then
-              echo "No content change for $PATH_"
               rm -f "$TMP"
             else
               mv "$TMP" "$PATH_"
-              echo "Wrote $PATH_ ($(wc -c < "$PATH_") bytes)"
               CHANGES=1
             fi
           done
 
           echo "CHANGES=$CHANGES" >> $GITHUB_ENV
 
-      - name: Commit and push (force redeploy if needed)
+      - name: Commit and push (if changed)
         run: |
           set -euo pipefail
           git config user.name "github-actions[bot]"
@@ -100,5 +89,15 @@ jobs:
           git add -A
           if [ "${CHANGES:-0}" = "1" ]; then
             git commit -m "${{ github.event.client_payload.message || 'update json via Flow' }}"
+            git push
+            echo "Changes pushed successfully."
+          else
+            echo "No changes detected. Skipping commit and push."
           fi
-          git push
+
+      - name: Deploy to Netlify
+        if: env.CHANGES == '1'
+        run: npx netlify-cli deploy --prod --dir=.
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
