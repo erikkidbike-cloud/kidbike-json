@@ -439,6 +439,13 @@
 
       <div class="alert warn" id="alertConflict" style="display:none;"></div>
       <div class="alert note" id="alertShort" style="display:none;"></div>
+      
+      <div class="alert warn" id="alertOverlap" style="display:none; background:#fffbeb; border-color:#fef08a; color:#854d0e;">
+        <strong style="display:block; margin-bottom:6px;">⚠️ <span id="overlapWarningText"></span></strong>
+        <label class="checkline">
+          <input type="checkbox" id="fOverlapConfirm"> <span id="labelOverlapConfirm">Ja, ich möchte trotzdem anfragen</span>
+        </label>
+      </div>
 
       <form id="requestForm" name="requestForm" novalidate>
         
@@ -682,7 +689,9 @@
         extraTisch: "Tischtennisplatte",
         message: "Nachricht (optional)",
         accept: "Ich habe die wesentlichen Bedingungen gelesen und akzeptiere sie.",
-        conflict: "Ausgewählter Zeitraum überschneidet sich mit einer bestehenden Belegung, ist kürzer als 30 Minuten oder ungültig (Ende vor Beginn).",
+        overlapWarning: "In diesem Zeitraum liegt bereits eine Reservierung vor. Wahrscheinlich ist keine Buchung mehr möglich. Möchten Sie trotzdem eine Anfrage senden?",
+        overlapCheck: "Ja, ich möchte trotzdem eine Anfrage senden",
+        conflict: "Ungültige Zeit (Ende vor Beginn) oder Zeitraum zu kurz (min. 30 Min).",
         shortTermWarning: "<strong>Kurzfristige Anfrage:</strong> Da Ihr gewünschter Termin in weniger als 7 Tagen liegt, können wir nicht garantieren, dass wir Ihre Anfrage rechtzeitig bearbeiten können.",
         priceTitle: "Vorläufige Preisindikation:",
         priceHint: " (unverbindlich; endgültige Bestätigung und ggf. Anpassungen vorbehalten)",
@@ -762,7 +771,9 @@
         extraTisch: "Table tennis",
         message: "Message (optional)",
         accept: "I have read and accept the key conditions.",
-        conflict: "Selected period overlaps with an existing booking, is shorter than 30 minutes, or is invalid (end before start).",
+        overlapWarning: "There is already a reservation in this time slot. It is likely not possible to book these times. Do you still want to send a request?",
+        overlapCheck: "Yes, I want to send a request anyway",
+        conflict: "Invalid time (end before start) or too short (min. 30 mins).",
         shortTermWarning: "<strong>Short-notice request:</strong> As your requested time is in less than 7 days, we cannot guarantee timely processing.",
         priceTitle: "Preliminary price indication:",
         priceHint: " (non-binding; subject to confirmation and possible adjustments)",
@@ -977,6 +988,10 @@
 
     const alertConflict = document.getElementById('alertConflict');
     const alertShort = document.getElementById('alertShort');
+    const alertOverlap = document.getElementById('alertOverlap');
+    const overlapWarningText = document.getElementById('overlapWarningText');
+    const fOverlapConfirm = document.getElementById('fOverlapConfirm');
+    const labelOverlapConfirm = document.getElementById('labelOverlapConfirm');
 
     const fSchool = document.getElementById('fSchool');
     const fFrom   = document.getElementById('fFrom');
@@ -1082,6 +1097,7 @@
     let calendar = null;
     let currentKey = null;
     let busyEvents = [];
+    let currentHolds = [];
     let wasSubmitted = false;
     const availability = {};
     let CURRENT_PRICE = null;
@@ -1121,6 +1137,9 @@
       labelLastName.textContent = L.lastName;
       labelMsg.textContent = L.message;
       labelAccept.textContent = L.accept;
+
+      overlapWarningText.textContent = L.overlapWarning;
+      labelOverlapConfirm.textContent = L.overlapCheck;
 
       priceTitle.textContent = L.priceTitle;
       priceHint.textContent = L.priceHint;
@@ -1345,27 +1364,43 @@
       if (msg) msg.style.display = shouldShow ? 'block' : 'none';
     }
 
+    // HULPFUNCTIE: Controleert over de geselecteerde tijd overlapt
+    function getOverlapState(start, end) {
+      if (!start || !end) return false;
+      for (const ev of busyEvents) {
+        if (ev.isFrei) continue;
+        const bS = new Date(ev.start), bE = new Date(ev.end || ev.start);
+        if (overlaps(start, end, bS, bE)) return true;
+      }
+      for (const ev of currentHolds) {
+        const bS = new Date(ev.start), bE = new Date(ev.end);
+        if (overlaps(start, end, bS, bE)) return true;
+      }
+      return false;
+    }
+
     function validateTimes(){
       const start = parseLocalDT(fFrom.value);
       const end   = parseLocalDT(fTo.value);
 
-      let ok = true;
-      if(!(start && end)) ok = false;
-      if(ok && end <= start) ok = false;
-      if(ok && (end - start) < 30*60000) ok = false;
+      let isInvalidTime = false;
+      if(!(start && end)) isInvalidTime = true;
+      if(!isInvalidTime && end <= start) isInvalidTime = true;
+      if(!isInvalidTime && (end - start) < 30*60000) isInvalidTime = true;
 
-      if(ok){
-        for(const ev of busyEvents){
-          // We testen alleen overlap met ECHTE busy events, niet met FREI
-          if (ev.isFrei) continue;
-          const bS = new Date(ev.start), bE = new Date(ev.end || ev.start);
-          if(overlaps(start, end, bS, bE)){ ok = false; break; }
-        }
-      }
+      const isOverlapping = !isInvalidTime && getOverlapState(start, end);
 
-      const showConflict = !ok && (wasSubmitted || (fFrom.dataset.touched==='1' && fTo.dataset.touched==='1'));
+      const showConflict = isInvalidTime && (wasSubmitted || (fFrom.dataset.touched==='1' && fTo.dataset.touched==='1'));
       alertConflict.style.display = showConflict ? 'block':'none';
       alertConflict.textContent = (I18N[langSelect.value]||I18N.de).conflict;
+
+      // Toon de waarschuwing bij overlap
+      if (isOverlapping) {
+        alertOverlap.style.display = 'block';
+      } else {
+        alertOverlap.style.display = 'none';
+        fOverlapConfirm.checked = false; // Reset als er geen overlap meer is
+      }
 
       if(start && start < minStartDate()) { alertShort.style.display='block'; alertShort.innerHTML = (I18N[langSelect.value]||I18N.de).shortTermWarning; }
       else { alertShort.style.display='none'; }
@@ -1400,20 +1435,19 @@
       }
 
       const requireAccept = (step2.style.display !== 'none');
+      // Verplicht om de overlap checkbox aan te vinken indien overlappend!
+      const timeOk = !isInvalidTime && (!isOverlapping || fOverlapConfirm.checked);
       const requiredOk = fSchool.value && fPersons.value && start && end && phoneOk && addrOk && bikesOk && fEmail.validity.valid && (!requireAccept || fAccept.checked);
-      btnSubmit.disabled = !(ok && requiredOk);
+      
+      btnSubmit.disabled = !(timeOk && requiredOk);
       updatePricePreview(); 
       updateSticky();
-      return ok && requiredOk;
+      return timeOk && requiredOk;
     }
 
+    // Laat de blokkade in de kalender los, zodat ze het blokje wél kunnen selecteren (en de warning zien)
     function selectAllowFn(selectInfo){
       const selStart = selectInfo.start, selEnd = selectInfo.end;
-      for(const ev of busyEvents){
-        if (ev.isFrei) continue; // FREI blokkeert de selectie niet
-        const bS = new Date(ev.start), bE = new Date(ev.end || ev.start);
-        if(overlaps(selStart, selEnd, bS, bE)) return false;
-      }
       if((selEnd - selStart)/60000 < 30) return false;
       return true;
     }
@@ -1457,22 +1491,20 @@
       const start = parseLocalDT(fFrom.value);
       const end   = parseLocalDT(fTo.value);
       
-      let ok = true;
-      if(!(start && end)) ok = false;
-      if(ok && end <= start) ok = false;
-      if(ok && (end - start) < 30*60000) ok = false;
+      let isInvalidTime = false;
+      if(!(start && end)) isInvalidTime = true;
+      if(!isInvalidTime && end <= start) isInvalidTime = true;
+      if(!isInvalidTime && (end - start) < 30*60000) isInvalidTime = true;
       
-      if(ok){
-        for(const ev of busyEvents){
-          if (ev.isFrei) continue;
-          const bS = new Date(ev.start), bE = new Date(ev.end || ev.start);
-          if(overlaps(start, end, bS, bE)){ ok = false; break; }
-        }
-      }
+      const isOverlapping = !isInvalidTime && getOverlapState(start, end);
       
-      const showConflict = !ok && (fFrom.dataset.touched==='1' && fTo.dataset.touched==='1');
+      const showConflict = isInvalidTime && (fFrom.dataset.touched==='1' && fTo.dataset.touched==='1');
       alertConflict.style.display = showConflict ? 'block':'none';
       alertConflict.textContent = (I18N[langSelect.value]||I18N.de).conflict;
+      
+      if (isOverlapping) {
+         alertOverlap.style.display = 'block';
+      }
       
       if(start && start < minStartDate()) { 
         alertShort.style.display='block'; 
@@ -1483,7 +1515,9 @@
       
       highlight(fPersons, !fPersons.value);
       
-      if(ok && fPersons.value) {
+      const timeOk = !isInvalidTime && (!isOverlapping || fOverlapConfirm.checked);
+
+      if(timeOk && fPersons.value) {
         goStep(2);
       } else {
         fFrom.dataset.touched = '1';
@@ -1492,6 +1526,9 @@
         validateTimes();
       }
     });
+
+    fOverlapConfirm.addEventListener('change', validateTimes);
+
     btnBackStep1.addEventListener('click', ()=> goStep(1));
     btnCloseX.addEventListener('click', closeModal);
     btnWiCloseX.addEventListener('click', closeModal);
@@ -1541,6 +1578,8 @@
       fTo.value   = toInputLocal(prefill.end);
       alertConflict.style.display = 'none';
       alertShort.style.display = 'none';
+      alertOverlap.style.display = 'none';
+      fOverlapConfirm.checked = false;
       fAccept.checked = false;
       btnSubmit.disabled = true;
 
@@ -1573,6 +1612,8 @@
       fSchool.value = '';
       alertConflict.style.display = 'none';
       alertShort.style.display = 'none';
+      alertOverlap.style.display = 'none';
+      fOverlapConfirm.checked = false;
       btnSubmit.disabled = true;
       priceValue.textContent = '–';
       priceBreakdown.style.display = 'none';
@@ -1711,6 +1752,7 @@
         if (r.ok) {
           const arr = await r.json();
           if (Array.isArray(arr)) {
+            currentHolds = arr; // NIEUW
             holdEvents = arr.map(h => ({
               title: (langSelect.value==='en'
                 ? 'Tentative — awaiting confirmation'
@@ -1760,7 +1802,7 @@
            }
 
            if ((ev.classNames || []).includes('frauenprojekt') && ev.url) {
-             info.jsEvent.preventDefault();           
+             info.jsEvent.preventDefault();            
              window.open(ev.url, '_blank', 'noopener');
            }
         },
@@ -1910,14 +1952,14 @@
           : (tierHours === 12 ? 'Basis (bis 12 Std.)' : 'Basis (12–16 Std.)');
 
         bdBaseLabel.textContent    = baseLabel;
-        bdBase.textContent         = euro(base);            
+        bdBase.textContent         = euro(base);             
         bdPersonsLabel.textContent = (langSelect.value==='en'
           ? `People tier (${personsLabel || ''})`
           : `Personen-Staffel (${personsLabel || ''})`);
         bdPersons.textContent      = personsAdd ? euro(personsAdd) : (langSelect.value==='en' ? '€0.00' : '0,00 €');
         bdTime.textContent         = (langSelect.value==='en' ? '€0.00' : '0,00 €');
         bdExtras.textContent       = (L.bdNoExtras || (langSelect.value==='en' ? 'none' : 'keine'));
-        bdTotal.textContent        = euro(total);           
+        bdTotal.textContent        = euro(total);            
 
         if (bdDepositRow) {
           if (depo) { bdDeposit.textContent = euro(depo); bdDepositRow.style.display = ''; }
@@ -2120,6 +2162,16 @@
           else if (fBikesNo.checked) bikesValue = 'Nein';
         }
 
+        // NIEUW: Stop de waarschuwing dikgedrukt in de opmerkingen voor de mail
+        const start = parseLocalDT(fFrom.value);
+        const end   = parseLocalDT(fTo.value);
+        const isOverlapping = getOverlapState(start, end);
+        
+        let finalMessage = fMsg.value;
+        if (isOverlapping) {
+            finalMessage = "⚠️ LET OP / ACHTUNG: Dit tijdsvak is al (deels) gereserveerd! De gebruiker heeft hiervoor een waarschuwing gekregen und er toch voor gekozen om de aanvraag te doen. ⚠️\n\n" + finalMessage;
+        }
+
         const payload = {
           school:  fSchool.value,              
           from:    fFrom.value,
@@ -2141,7 +2193,8 @@
           city:    fCity.value,
           zipcity: fZipCity.value,
           address: formatAddress(),
-          message: fMsg.value,
+          message: finalMessage, // Zodat dit met waarschuwing en al naar Apps Script gaat
+          has_overlap: isOverlapping,
           extras:  extrasList,
           lang:    langSelect.value || 'de',
           price:   CURRENT_PRICE,
@@ -2234,6 +2287,7 @@
           if (r.ok) {
             const arr = await r.json();
             if (Array.isArray(arr)) {
+              currentHolds = arr; // NIEUW
               const holdEvents = arr.map(h => ({
                 title: (langSelect.value==='en'
                   ? 'Tentative — awaiting confirmation'
