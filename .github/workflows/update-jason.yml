@@ -100,10 +100,5 @@ jobs:
           git add -A
           if [ "${CHANGES:-0}" = "1" ]; then
             git commit -m "${{ github.event.client_payload.message || 'update json via Flow' }}"
-          else
-            # geen diffs? – doe lege commit om bv. Netlify te triggeren, maar laat ook toe om niets te doen
-            echo "No changes; creating empty commit for redeploy."
-            NOW=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-            git commit --allow-empty -m "trigger redeploy ${NOW}"
           fi
           git push
