@@ -7,6 +7,8 @@
 
   <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <style>
     /* Toast volledig uitschakelen */
@@ -266,11 +268,18 @@
     .success-actions .btn{ min-width:160px; }
 
     .start-overlay{position:fixed;inset:0;z-index:110;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;padding:20px;}
-    .start-card{width:min(920px, 96vw);background:#fff;border:1px solid var(--border);border-radius:14px;padding:22px;box-shadow:0 24px 80px rgba(0,0,0,0.18);}
+    .start-card{width:min(1100px, 96vw);background:#fff;border:1px solid var(--border);border-radius:14px;padding:22px;box-shadow:0 24px 80px rgba(0,0,0,0.18); max-height: 96vh; overflow-y: auto;}
     .start-card h2{margin:0 0 8px;font-size:22px;}
-    .start-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:12px;}
-    .school-card{border:1px solid var(--border);border-radius:12px;padding:14px;background:#fff;display:flex;flex-direction:column;gap:8px;transition:transform .12s, box-shadow .12s, border-color .12s;}
-    .school-card:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(0,0,0,.06);border-color:#cbd5e1;}
+    .start-card-inner { display: flex; flex-direction: column; gap: 20px; margin-top: 16px; }
+    #startMap { height: 260px; border-radius: 12px; border: 1px solid var(--border); width: 100%; z-index: 1; }
+    .start-grid{display:grid;grid-template-columns:1fr;gap:14px;}
+    @media (min-width: 900px) {
+      .start-card-inner { flex-direction: row; }
+      #startMap { height: auto; min-height: 400px; flex: 1; }
+      .start-grid-wrap { flex: 1; }
+    }
+    .school-card{border:1px solid var(--border);border-radius:12px;padding:14px;background:#fff;display:flex;flex-direction:column;gap:8px;transition:transform .12s, box-shadow .12s, border-color .12s; cursor:pointer;}
+    .school-card:hover, .school-card.highlighted {transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.1);border-color:var(--brand);}
     
     .school-card .status{font-size:12px;color:#065f46;background:#ecfdf5;border:1px solid #a7f3d0;padding:4px 8px;border-radius:999px;width:max-content;}
     
@@ -297,7 +306,6 @@
     .field select.error + .error-msg{display:block}
 
     @media (max-width:900px){
-      .start-grid{grid-template-columns:1fr;}
       .success-actions{flex-direction:column;}
       .success-actions .btn{width:100%;}
     }
@@ -387,6 +395,7 @@
       <h2 id="successTitle">Anfrage gesendet</h2>
       <p id="successLead">Vielen Dank. Wir melden uns per E-Mail zur Bestätigung.</p>
       <div class="success-summary" id="successSummary"></div>
+      <p id="successAdditionalText" style="margin-top:16px; font-size:14px; color:#4b5563; line-height: 1.5;"></p>
       <div class="success-actions">
         <button class="btn" id="btnBackToCalendar">Zurück zum Kalender</button>
       </div>
@@ -397,8 +406,13 @@
     <div class="start-card">
       <h2 id="startTitle">Bitte wählen Sie Ihre Verkehrsschule</h2>
       <p id="startLead" class="start-hint">Einige Standorte sind ggf. noch nicht online buchbar.</p>
-      <div class="start-grid"></div>
-      <p id="startHintBelow" class="start-hint">Sie können den Standort später oben im Auswahlfeld wechseln.</p>
+      <div class="start-card-inner">
+        <div id="startMap"></div>
+        <div class="start-grid-wrap">
+          <div class="start-grid"></div>
+          <p id="startHintBelow" class="start-hint" style="margin-top:14px;">Sie können den Standort später oben im Auswahlfeld wechseln.</p>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -735,7 +749,8 @@
         
         wiInfoTitle: "Buchung Verkehrsschule Wiener Straße",
         wiInfoText: `Die Verkehrsschule Wiener Straße kann <strong>nicht online</strong> gebucht werden.<br><br>Grüne Blöcke im Kalender sind voraussichtlich frei. Bitte rufen Sie uns an, um Details zu besprechen und Ihre Buchung vorzunehmen: <br><br><strong style="font-size: 18px; color: var(--brand);"><a href="tel:+493022502486" style="color: inherit; text-decoration: none;">030 22502486</a></strong>`,
-        wiInfoOk: "Verstanden"
+        wiInfoOk: "Verstanden",
+        successAdditional: (school, date, start, end, mailto) => `Sie haben eine Anfrage für die Verkehrsschule ${school} am ${date} von ${start} bis ${end} eingereicht. Wir melden uns per E-Mail bei Ihnen. Haben Sie bei der Einreichung dieser Anfrage einen Fehler gemacht oder diese Anfrage versehentlich eingereicht, schreiben Sie uns bitte an <a href="${mailto}">events@kidbike.de</a>.`
       },
       en: {
         appTitle: "Traffic School Availability",
@@ -817,7 +832,8 @@
         
         wiInfoTitle: "Booking Traffic School Wiener Straße",
         wiInfoText: `The Wiener Straße traffic school <strong>cannot be booked online</strong>.<br><br>Green blocks in the calendar are likely available. Please call us to discuss the details and to make a booking: <br><br><strong style="font-size: 18px; color: var(--brand);"><a href="tel:+493022502486" style="color: inherit; text-decoration: none;">030 22502486</a></strong>`,
-        wiInfoOk: "Got it"
+        wiInfoOk: "Got it",
+        successAdditional: (school, date, start, end, mailto) => `You have submitted a request for the Traffic School ${school} on ${date} from ${start} to ${end}. We will contact you by email. If you made a mistake when submitting this request or submitted it by accident, please write to us at <a href="${mailto}">events@kidbike.de</a>.`
       }
     };
 
@@ -834,9 +850,9 @@
     }
 
     const SCHOOLS = {
-      WA: { name: "Verkehrsschule am Wassertorplatz", short:"Wassertorplatz", file: "events-wa.json", address: "Wassertorplatz 1, 10999 Berlin" },
-      WI: { name: "Verkehrsschule Wiener Straße",     short:"Wiener Straße",  file: "events-wi.json", address: "Wiener Str. 59c, 10999 Berlin" },
-      WE: { name: "Verkehrsschule Weinstraße",        short:"Weinstraße",     file: "events-we.json", address: "Weinstraße 2, 10249 Berlin" }
+      WA: { name: "Verkehrsschule am Wassertorplatz", short:"Wassertorplatz", file: "events-wa.json", address: "Wassertorplatz 1, 10999 Berlin", coords: [52.4983, 13.4079] },
+      WI: { name: "Verkehrsschule Wiener Straße",     short:"Wiener Straße",  file: "events-wi.json", address: "Wiener Str. 59c, 10999 Berlin", coords: [52.4967, 13.4363] },
+      WE: { name: "Verkehrsschule Weinstraße",        short:"Weinstraße",     file: "events-we.json", address: "Weinstraße 2, 10249 Berlin", coords: [52.5255, 13.4411] }
     };
     const FORCE_OFFLINE = {};
 
@@ -950,6 +966,17 @@
         extrasField.style.display = (cfg.extras && cfg.extras.length) ? '' : 'none';
       }
     }
+
+    let calendar = null;
+    let startMapObj = null;
+    let mapMarkers = {};
+    let currentKey = null;
+    let busyEvents = [];
+    let currentHolds = [];
+    let wasSubmitted = false;
+    const availability = {};
+    let CURRENT_PRICE = null;
+    let untrap = null;
 
     const schoolSelect = document.getElementById('schoolSelect');
     const langSelect   = document.getElementById('langSelect');
@@ -1093,15 +1120,6 @@
     const DEFAULT_TAP_MINUTES = 120;
     const MAX_EVENT_HOURS   = 24;
     const FALLBACK_MINUTES  = 120;
-
-    let calendar = null;
-    let currentKey = null;
-    let busyEvents = [];
-    let currentHolds = [];
-    let wasSubmitted = false;
-    const availability = {};
-    let CURRENT_PRICE = null;
-    let untrap = null;
 
     /* ===== I18N apply ===== */
     function applyI18n(){
@@ -1255,9 +1273,10 @@
         }
        if (FORCE_OFFLINE[key]) availability[key].ok = false;
       }
-     renderSchoolSelectOptions();
+      renderSchoolSelectOptions();
       renderStartCards();
       startOverlay.style.display = 'flex';
+      if (startMapObj) setTimeout(() => startMapObj.invalidateSize(), 150);
     }
 
 
@@ -1295,35 +1314,44 @@
     }
 
     function renderStartCards(){
-      const L = I18N[langSelect.value] || I18N.de;
+      const T = I18N[langSelect.value] || I18N.de;
       startGrid.innerHTML = '';
+      
+      if (!startMapObj && window.L) {
+        startMapObj = window.L.map('startMap').setView([52.505, 13.42], 12);
+        window.L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+          attribution: '&copy; OSM contributors'
+        }).addTo(startMapObj);
+      }
+
       for(const key of Object.keys(SCHOOLS)){
-        const { name, address } = SCHOOLS[key];
+        const { name, address, coords } = SCHOOLS[key];
         const ok = availability[key]?.ok;
         
         let statusText = '';
         let statusClass = 'status';
         
         if (!ok) {
-          statusText = L.notOnline;
+          statusText = T.notOnline;
         } else if (key === 'WI') {
-          statusText = L.phoneBookable;
+          statusText = T.phoneBookable;
           statusClass = 'status phone';
         } else {
-          statusText = L.onlineBookable;
+          statusText = T.onlineBookable;
         }
 
         const card = document.createElement('div');
         card.className = 'school-card' + (ok ? '' : ' disabled');
+        card.id = 'scard_' + key;
         card.innerHTML = `
           <h3 style="margin:0;font-size:16px;">${name}</h3>
           <p style="margin:0;color:#374151;font-size:13px;">${address}</p>
           <span class="${statusClass}">${statusText}</span>
           <div class="choose" style="margin-top:auto">
-            <button class="btn ${ok ? 'primary' : ''}" ${ ok ? '' : 'disabled' }>${L.choose}</button>
+            <button class="btn ${ok ? 'primary' : ''}" ${ ok ? '' : 'disabled' }>${T.choose}</button>
           </div>`;
-        const btn = card.querySelector('button');
-        btn.addEventListener('click', ()=>{
+          
+        card.addEventListener('click', ()=>{
           if(!ok) return;
           currentKey = key;
           startOverlay.style.display = 'none';
@@ -1331,7 +1359,29 @@
           schoolSelect.value = key;
           loadCalendar(key);
         });
+
+        const redIcon = window.L ? new window.L.Icon({iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png', shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]}) : null;
+        const defaultIcon = window.L ? new window.L.Icon.Default() : null;
+
+        card.addEventListener('mouseenter', () => { if (mapMarkers[key] && redIcon) mapMarkers[key].setIcon(redIcon); });
+        card.addEventListener('mouseleave', () => { if (mapMarkers[key] && defaultIcon) mapMarkers[key].setIcon(defaultIcon); });
+
         startGrid.appendChild(card);
+
+        if (startMapObj && coords && !mapMarkers[key]) {
+           const m = window.L.marker(coords).addTo(startMapObj).bindPopup(`<b>${name}</b><br>${address}`);
+           mapMarkers[key] = m;
+           m.on('mouseover', () => { card.classList.add('highlighted'); card.scrollIntoView({behavior: 'smooth', block: 'nearest'}); });
+           m.on('mouseout', () => { card.classList.remove('highlighted'); });
+           m.on('click', () => { 
+             if(ok) {
+                currentKey = key; startOverlay.style.display = 'none'; renderSchoolSelectOptions(); schoolSelect.value = key; loadCalendar(key);
+             } else {
+                card.scrollIntoView({behavior: 'smooth', block: 'nearest'});
+                card.classList.add('highlighted'); setTimeout(()=>card.classList.remove('highlighted'), 1000);
+             }
+           });
+        }
       }
     }
 
@@ -2105,6 +2155,20 @@
         ${messageRow}
       `;
 
+      const dateStr = start.toLocaleDateString(langSelect.value === 'en' ? 'en-GB' : 'de-DE');
+      const startStr = start.toLocaleTimeString(langSelect.value === 'en' ? 'en-GB' : 'de-DE', { hour: '2-digit', minute: '2-digit' });
+      const endStr = end.toLocaleTimeString(langSelect.value === 'en' ? 'en-GB' : 'de-DE', { hour: '2-digit', minute: '2-digit' });
+      const mailSubject = `Anfrage / Request Verkehrsschule ${payload.school || ""} - ${dateStr}`;
+      const mailLink = `mailto:events@kidbike.de?subject=${encodeURIComponent(mailSubject)}`;
+      
+      document.getElementById('successAdditionalText').innerHTML = L.successAdditional(
+        esc(payload.school || ""), 
+        dateStr, 
+        startStr, 
+        endStr, 
+        mailLink
+      );
+
       successOverlay.style.display = 'flex';
       btnBackToCalendar.focus();
 
@@ -2162,14 +2226,13 @@
           else if (fBikesNo.checked) bikesValue = 'Nein';
         }
 
-        // NIEUW: Stop de waarschuwing dikgedrukt in de opmerkingen voor de mail
         const start = parseLocalDT(fFrom.value);
         const end   = parseLocalDT(fTo.value);
         const isOverlapping = getOverlapState(start, end);
         
         let finalMessage = fMsg.value;
         if (isOverlapping) {
-            finalMessage = "⚠️ LET OP / ACHTUNG: Dit tijdsvak is al (deels) gereserveerd! De gebruiker heeft hiervoor een waarschuwing gekregen und er toch voor gekozen om de aanvraag te doen. ⚠️\n\n" + finalMessage;
+            finalMessage = "⚠️ ACHTUNG: Dieser Zeitraum ist bereits (teilweise) reserviert! Der Nutzer hat eine Warnung erhalten und sich dennoch für die Anfrage entschieden. ⚠️\n\n" + finalMessage;
         }
 
         const payload = {
@@ -2193,7 +2256,7 @@
           city:    fCity.value,
           zipcity: fZipCity.value,
           address: formatAddress(),
-          message: finalMessage, // Zodat dit met waarschuwing en al naar Apps Script gaat
+          message: finalMessage, 
           has_overlap: isOverlapping,
           extras:  extrasList,
           lang:    langSelect.value || 'de',
