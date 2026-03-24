@@ -305,6 +305,18 @@
     .field input.error + .error-msg,
     .field select.error + .error-msg{display:block}
 
+    /* Stepper UI voor Fietsen */
+    .bike-list { display: flex; flex-direction: column; gap: 8px; border: 1px solid var(--border); border-radius: 10px; padding: 8px; background: #fff; }
+    .bike-item { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; }
+    .bike-item:not(:last-child) { border-bottom: 1px solid #f1f5f9; }
+    .bike-label { font-size: 13px; font-weight: 600; color: #374151; line-height: 1.2; }
+    .bike-label span { display: block; font-size: 11px; font-weight: normal; color: var(--muted); margin-top: 2px; }
+    .stepper { display: flex; align-items: center; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; background: #fff; }
+    .stepper button { width: 36px; height: 36px; border: none; background: #f8fafc; color: #475569; font-size: 18px; cursor: pointer; transition: background 0.2s; display: flex; align-items: center; justify-content: center; }
+    .stepper button:hover { background: #e2e8f0; }
+    .stepper input { width: 40px; height: 36px; border: none !important; border-left: 1px solid var(--border) !important; border-right: 1px solid var(--border) !important; text-align: center; border-radius: 0 !important; font-weight: bold; -moz-appearance: textfield; padding:0; min-height:0; }
+    .stepper input::-webkit-outer-spin-button, .stepper input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
     @media (max-width:900px){
       .success-actions{flex-direction:column;}
       .success-actions .btn{width:100%;}
@@ -607,13 +619,56 @@
               </fieldset>
 
               <div id="bikesDetailsWrapper" style="display:none; margin-top:4px;">
-                <label id="labelBikesDetails">Anzahl Fahrräder nach Größe/Alter *</label>
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:8px;">
-                  <div class="field sm" style="margin-bottom:0"><label>12 Zoll (3-4 J.)</label><input type="number" id="fBikes12" min="0" value="0"></div>
-                  <div class="field sm" style="margin-bottom:0"><label>16 Zoll (4-6 J.)</label><input type="number" id="fBikes16" min="0" value="0"></div>
-                  <div class="field sm" style="margin-bottom:0"><label>20 Zoll (6-8 J.)</label><input type="number" id="fBikes20" min="0" value="0"></div>
-                  <div class="field sm" style="margin-bottom:0"><label>24 Zoll (8-10 J.)</label><input type="number" id="fBikes24" min="0" value="0"></div>
-                  <div class="field sm" style="margin-bottom:0"><label>26 Zoll (10-14 J.)</label><input type="number" id="fBikes26" min="0" value="0"></div>
+                <label id="labelBikesDetails" style="margin-bottom:8px;">Anzahl Fahrräder nach Größe/Alter *</label>
+                <div class="bike-list">
+                  <div class="bike-item">
+                    <div class="bike-label">Laufräder <span>(2-3 Jahre)</span></div>
+                    <div class="stepper">
+                      <button type="button" class="btn-minus" data-target="fBikesLauf">−</button>
+                      <input type="number" id="fBikesLauf" min="0" value="0" readonly>
+                      <button type="button" class="btn-plus" data-target="fBikesLauf">+</button>
+                    </div>
+                  </div>
+                  <div class="bike-item">
+                    <div class="bike-label">12 Zoll <span>(3-4 Jahre)</span></div>
+                    <div class="stepper">
+                      <button type="button" class="btn-minus" data-target="fBikes12">−</button>
+                      <input type="number" id="fBikes12" min="0" value="0" readonly>
+                      <button type="button" class="btn-plus" data-target="fBikes12">+</button>
+                    </div>
+                  </div>
+                  <div class="bike-item">
+                    <div class="bike-label">16 Zoll <span>(4-6 Jahre)</span></div>
+                    <div class="stepper">
+                      <button type="button" class="btn-minus" data-target="fBikes16">−</button>
+                      <input type="number" id="fBikes16" min="0" value="0" readonly>
+                      <button type="button" class="btn-plus" data-target="fBikes16">+</button>
+                    </div>
+                  </div>
+                  <div class="bike-item">
+                    <div class="bike-label">20 Zoll <span>(6-8 Jahre)</span></div>
+                    <div class="stepper">
+                      <button type="button" class="btn-minus" data-target="fBikes20">−</button>
+                      <input type="number" id="fBikes20" min="0" value="0" readonly>
+                      <button type="button" class="btn-plus" data-target="fBikes20">+</button>
+                    </div>
+                  </div>
+                  <div class="bike-item">
+                    <div class="bike-label">24 Zoll <span>(8-10 Jahre)</span></div>
+                    <div class="stepper">
+                      <button type="button" class="btn-minus" data-target="fBikes24">−</button>
+                      <input type="number" id="fBikes24" min="0" value="0" readonly>
+                      <button type="button" class="btn-plus" data-target="fBikes24">+</button>
+                    </div>
+                  </div>
+                  <div class="bike-item">
+                    <div class="bike-label">26 Zoll <span>(10-14 Jahre)</span></div>
+                    <div class="stepper">
+                      <button type="button" class="btn-minus" data-target="fBikes26">−</button>
+                      <input type="number" id="fBikes26" min="0" value="0" readonly>
+                      <button type="button" class="btn-plus" data-target="fBikes26">+</button>
+                    </div>
+                  </div>
                 </div>
                 <div class="error-msg" id="err-bikesdetails">Bitte mindestens 1 Fahrrad auswählen</div>
               </div>
@@ -754,7 +809,7 @@
         wiInfoTitle: "Buchung Verkehrsschule Wiener Straße",
         wiInfoText: `Die Verkehrsschule Wiener Straße kann <strong>nicht online</strong> gebucht werden.<br><br>Grüne Blöcke im Kalender sind voraussichtlich frei. Bitte rufen Sie uns an, um Details zu besprechen und Ihre Buchung vorzunehmen: <br><br><strong style="font-size: 18px; color: var(--brand);"><a href="tel:+493022502486" style="color: inherit; text-decoration: none;">030 22502486</a></strong>`,
         wiInfoOk: "Verstanden",
-        successAdditional: (school, date, start, end, mailto) => `Sie haben eine Anfrage für die Verkehrsschule ${school} am ${date} von ${start} bis ${end} eingereicht. Wir melden uns per E-Mail bei Ihnen. Haben Sie bei der Einreichung dieser Anfrage einen Fehler gemacht oder diese Anfrage versehentlich eingereicht, schreiben Sie uns bitte an <a href="${mailto}">events@kidbike.de</a>.`
+        successAdditional: (school, date, start, end, mailto) => `Sie haben eine Anfrage für die Verkehrsschule ${school} am ${date} von ${start} bis ${end} eingereicht. Wir melden uns per E-Mail bei Ihnen.<br><br>Haben Sie bei der Einreichung dieser Anfrage einen Fehler gemacht oder diese Anfrage versehentlich eingereicht, schreiben Sie uns bitte an <a href="${mailto}">events@kidbike.de</a>.`
       },
       en: {
         appTitle: "Traffic School Availability",
@@ -836,7 +891,7 @@
         wiInfoTitle: "Booking Traffic School Wiener Straße",
         wiInfoText: `The Wiener Straße traffic school <strong>cannot be booked online</strong>.<br><br>Green blocks in the calendar are likely available. Please call us to discuss the details and to make a booking: <br><br><strong style="font-size: 18px; color: var(--brand);"><a href="tel:+493022502486" style="color: inherit; text-decoration: none;">030 22502486</a></strong>`,
         wiInfoOk: "Got it",
-        successAdditional: (school, date, start, end, mailto) => `You have submitted a request for the Traffic School ${school} on ${date} from ${start} to ${end}. We will contact you by email. If you made a mistake when submitting this request or submitted it by accident, please write to us at <a href="${mailto}">events@kidbike.de</a>.`
+        successAdditional: (school, date, start, end, mailto) => `You have submitted a request for the Traffic School ${school} on ${date} from ${start} to ${end}. We will contact you by email.<br><br>If you made a mistake when submitting this request or submitted it by accident, please write to us at <a href="${mailto}">events@kidbike.de</a>.`
       }
     };
 
@@ -1056,6 +1111,7 @@
     const bikesDetailsWrapper = document.getElementById('bikesDetailsWrapper');
     const labelBikesDetails = document.getElementById('labelBikesDetails');
     const errBikesDetails = document.getElementById('err-bikesdetails');
+    const fBikesLauf = document.getElementById('fBikesLauf');
     const fBikes12 = document.getElementById('fBikes12');
     const fBikes16 = document.getElementById('fBikes16');
     const fBikes20 = document.getElementById('fBikes20');
@@ -1132,8 +1188,9 @@
     /* ===== I18N apply ===== */
     function applyI18n(){
       const L = I18N[langSelect.value] || I18N.de;
-      successTitle.textContent = L.successTitle;
-      btnBackToCalendar.textContent = L.successBack;
+      titleApp.textContent = L.appTitle;
+      labelSchool.textContent = L.labelSchool;
+      labelLang.textContent = L.labelLang;
       introLine1.textContent = L.intro1;
       introHint.textContent  = L.introHint;
       document.getElementById('calendarLoading').firstChild.nodeValue = L.loadingCalendar;
@@ -1188,7 +1245,6 @@
       fTypeFree.placeholder = L.phType;
 
       successTitle.textContent = L.successTitle;
-      successLead.textContent  = L.successLead;
       btnBackToCalendar.textContent = L.successBack;
 
       startTitle.textContent = L.startTitle;
@@ -1481,10 +1537,10 @@
         } else {
           errBikesChoice.style.display = 'none';
           if (fBikesYes.checked) {
-            const totalBikes = (parseInt(fBikes12.value)||0) + (parseInt(fBikes16.value)||0) + (parseInt(fBikes20.value)||0) + (parseInt(fBikes24.value)||0) + (parseInt(fBikes26.value)||0);
+            const totalBikes = (parseInt(fBikesLauf.value)||0) + (parseInt(fBikes12.value)||0) + (parseInt(fBikes16.value)||0) + (parseInt(fBikes20.value)||0) + (parseInt(fBikes24.value)||0) + (parseInt(fBikes26.value)||0);
             if (totalBikes < 1) bikesOk = false;
             
-            const bTouch = (fBikes12.dataset.touched==='1' || fBikes16.dataset.touched==='1' || fBikes20.dataset.touched==='1' || fBikes24.dataset.touched==='1' || fBikes26.dataset.touched==='1');
+            const bTouch = (fBikesLauf.dataset.touched==='1' || fBikes12.dataset.touched==='1' || fBikes16.dataset.touched==='1' || fBikes20.dataset.touched==='1' || fBikes24.dataset.touched==='1' || fBikes26.dataset.touched==='1');
             errBikesDetails.style.display = (bikesOk === false && (wasSubmitted || bTouch)) ? 'block' : 'none';
           } else {
             errBikesDetails.style.display = 'none';
@@ -1649,8 +1705,8 @@
       fBikesYes.checked = false;
       fBikesNo.checked = false;
       if(fBikes12) {
-          fBikes12.value = 0; fBikes16.value = 0; fBikes20.value = 0; fBikes24.value = 0; fBikes26.value = 0;
-          fBikes12.dataset.touched = '0'; fBikes16.dataset.touched = '0'; fBikes20.dataset.touched = '0'; fBikes24.dataset.touched = '0'; fBikes26.dataset.touched = '0';
+          fBikesLauf.value = 0; fBikes12.value = 0; fBikes16.value = 0; fBikes20.value = 0; fBikes24.value = 0; fBikes26.value = 0;
+          fBikesLauf.dataset.touched = '0'; fBikes12.dataset.touched = '0'; fBikes16.dataset.touched = '0'; fBikes20.dataset.touched = '0'; fBikes24.dataset.touched = '0'; fBikes26.dataset.touched = '0';
       }
       bikesDetailsWrapper.style.display = 'none';
       errBikesChoice.style.display = 'none';
@@ -1736,7 +1792,22 @@
       });
     });
 
-    [fBikes12, fBikes16, fBikes20, fBikes24, fBikes26].forEach(el => {
+    // Stepper logic
+    document.querySelectorAll('.stepper button').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const targetId = e.currentTarget.dataset.target;
+        const input = document.getElementById(targetId);
+        if(!input) return;
+        let val = parseInt(input.value) || 0;
+        if (e.currentTarget.classList.contains('btn-minus') && val > 0) val--;
+        if (e.currentTarget.classList.contains('btn-plus')) val++;
+        input.value = val;
+        input.dataset.touched = '1';
+        validateTimes();
+      });
+    });
+
+    [fBikesLauf, fBikes12, fBikes16, fBikes20, fBikes24, fBikes26].forEach(el => {
       if(!el) return;
       el.addEventListener('input', validateTimes);
       el.addEventListener('blur', () => { el.dataset.touched = '1'; validateTimes(); });
@@ -2141,7 +2212,6 @@
     function showSuccessOverlay(payload){
       const L = I18N[langSelect.value] || I18N.de;
       successTitle.textContent = L.successTitle;
-      successLead.textContent  = L.successLead;
       btnBackToCalendar.textContent = L.successBack;
 
       const labels = L.successSummaryLabels;
@@ -2238,6 +2308,7 @@
         if (currentKey === 'WE') {
           if (fBikesYes.checked) {
             let b = [];
+            if (parseInt(fBikesLauf.value)>0) b.push(`${fBikesLauf.value}x Laufrad (2-3 J.)`);
             if (parseInt(fBikes12.value)>0) b.push(`${fBikes12.value}x 12" (3-4 J.)`);
             if (parseInt(fBikes16.value)>0) b.push(`${fBikes16.value}x 16" (4-6 J.)`);
             if (parseInt(fBikes20.value)>0) b.push(`${fBikes20.value}x 20" (6-8 J.)`);
