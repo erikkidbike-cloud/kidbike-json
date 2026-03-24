@@ -17,7 +17,7 @@
     /* toon vaste + knop op touch devices */
     .touch .mobile-add { display: block; }
     
-    /* -- Fix horizontale scroll in embed -- */
+    /* --- Fix horizontale scroll in embed --- */
     html, body { overflow-x: hidden; width:100%; max-width:100%; }
     header, .intro, #calendar { max-width: 100%; }
 
@@ -393,9 +393,8 @@
   <div id="successOverlay" class="success-overlay" role="dialog" aria-modal="true" aria-labelledby="successTitle">
     <div class="success-card">
       <h2 id="successTitle">Anfrage gesendet</h2>
-      <p id="successLead">Vielen Dank. Wir melden uns per E-Mail zur Bestätigung.</p>
+      <p id="successLead" style="margin:0 0 16px; line-height:1.5;"></p>
       <div class="success-summary" id="successSummary"></div>
-      <p id="successAdditionalText" style="margin-top:16px; font-size:14px; color:#4b5563; line-height: 1.5;"></p>
       <div class="success-actions">
         <button class="btn" id="btnBackToCalendar">Zurück zum Kalender</button>
       </div>
@@ -608,9 +607,15 @@
               </fieldset>
 
               <div id="bikesDetailsWrapper" style="display:none; margin-top:4px;">
-                <label id="labelBikesDetails" for="fBikesDetails">Anzahl Fahrräder & Alter der Kinder *</label>
-                <input id="fBikesDetails" name="bikes_details" type="text" placeholder="z. B. 6 Räder, Alter 5–9" aria-describedby="err-bikesdetails">
-                <div class="error-msg" id="err-bikesdetails">Bitte Details angeben</div>
+                <label id="labelBikesDetails">Anzahl Fahrräder nach Größe/Alter *</label>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:8px;">
+                  <div class="field sm" style="margin-bottom:0"><label>12 Zoll (3-4 J.)</label><input type="number" id="fBikes12" min="0" value="0"></div>
+                  <div class="field sm" style="margin-bottom:0"><label>16 Zoll (4-6 J.)</label><input type="number" id="fBikes16" min="0" value="0"></div>
+                  <div class="field sm" style="margin-bottom:0"><label>20 Zoll (6-8 J.)</label><input type="number" id="fBikes20" min="0" value="0"></div>
+                  <div class="field sm" style="margin-bottom:0"><label>24 Zoll (8-10 J.)</label><input type="number" id="fBikes24" min="0" value="0"></div>
+                  <div class="field sm" style="margin-bottom:0"><label>26 Zoll (10-14 J.)</label><input type="number" id="fBikes26" min="0" value="0"></div>
+                </div>
+                <div class="error-msg" id="err-bikesdetails">Bitte mindestens 1 Fahrrad auswählen</div>
               </div>
             </div>
 
@@ -693,10 +698,9 @@
         bikesQuestion: "Möchten Sie die Kinderfahrräder der Verkehrsschule nutzen? *",
         bikesYes: "Ja, ich möchte Fahrräder nutzen",
         bikesNo: "Nein, brauche keine / bringe eigene mit",
-        bikesDetails: "Anzahl Fahrräder & Alter der Kinder *",
+        bikesDetails: "Anzahl Fahrräder nach Größe/Alter *",
         errBikesChoice: "Bitte eine Option auswählen",
-        errBikesDetails: "Bitte geben Sie die Details an",
-        phBikes: "z. B. 6 Räder, Alter 5–9",
+        errBikesDetails: "Bitte mindestens 1 Fahrrad auswählen",
         extras: "Extras",
         extraParcours: "Fahrradparcours",
         extraGrill: "Grill",
@@ -776,10 +780,9 @@
         bikesQuestion: "Would you like to use the traffic school's kids' bikes? *",
         bikesYes: "Yes, I want to use the bikes",
         bikesNo: "No, I don't need bikes / will bring my own",
-        bikesDetails: "Number of bikes & ages of children *",
+        bikesDetails: "Number of bikes by size/age *",
         errBikesChoice: "Please select an option",
-        errBikesDetails: "Please provide details",
-        phBikes: "e.g. 6 bikes, ages 5–9",
+        errBikesDetails: "Please select at least 1 bike",
         extras: "Extras",
         extraParcours: "Bike course",
         extraGrill: "Grill",
@@ -850,9 +853,9 @@
     }
 
     const SCHOOLS = {
+      WE: { name: "Verkehrsschule Weinstraße",        short:"Weinstraße",     file: "events-we.json", address: "Weinstraße 2, 10249 Berlin", coords: [52.5255, 13.4411] },
       WA: { name: "Verkehrsschule am Wassertorplatz", short:"Wassertorplatz", file: "events-wa.json", address: "Wassertorplatz 1, 10999 Berlin", coords: [52.4983, 13.4079] },
-      WI: { name: "Verkehrsschule Wiener Straße",     short:"Wiener Straße",  file: "events-wi.json", address: "Wiener Str. 59c, 10999 Berlin", coords: [52.4967, 13.4363] },
-      WE: { name: "Verkehrsschule Weinstraße",        short:"Weinstraße",     file: "events-we.json", address: "Weinstraße 2, 10249 Berlin", coords: [52.5255, 13.4411] }
+      WI: { name: "Verkehrsschule Wiener Straße",     short:"Wiener Straße",  file: "events-wi.json", address: "Wiener Str. 59c, 10999 Berlin", coords: [52.4967, 13.4363] }
     };
     const FORCE_OFFLINE = {};
 
@@ -1049,10 +1052,15 @@
     const fBikesYes = document.getElementById('fBikesYes');
     const fBikesNo = document.getElementById('fBikesNo');
     const errBikesChoice = document.getElementById('err-bikeschoice');
+    
     const bikesDetailsWrapper = document.getElementById('bikesDetailsWrapper');
     const labelBikesDetails = document.getElementById('labelBikesDetails');
-    const fBikesDetails = document.getElementById('fBikesDetails');
     const errBikesDetails = document.getElementById('err-bikesdetails');
+    const fBikes12 = document.getElementById('fBikes12');
+    const fBikes16 = document.getElementById('fBikes16');
+    const fBikes20 = document.getElementById('fBikes20');
+    const fBikes24 = document.getElementById('fBikes24');
+    const fBikes26 = document.getElementById('fBikes26');
 
     const fMsg      = document.getElementById('fMsg');
 
@@ -1124,9 +1132,8 @@
     /* ===== I18N apply ===== */
     function applyI18n(){
       const L = I18N[langSelect.value] || I18N.de;
-      titleApp.textContent = L.appTitle;
-      labelSchool.textContent = L.labelSchool;
-      labelLang.textContent = L.labelLang;
+      successTitle.textContent = L.successTitle;
+      btnBackToCalendar.textContent = L.successBack;
       introLine1.textContent = L.intro1;
       introHint.textContent  = L.introHint;
       document.getElementById('calendarLoading').firstChild.nodeValue = L.loadingCalendar;
@@ -1144,7 +1151,6 @@
       if(labelBikesDetails) labelBikesDetails.textContent = L.bikesDetails;
       if(errBikesChoice) errBikesChoice.textContent = L.errBikesChoice;
       if(errBikesDetails) errBikesDetails.textContent = L.errBikesDetails;
-      if(fBikesDetails) fBikesDetails.placeholder = L.phBikes || '';
 
       labelEmail.textContent = L.email;
       labelPhone.textContent = (langSelect.value==='en'?'Phone number *':'Telefon *');
@@ -1475,11 +1481,13 @@
         } else {
           errBikesChoice.style.display = 'none';
           if (fBikesYes.checked) {
-            const detailsOk = !!(fBikesDetails.value || '').trim();
-            if (!detailsOk) bikesOk = false;
-            highlight(fBikesDetails, !detailsOk);
+            const totalBikes = (parseInt(fBikes12.value)||0) + (parseInt(fBikes16.value)||0) + (parseInt(fBikes20.value)||0) + (parseInt(fBikes24.value)||0) + (parseInt(fBikes26.value)||0);
+            if (totalBikes < 1) bikesOk = false;
+            
+            const bTouch = (fBikes12.dataset.touched==='1' || fBikes16.dataset.touched==='1' || fBikes20.dataset.touched==='1' || fBikes24.dataset.touched==='1' || fBikes26.dataset.touched==='1');
+            errBikesDetails.style.display = (bikesOk === false && (wasSubmitted || bTouch)) ? 'block' : 'none';
           } else {
-            highlight(fBikesDetails, false);
+            errBikesDetails.style.display = 'none';
           }
         }
       }
@@ -1636,15 +1644,17 @@
       if (bikesWrapper) {
         bikesWrapper.style.display = (currentKey === 'WE') ? 'block' : 'none';
       }
-      fBikesYes.checked = false;
-      fBikesNo.checked = false;
       fBikesYes.dataset.touched = '0';
       fBikesNo.dataset.touched = '0';
-      fBikesDetails.value = '';
-      fBikesDetails.dataset.touched = '0';
+      fBikesYes.checked = false;
+      fBikesNo.checked = false;
+      if(fBikes12) {
+          fBikes12.value = 0; fBikes16.value = 0; fBikes20.value = 0; fBikes24.value = 0; fBikes26.value = 0;
+          fBikes12.dataset.touched = '0'; fBikes16.dataset.touched = '0'; fBikes20.dataset.touched = '0'; fBikes24.dataset.touched = '0'; fBikes26.dataset.touched = '0';
+      }
       bikesDetailsWrapper.style.display = 'none';
       errBikesChoice.style.display = 'none';
-      highlight(fBikesDetails, false);
+      errBikesDetails.style.display = 'none';
 
       formatAddress();
       renderExtrasForSchool(currentKey || 'WE');
@@ -1725,8 +1735,12 @@
         validateTimes();
       });
     });
-    fBikesDetails.addEventListener('input', validateTimes);
-    fBikesDetails.addEventListener('blur', () => { fBikesDetails.dataset.touched = '1'; validateTimes(); });
+
+    [fBikes12, fBikes16, fBikes20, fBikes24, fBikes26].forEach(el => {
+      if(!el) return;
+      el.addEventListener('input', validateTimes);
+      el.addEventListener('blur', () => { el.dataset.touched = '1'; validateTimes(); });
+    });
 
     [fFrom,fTo,fPersons,fEmail,fPhoneNat,fStreet,fHouse,fZip,fCity].forEach(el=>{
       el.addEventListener('blur', ()=>{ el.dataset.touched = '1'; validateTimes(); });
@@ -2161,7 +2175,7 @@
       const mailSubject = `Anfrage / Request Verkehrsschule ${payload.school || ""} - ${dateStr}`;
       const mailLink = `mailto:events@kidbike.de?subject=${encodeURIComponent(mailSubject)}`;
       
-      document.getElementById('successAdditionalText').innerHTML = L.successAdditional(
+      successLead.innerHTML = L.successAdditional(
         esc(payload.school || ""), 
         dateStr, 
         startStr, 
@@ -2198,7 +2212,7 @@
       errBox.textContent = '';
 
       if(!validateTimes()) {
-        const firstErr = [fPersons,fFrom,fTo,fEmail,fPhoneNat,fStreet,fHouse,fZip,fCity,fBikesDetails]
+        const firstErr = [fPersons,fFrom,fTo,fEmail,fPhoneNat,fStreet,fHouse,fZip,fCity]
           .find(el=>el && el.classList && el.classList.contains('error'));
         if(firstErr) firstErr.focus();
         return;
@@ -2222,7 +2236,15 @@
 
         let bikesValue = '';
         if (currentKey === 'WE') {
-          if (fBikesYes.checked) bikesValue = 'Ja: ' + fBikesDetails.value.trim();
+          if (fBikesYes.checked) {
+            let b = [];
+            if (parseInt(fBikes12.value)>0) b.push(`${fBikes12.value}x 12" (3-4 J.)`);
+            if (parseInt(fBikes16.value)>0) b.push(`${fBikes16.value}x 16" (4-6 J.)`);
+            if (parseInt(fBikes20.value)>0) b.push(`${fBikes20.value}x 20" (6-8 J.)`);
+            if (parseInt(fBikes24.value)>0) b.push(`${fBikes24.value}x 24" (8-10 J.)`);
+            if (parseInt(fBikes26.value)>0) b.push(`${fBikes26.value}x 26" (10-14 J.)`);
+            bikesValue = 'Ja: ' + b.join(', ');
+          }
           else if (fBikesNo.checked) bikesValue = 'Nein';
         }
 
