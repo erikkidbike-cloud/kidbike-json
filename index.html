@@ -519,7 +519,7 @@
             <div class="row"><span id="bdPersonsLabel" class="muted">Personen-Staffel</span><span id="bdPersons">–</span></div>
             <div class="row">
               <span class="muted tooltip-wrap">
-                <span id="bdTimeLabel">Zeit-Zuschlag</span>
+                <span id="bdTimeLabel">Personal-Zuschlag</span>
                 <span id="timeInfo" class="tooltip-icon" aria-haspopup="dialog" aria-expanded="false" tabindex="0">?</span>
                 <div id="timeInfoPopover" class="popover" role="dialog" aria-hidden="true"></div>
               </span>
@@ -786,12 +786,12 @@
         phType: "z. B. Kindergeburtstag, Jubiläum, …",
         bdBase: (tier)=>`Basis (bis ${tier} Std.)`,
         bdPersons: (label)=>`Personen-Staffel (${label})`,
-        bdTime: "Zeit-Zuschlag",
+        bdTime: "Personal-Zuschlag",
         bdExtras: "Extras",
         bdTotal: "Summe",
         bdNoExtras: "keine",
         priceOnReq: "Preis nach Vereinbarung",
-        bdTimeInfo: "30 € Zuschlag, wenn Beginn UND Ende nicht zwischen 9:00–17:30 Uhr liegen oder wenn der Zeitraum (auch teilweise) am Wochenende liegt.",
+        bdTimeInfo: "35 € Personal-Zuschlag für das Öffnen bzw. Schließen der Anlage. Dieser fällt an, wenn der Beginn oder das Ende außerhalb der regulären Zeiten (Mo-Sa 9:00–17:30 Uhr) oder auf einen Sonntag fällt. Liegen sowohl Beginn als auch Ende außerhalb, wird der Zuschlag zweimal (70 €) berechnet.",
         successTitle: "Anfrage gesendet",
         successLead: "Vielen Dank. Ihre Anfrage ist noch nicht verbindlich. Wir prüfen die Angaben und melden uns per E-Mail. Sie erhalten dann die Nutzungsvereinbarung sowie weitere Hinweise.",
         successBack: "Zurück zum Kalender",
@@ -868,12 +868,12 @@
         phType: "e.g. kids' birthday, anniversary …",
         bdBase: (tier)=>`Base (up to ${tier} h)`,
         bdPersons: (label)=>`People tier (${label})`,
-        bdTime: "Time surcharge",
+        bdTime: "Staff Surcharge",
         bdExtras: "Extras",
         bdTotal: "Total",
         bdNoExtras: "none",
         priceOnReq: "Price on request",
-        bdTimeInfo: "€30 surcharge if start AND end are not between 9:00–17:30, or if any part of the booking falls on a weekend.",
+        bdTimeInfo: "€35 staff surcharge for opening or closing the facility. This applies if the start or end time falls outside regular hours (Mon-Sat 9:00–17:30) or on a Sunday. If both start and end are outside these hours, the surcharge is applied twice (€70).",
         successTitle: "Request submitted",
         successLead: "Thank you. Your request is not yet binding. We will review the details and contact you by email. You will then receive the usage agreement and further instructions.",
         successBack: "Back to calendar",
@@ -913,20 +913,19 @@
     };
     const FORCE_OFFLINE = {};
 
-    function defaultSurcharge30(start, end){
-      const validTime = (dt)=> {
+    function staffSurcharge(start, end){
+      const isOutside = (dt) => {
+        const day = dt.getDay();
+        if (day === 0) return true; // Zondag is altijd "outside"
         const m = dt.getHours()*60 + dt.getMinutes();
-        return (m >= 9*60) && (m <= 17*60 + 30);
+        return (m < 9*60 || m > 17*60 + 30);
       };
-      const bothOutside = !(validTime(start) && validTime(end));
-
-      function touchesWeekend(s,e){
-        const cur = new Date(s); cur.setHours(0,0,0,0);
-        const endDay = new Date(e); endDay.setHours(23,59,59,999);
-        while(cur <= endDay){ const d=cur.getDay(); if(d===0||d===6) return true; cur.setDate(cur.getDate()+1); }
-        return false;
-      }
-      return (bothOutside || touchesWeekend(start,end)) ? 30 : 0;
+      
+      let count = 0;
+      if (isOutside(start)) count++;
+      if (isOutside(end)) count++;
+      
+      return count * 35;
     }
 
     const PRICING = {
@@ -947,7 +946,7 @@
           { max: 75, mult: 1.75, label: "≤75" },
           { max:100, mult: 2.00, label: "≤100" },
         ],
-        surcharge: defaultSurcharge30,
+        surcharge: staffSurcharge,
         extras: [
           { id: "parcours",  price: 10, labelDe: "Fahrradparcours",  labelEn: "Bike course" },
           { id: "grill",     price: 10, labelDe: "Grill",            labelEn: "Grill" },
@@ -971,7 +970,7 @@
           { max: 75, mult: 1.75, label: "≤75" },
           { max:100, mult: 2.00, label: "≤100" },
         ],
-        surcharge: defaultSurcharge30,
+        surcharge: staffSurcharge,
         extras: []
       },
       WA: {
@@ -2065,7 +2064,7 @@
           updateSticky();
           timePopover.textContent = (langSelect.value === 'en')
             ? 'No time surcharge at Wassertorplatz.'
-            : 'Kein Zeit-Zuschlag am Wassertorplatz.';
+            : 'Kein Personal-Zuschlag am Wassertorplatz.';
           return;
         }
 
@@ -2129,7 +2128,7 @@
 
         timePopover.textContent = (langSelect.value === 'en')
           ? 'No time surcharge at Wassertorplatz.'
-          : 'Kein Zeit-Zuschlag am Wassertorplatz.';
+          : 'Kein Personal-Zuschlag am Wassertorplatz.';
 
         priceBreakdown.style.display = 'block';
         updateSticky();
@@ -2201,6 +2200,9 @@
         extrasSelected
       };
 
+      // Zorg ervoor dat de tooltip netjes de tekst laat zien (handig als er gewisseld is van school)
+      timePopover.textContent = L.bdTimeInfo;
+
       priceBreakdown.style.display = 'block';
       updateSticky();
 
@@ -2218,6 +2220,13 @@
     function hidePopover(){
       timePopover.classList.remove('show'); timePopover.setAttribute('aria-hidden','true'); timeInfoIcon.setAttribute('aria-expanded','false');
     }
+    
+    // Voeg muis-hover toe voor makkelijkere interactie met het icoontje en tooltip zelf
+    timeInfoIcon.addEventListener('mouseenter', showPopover);
+    timeInfoIcon.addEventListener('mouseleave', hidePopover);
+    timePopover.addEventListener('mouseenter', showPopover);
+    timePopover.addEventListener('mouseleave', hidePopover);
+
     document.addEventListener('click', (e)=>{ if(!timePopover.classList.contains('show')) return; const within = e.target.closest('.tooltip-wrap'); if(!within) hidePopover(); });
     document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') hidePopover(); if((e.key === 'Enter' || e.key === ' ') && document.activeElement === timeInfoIcon){ e.preventDefault(); togglePopover(); } });
     timeInfoIcon.addEventListener('click', (e)=>{ e.stopPropagation(); togglePopover(); });
