@@ -932,13 +932,13 @@
     const PRICING = {
       WE: {
         tiers: [
-          { maxMin: 240, hoursLabel: 4,  base: 80 },
-          { maxMin: 360, hoursLabel: 6,  base: 110 },
-          { maxMin: 480, hoursLabel: 8,  base: 140 },
-          { maxMin: 600, hoursLabel:10,  base: 170 },
-          { maxMin: 720, hoursLabel:12,  base: 200 },
-          { maxMin: 960, hoursLabel:16,  base: 260 },
-          { maxMin:1440, hoursLabel:24,  base: 340 },
+          { maxMin: 240, hoursLabel: 4,  base: 60 },
+          { maxMin: 360, hoursLabel: 6,  base: 90 },
+          { maxMin: 480, hoursLabel: 8,  base: 120 },
+          { maxMin: 600, hoursLabel:10,  base: 150 },
+          { maxMin: 720, hoursLabel:12,  base: 180 },
+          { maxMin: 960, hoursLabel:16,  base: 240 },
+          { maxMin:1440, hoursLabel:24,  base: 320 },
         ],
         personTiers: [
           { max: 30, mult: 1.00, label: "≤30" },
@@ -956,13 +956,13 @@
       },
       WI: {
         tiers: [
-          { maxMin: 240, hoursLabel: 4,  base: 80 },
-          { maxMin: 360, hoursLabel: 6,  base: 110 },
-          { maxMin: 480, hoursLabel: 8,  base: 140 },
-          { maxMin: 600, hoursLabel:10,  base: 170 },
-          { maxMin: 720, hoursLabel:12,  base: 200 },
-          { maxMin: 960, hoursLabel:16,  base: 260 },
-          { maxMin:1440, hoursLabel:24,  base: 340 },
+          { maxMin: 240, hoursLabel: 4,  base: 60 },
+          { maxMin: 360, hoursLabel: 6,  base: 90 },
+          { maxMin: 480, hoursLabel: 8,  base: 120 },
+          { maxMin: 600, hoursLabel:10,  base: 150 },
+          { maxMin: 720, hoursLabel:12,  base: 180 },
+          { maxMin: 960, hoursLabel:16,  base: 240 },
+          { maxMin:1440, hoursLabel:24,  base: 320 },
         ],
         personTiers: [
           { max: 30, mult: 1.00, label: "≤30" },
@@ -976,8 +976,8 @@
       },
       WA: {
         tiers: [
-          { maxMin: 720, hoursLabel: 12, base: 120 },
-          { maxMin: 960, hoursLabel: 16, base: 180 },
+          { maxMin: 720, hoursLabel: 12, base: 100 },
+          { maxMin: 960, hoursLabel: 16, base: 160 },
         ],
         usePersonBands: true,
         personBands: [
@@ -1049,9 +1049,7 @@
 
     const startOverlay = document.getElementById('startOverlay');
     const startTitle = document.getElementById('startTitle');
-    const startLead = document.getElementById('startLead');
     const startHintBelow = document.getElementById('startHintBelow');
-    const startGrid = startOverlay.querySelector('.start-grid');
 
     const modalBack    = document.getElementById('modalBackdrop');
     const bookingModal = document.getElementById('bookingModal');
@@ -1187,73 +1185,77 @@
     /* ===== I18N apply ===== */
     function applyI18n(){
       const L = I18N[langSelect.value] || I18N.de;
-      titleApp.textContent = L.appTitle;
-      labelSchool.textContent = L.labelSchool;
-      labelLang.textContent = L.labelLang;
-      introLine1.textContent = L.intro1;
-      introHint.textContent  = L.introHint;
-      document.getElementById('calendarLoading').firstChild.nodeValue = L.loadingCalendar;
-
-      modalTitle.textContent = L.modalTitle;
-      labelFormSchool.textContent = L.formSchool;
-      labelPersons.textContent = L.persons;
-      labelFrom.textContent = L.from;
-      labelTo.textContent = L.to;
-      labelType.textContent = L.type;
+      if (titleApp) titleApp.textContent = L.appTitle;
+      if (labelSchool) labelSchool.textContent = L.labelSchool;
+      if (labelLang) labelLang.textContent = L.labelLang;
+      if (introLine1) introLine1.textContent = L.intro1;
+      if (introHint) introHint.textContent  = L.introHint;
       
-      if(labelBikesQuestion) labelBikesQuestion.textContent = L.bikesQuestion;
-      if(labelBikesYes) labelBikesYes.textContent = L.bikesYes;
-      if(labelBikesNo) labelBikesNo.textContent = L.bikesNo;
-      if(labelBikesDetails) labelBikesDetails.textContent = L.bikesDetails;
-      if(errBikesChoice) errBikesChoice.textContent = L.errBikesChoice;
-      if(errBikesDetails) errBikesDetails.textContent = L.errBikesDetails;
+      const calLoad = document.getElementById('calendarLoading');
+      if (calLoad && calLoad.firstChild) calLoad.firstChild.nodeValue = L.loadingCalendar;
 
-      labelEmail.textContent = L.email;
-      labelPhone.textContent = (langSelect.value==='en'?'Phone number *':'Telefon *');
-      labelPhoneCountry.textContent = L.phoneCountry;
-      labelAddress.textContent = L.address;
-      labelSalutation.textContent = L.salutation;
-      labelFirstName.textContent = L.firstName;
-      labelLastName.textContent = L.lastName;
-      labelMsg.textContent = L.message;
-      labelAccept.textContent = L.accept;
+      if (modalTitle) modalTitle.textContent = L.modalTitle;
+      if (labelFormSchool) labelFormSchool.textContent = L.formSchool;
+      if (labelPersons) labelPersons.textContent = L.persons;
+      if (labelFrom) labelFrom.textContent = L.from;
+      if (labelTo) labelTo.textContent = L.to;
+      if (labelType) labelType.textContent = L.type;
+      
+      if (labelBikesQuestion) labelBikesQuestion.textContent = L.bikesQuestion;
+      if (labelBikesYes) labelBikesYes.textContent = L.bikesYes;
+      if (labelBikesNo) labelBikesNo.textContent = L.bikesNo;
+      if (labelBikesDetails) labelBikesDetails.textContent = L.bikesDetails;
+      if (errBikesChoice) errBikesChoice.textContent = L.errBikesChoice;
+      if (errBikesDetails) errBikesDetails.textContent = L.errBikesDetails;
 
-      overlapWarningText.textContent = L.overlapWarning;
-      labelOverlapConfirm.textContent = L.overlapCheck;
+      if (labelEmail) labelEmail.textContent = L.email;
+      if (labelPhone) labelPhone.textContent = (langSelect.value==='en'?'Phone number *':'Telefon *');
+      if (labelPhoneCountry) labelPhoneCountry.textContent = L.phoneCountry;
+      if (labelAddress) labelAddress.textContent = L.address;
+      if (labelSalutation) labelSalutation.textContent = L.salutation;
+      if (labelFirstName) labelFirstName.textContent = L.firstName;
+      if (labelLastName) labelLastName.textContent = L.lastName;
+      if (labelMsg) labelMsg.textContent = L.message;
+      if (labelAccept) labelAccept.textContent = L.accept;
 
-      priceTitle.textContent = L.priceTitle;
-      priceHint.textContent = L.priceHint;
-      document.getElementById('termsSummary').textContent = L.termsSummary;
+      if (overlapWarningText) overlapWarningText.textContent = L.overlapWarning;
+      if (labelOverlapConfirm) labelOverlapConfirm.textContent = L.overlapCheck;
+
+      if (priceTitle) priceTitle.textContent = L.priceTitle;
+      if (priceHint) priceHint.textContent = L.priceHint;
+      
+      const ts = document.getElementById('termsSummary');
+      if (ts) ts.textContent = L.termsSummary;
 
       const termsList = document.getElementById('termsList');
-      termsList.innerHTML = "";
-      const termsToRender = getTermsForSchool(langSelect.value, currentKey);
-      termsToRender.forEach(t => { const li = document.createElement('li'); li.textContent = t; termsList.appendChild(li); });
+      if (termsList) {
+        termsList.innerHTML = "";
+        const termsToRender = getTermsForSchool(langSelect.value, currentKey);
+        termsToRender.forEach(t => { const li = document.createElement('li'); li.textContent = t; termsList.appendChild(li); });
+      }
 
-      document.getElementById('bdTimeLabel').textContent = L.bdTime;
-      document.getElementById('bdExtrasLabel').textContent = L.bdExtras;
-      document.getElementById('bdTotalLabel').textContent = L.bdTotal;
+      if (document.getElementById('bdTimeLabel')) document.getElementById('bdTimeLabel').textContent = L.bdTime;
+      if (document.getElementById('bdExtrasLabel')) document.getElementById('bdExtrasLabel').textContent = L.bdExtras;
+      if (document.getElementById('bdTotalLabel')) document.getElementById('bdTotalLabel').textContent = L.bdTotal;
       
-      bdGrandTotalLabel.textContent = (langSelect.value==='en')
+      if (bdGrandTotalLabel) bdGrandTotalLabel.textContent = (langSelect.value==='en')
         ? 'Total incl. deposit'
         : 'Summe inkl. Kaution';
 
-      btnSubmit.textContent = L.btnSend;
+      if (btnSubmit) btnSubmit.textContent = L.btnSend;
 
-      fPersons.placeholder = L.phPersons;
-      fTypeFree.placeholder = L.phType;
+      if (fPersons) fPersons.placeholder = L.phPersons;
+      if (fTypeFree) fTypeFree.placeholder = L.phType;
 
-      successTitle.textContent = L.successTitle;
-      btnBackToCalendar.textContent = L.successBack;
+      if (successTitle) successTitle.textContent = L.successTitle;
+      if (btnBackToCalendar) btnBackToCalendar.textContent = L.successBack;
 
-      startTitle.textContent = L.startTitle;
-      startLead.textContent = L.startLead;
-      startHintBelow.textContent = L.startHint;
+      if (startTitle) startTitle.textContent = L.startTitle;
+      if (startHintBelow) startHintBelow.textContent = L.startHint;
 
-      // WI-specific texts
-      wiInfoTitle.textContent = L.wiInfoTitle;
-      wiInfoText.innerHTML = L.wiInfoText;
-      btnWiOk.textContent = L.wiInfoOk;
+      if (wiInfoTitle) wiInfoTitle.textContent = L.wiInfoTitle;
+      if (wiInfoText) wiInfoText.innerHTML = L.wiInfoText;
+      if (btnWiOk) btnWiOk.textContent = L.wiInfoOk;
 
       if(calendar) calendar.setOption('locale', langSelect.value === 'en' ? 'en-gb' : 'de');
 
@@ -1337,13 +1339,14 @@
       }
       renderSchoolSelectOptions();
       renderStartCards();
-      startOverlay.style.display = 'flex';
+      if(startOverlay) startOverlay.style.display = 'flex';
       if (startMapObj) setTimeout(() => startMapObj.invalidateSize(), 150);
     }
 
 
     function renderSchoolSelectOptions(){
       const L = I18N[langSelect.value] || I18N.de;
+      if(!schoolSelect) return;
       schoolSelect.innerHTML = '';
       const placeholder = document.createElement('option');
       placeholder.value = ''; placeholder.disabled = true; placeholder.selected = !currentKey;
@@ -1377,9 +1380,11 @@
 
     function renderStartCards(){
       const T = I18N[langSelect.value] || I18N.de;
+      const startGrid = document.querySelector('.start-grid');
+      if(!startGrid) return;
       startGrid.innerHTML = '';
       
-      if (!startMapObj && window.L) {
+      if (!startMapObj && window.L && document.getElementById('startMap')) {
         startMapObj = window.L.map('startMap').setView([52.505, 13.42], 12);
         window.L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
           attribution: '&copy; OSM contributors'
@@ -1416,9 +1421,9 @@
         card.addEventListener('click', ()=>{
           if(!ok) return;
           currentKey = key;
-          startOverlay.style.display = 'none';
+          if(startOverlay) startOverlay.style.display = 'none';
           renderSchoolSelectOptions();
-          schoolSelect.value = key;
+          if(schoolSelect) schoolSelect.value = key;
           loadCalendar(key);
         });
 
@@ -1437,7 +1442,7 @@
            m.on('mouseout', () => { card.classList.remove('highlighted'); });
            m.on('click', () => { 
              if(ok) {
-                currentKey = key; startOverlay.style.display = 'none'; renderSchoolSelectOptions(); schoolSelect.value = key; loadCalendar(key);
+                currentKey = key; if(startOverlay) startOverlay.style.display = 'none'; renderSchoolSelectOptions(); if(schoolSelect) schoolSelect.value = key; loadCalendar(key);
              } else {
                 card.scrollIntoView({behavior: 'smooth', block: 'nearest'});
                 card.classList.add('highlighted'); setTimeout(()=>card.classList.remove('highlighted'), 1000);
@@ -1452,6 +1457,7 @@
     function overlaps(aStart,aEnd,bStart,bEnd){ return (aStart < bEnd) && (aEnd > bStart); }
 
     function formatAddress(){
+      if(!fStreet) return '';
       const street=(fStreet.value||'').trim();
       const house=(fHouse.value||'').trim();
       const zip=(fZip.value||'').trim();
@@ -1463,6 +1469,7 @@
     }
 
     function highlight(el, on){
+      if(!el) return;
       const shouldShow = on && (wasSubmitted || el.dataset.touched === '1');
       el.classList.toggle('error', !!shouldShow);
       
@@ -1476,7 +1483,6 @@
       if (msg) msg.style.display = shouldShow ? 'block' : 'none';
     }
 
-    // HULPFUNCTIE: Controleert over de geselecteerde tijd overlapt
     function getOverlapState(start, end) {
       if (!start || !end) return false;
       for (const ev of busyEvents) {
@@ -1492,6 +1498,7 @@
     }
 
     function validateTimes(){
+      if(!fFrom || !fTo) return false;
       const start = parseLocalDT(fFrom.value);
       const end   = parseLocalDT(fTo.value);
 
@@ -1503,55 +1510,61 @@
       const isOverlapping = !isInvalidTime && getOverlapState(start, end);
 
       const showConflict = isInvalidTime && (wasSubmitted || (fFrom.dataset.touched==='1' && fTo.dataset.touched==='1'));
-      alertConflict.style.display = showConflict ? 'block':'none';
-      alertConflict.textContent = (I18N[langSelect.value]||I18N.de).conflict;
-
-      if (isOverlapping) {
-        alertOverlap.style.display = 'block';
-      } else {
-        alertOverlap.style.display = 'none';
-        fOverlapConfirm.checked = false;
+      if(alertConflict){
+        alertConflict.style.display = showConflict ? 'block':'none';
+        alertConflict.textContent = (I18N[langSelect.value]||I18N.de).conflict;
       }
 
-      if(start && start < minStartDate()) { alertShort.style.display='block'; alertShort.innerHTML = (I18N[langSelect.value]||I18N.de).shortTermWarning; }
-      else { alertShort.style.display='none'; }
+      if(alertOverlap){
+        if (isOverlapping) {
+          alertOverlap.style.display = 'block';
+        } else {
+          alertOverlap.style.display = 'none';
+          if(fOverlapConfirm) fOverlapConfirm.checked = false;
+        }
+      }
 
-      const phoneOk = (fPhoneNat.value||'').replace(/[^\d]/g,'').length >= 6;
+      if(alertShort){
+        if(start && start < minStartDate()) { alertShort.style.display='block'; alertShort.innerHTML = (I18N[langSelect.value]||I18N.de).shortTermWarning; }
+        else { alertShort.style.display='none'; }
+      }
+
+      const phoneOk = (fPhoneNat && fPhoneNat.value||'').replace(/[^\d]/g,'').length >= 6;
       const addrOk  = !!formatAddress();
 
-      highlight(fPersons, !fPersons.value);
-      highlight(fEmail, !fEmail.validity.valid);
+      highlight(fPersons, fPersons && !fPersons.value);
+      highlight(fEmail, fEmail && !fEmail.validity.valid);
       highlight(fPhoneNat, !phoneOk);
-      highlight(fStreet, !(fStreet.value||'').trim());
-      highlight(fHouse,  !(fHouse.value||'').trim());
-      highlight(fZip,    !(fZip.value||'').trim());
-      highlight(fCity,   !(fCity.value||'').trim());
+      highlight(fStreet, fStreet && !(fStreet.value||'').trim());
+      highlight(fHouse,  fHouse && !(fHouse.value||'').trim());
+      highlight(fZip,    fZip && !(fZip.value||'').trim());
+      highlight(fCity,   fCity && !(fCity.value||'').trim());
 
       let bikesOk = true;
-      if (currentKey === 'WE') {
+      if (currentKey === 'WE' && fBikesYes && fBikesNo) {
         const isBikesTouched = fBikesYes.dataset.touched === '1' || fBikesNo.dataset.touched === '1';
         if (!fBikesYes.checked && !fBikesNo.checked) {
           bikesOk = false;
-          errBikesChoice.style.display = (wasSubmitted || isBikesTouched) ? 'block' : 'none';
+          if(errBikesChoice) errBikesChoice.style.display = (wasSubmitted || isBikesTouched) ? 'block' : 'none';
         } else {
-          errBikesChoice.style.display = 'none';
+          if(errBikesChoice) errBikesChoice.style.display = 'none';
           if (fBikesYes.checked) {
             const totalBikes = (parseInt(fBikesLauf.value)||0) + (parseInt(fBikes12.value)||0) + (parseInt(fBikes16.value)||0) + (parseInt(fBikes20.value)||0) + (parseInt(fBikes24.value)||0) + (parseInt(fBikes26.value)||0);
             if (totalBikes < 1) bikesOk = false;
             
             const bTouch = (fBikesLauf.dataset.touched==='1' || fBikes12.dataset.touched==='1' || fBikes16.dataset.touched==='1' || fBikes20.dataset.touched==='1' || fBikes24.dataset.touched==='1' || fBikes26.dataset.touched==='1');
-            errBikesDetails.style.display = (bikesOk === false && (wasSubmitted || bTouch)) ? 'block' : 'none';
+            if(errBikesDetails) errBikesDetails.style.display = (bikesOk === false && (wasSubmitted || bTouch)) ? 'block' : 'none';
           } else {
-            errBikesDetails.style.display = 'none';
+            if(errBikesDetails) errBikesDetails.style.display = 'none';
           }
         }
       }
 
-      const requireAccept = (step2.style.display !== 'none');
-      const timeOk = !isInvalidTime && (!isOverlapping || fOverlapConfirm.checked);
-      const requiredOk = fSchool.value && fPersons.value && start && end && phoneOk && addrOk && bikesOk && fEmail.validity.valid && (!requireAccept || fAccept.checked);
+      const requireAccept = (step2 && step2.style.display !== 'none');
+      const timeOk = !isInvalidTime && (!isOverlapping || (fOverlapConfirm && fOverlapConfirm.checked));
+      const requiredOk = fSchool && fSchool.value && fPersons && fPersons.value && start && end && phoneOk && addrOk && bikesOk && fEmail && fEmail.validity.valid && (!requireAccept || (fAccept && fAccept.checked));
       
-      btnSubmit.disabled = !(timeOk && requiredOk);
+      if(btnSubmit) btnSubmit.disabled = !(timeOk && requiredOk);
       updatePricePreview(); 
       updateSticky();
       return timeOk && requiredOk;
@@ -1568,17 +1581,21 @@
 
     /* ===== Wizard & sticky bar ===== */
     function goStep(n){
+      if(!step1 || !step2) return;
       if(n===1){ step1.style.display='block'; step2.style.display='none'; }
       else { step1.style.display='none'; step2.style.display='block'; }
 
-      const agreeWrap = document.getElementById('fAccept').closest('.checkline');
-      if(agreeWrap){ agreeWrap.style.display = (n===2 ? 'inline-flex' : 'none'); }
-      btnSubmit.style.display = (n===2 ? 'inline-flex' : 'none');
+      if(fAccept){
+        const agreeWrap = fAccept.closest('.checkline');
+        if(agreeWrap){ agreeWrap.style.display = (n===2 ? 'inline-flex' : 'none'); }
+      }
+      if(btnSubmit) btnSubmit.style.display = (n===2 ? 'inline-flex' : 'none');
 
       sendHeightThrottled();
     }
 
     function updateSticky(){
+      if(!stickyPrice) return;
       let stickyText = '–';
       if (currentKey === 'WA' && CURRENT_PRICE && CURRENT_PRICE.total != null) {
         if (CURRENT_PRICE.caution) {
@@ -1588,17 +1605,17 @@
         }
       } else if (CURRENT_PRICE && CURRENT_PRICE.total != null) {
         stickyText = euro(CURRENT_PRICE.total);
-      } else if (priceValue.textContent) {
+      } else if (priceValue && priceValue.textContent) {
         stickyText = priceValue.textContent;
       }
       stickyPrice.textContent = stickyText;
 
       const s = parseLocalDT(fFrom.value), e = parseLocalDT(fTo.value);
-      stickyWhen.textContent = (s&&e)? `${formatDT(s, langSelect.value)} – ${formatDT(e, langSelect.value)}` : '–';
-      stickyPersons.textContent = fPersons.value ? `${fPersons.value} Pers.` : '';
+      if(stickyWhen) stickyWhen.textContent = (s&&e)? `${formatDT(s, langSelect.value)} – ${formatDT(e, langSelect.value)}` : '–';
+      if(stickyPersons) stickyPersons.textContent = fPersons.value ? `${fPersons.value} Pers.` : '';
     }
 
-    btnToStep2.addEventListener('click', ()=>{ 
+    if(btnToStep2) btnToStep2.addEventListener('click', ()=>{ 
       const start = parseLocalDT(fFrom.value);
       const end   = parseLocalDT(fTo.value);
       
@@ -1610,43 +1627,49 @@
       const isOverlapping = !isInvalidTime && getOverlapState(start, end);
       
       const showConflict = isInvalidTime && (fFrom.dataset.touched==='1' && fTo.dataset.touched==='1');
-      alertConflict.style.display = showConflict ? 'block':'none';
-      alertConflict.textContent = (I18N[langSelect.value]||I18N.de).conflict;
-      
-      if (isOverlapping) {
-         alertOverlap.style.display = 'block';
+      if(alertConflict){
+        alertConflict.style.display = showConflict ? 'block':'none';
+        alertConflict.textContent = (I18N[langSelect.value]||I18N.de).conflict;
       }
       
-      if(start && start < minStartDate()) { 
-        alertShort.style.display='block'; 
-        alertShort.innerHTML = (I18N[langSelect.value]||I18N.de).shortTermWarning; 
-      } else { 
-        alertShort.style.display='none'; 
+      if(alertOverlap){
+        if (isOverlapping) {
+           alertOverlap.style.display = 'block';
+        }
       }
       
-      highlight(fPersons, !fPersons.value);
+      if(alertShort){
+        if(start && start < minStartDate()) { 
+          alertShort.style.display='block'; 
+          alertShort.innerHTML = (I18N[langSelect.value]||I18N.de).shortTermWarning; 
+        } else { 
+          alertShort.style.display='none'; 
+        }
+      }
       
-      const timeOk = !isInvalidTime && (!isOverlapping || fOverlapConfirm.checked);
+      highlight(fPersons, fPersons && !fPersons.value);
+      
+      const timeOk = !isInvalidTime && (!isOverlapping || (fOverlapConfirm && fOverlapConfirm.checked));
 
       if(timeOk && fPersons.value) {
         goStep(2);
       } else {
-        fFrom.dataset.touched = '1';
-        fTo.dataset.touched = '1';
-        fPersons.dataset.touched = '1';
+        if(fFrom) fFrom.dataset.touched = '1';
+        if(fTo) fTo.dataset.touched = '1';
+        if(fPersons) fPersons.dataset.touched = '1';
         validateTimes();
       }
     });
 
-    fOverlapConfirm.addEventListener('change', validateTimes);
+    if(fOverlapConfirm) fOverlapConfirm.addEventListener('change', validateTimes);
 
-    btnBackStep1.addEventListener('click', ()=> goStep(1));
-    btnCloseX.addEventListener('click', closeModal);
-    btnWiCloseX.addEventListener('click', closeModal);
-    btnWiOk.addEventListener('click', closeModal);
+    if(btnBackStep1) btnBackStep1.addEventListener('click', ()=> goStep(1));
+    if(btnCloseX) btnCloseX.addEventListener('click', closeModal);
+    if(btnWiCloseX) btnWiCloseX.addEventListener('click', closeModal);
+    if(btnWiOk) btnWiOk.addEventListener('click', closeModal);
 
-    priceToggle.addEventListener('click', ()=>{
-      priceBreakdown.style.display = priceBreakdown.style.display==='none' ? 'block':'none';
+    if(priceToggle) priceToggle.addEventListener('click', ()=>{
+      if(priceBreakdown) priceBreakdown.style.display = priceBreakdown.style.display==='none' ? 'block':'none';
       sendHeightThrottled();
     });
 
@@ -1666,11 +1689,11 @@
     }
 
     function openWiInfo(){
-      bookingModal.style.display = 'none';
-      wiInfoModal.style.display = 'block';
-      modalBack.style.display = 'flex';
+      if(bookingModal) bookingModal.style.display = 'none';
+      if(wiInfoModal) wiInfoModal.style.display = 'block';
+      if(modalBack) modalBack.style.display = 'flex';
       if(untrap) untrap(); 
-      untrap = trapFocus(wiInfoModal);
+      if(wiInfoModal) untrap = trapFocus(wiInfoModal);
     }
 
     function openModal(prefill){
@@ -1679,55 +1702,53 @@
         return;
       }
 
-      bookingModal.style.display = 'block';
-      wiInfoModal.style.display = 'none';
+      if(bookingModal) bookingModal.style.display = 'block';
+      if(wiInfoModal) wiInfoModal.style.display = 'none';
 
-      fSchool.value = prefill.school;
-      fFrom.value = toInputLocal(prefill.start);
-      fTo.value   = toInputLocal(prefill.end);
-      alertConflict.style.display = 'none';
-      alertShort.style.display = 'none';
-      alertOverlap.style.display = 'none';
-      fOverlapConfirm.checked = false;
-      fAccept.checked = false;
-      btnSubmit.disabled = true;
+      if(fSchool) fSchool.value = prefill.school;
+      if(fFrom) fFrom.value = toInputLocal(prefill.start);
+      if(fTo) fTo.value   = toInputLocal(prefill.end);
+      if(alertConflict) alertConflict.style.display = 'none';
+      if(alertShort) alertShort.style.display = 'none';
+      if(alertOverlap) alertOverlap.style.display = 'none';
+      if(fOverlapConfirm) fOverlapConfirm.checked = false;
+      if(fAccept) fAccept.checked = false;
+      if(btnSubmit) btnSubmit.disabled = true;
 
       if (bikesWrapper) {
         bikesWrapper.style.display = (currentKey === 'WE') ? 'block' : 'none';
       }
-      fBikesYes.dataset.touched = '0';
-      fBikesNo.dataset.touched = '0';
-      fBikesYes.checked = false;
-      fBikesNo.checked = false;
+      if(fBikesYes){ fBikesYes.dataset.touched = '0'; fBikesYes.checked = false; }
+      if(fBikesNo){ fBikesNo.dataset.touched = '0'; fBikesNo.checked = false; }
       if(fBikes12) {
           fBikesLauf.value = 0; fBikes12.value = 0; fBikes16.value = 0; fBikes20.value = 0; fBikes24.value = 0; fBikes26.value = 0;
           fBikesLauf.dataset.touched = '0'; fBikes12.dataset.touched = '0'; fBikes16.dataset.touched = '0'; fBikes20.dataset.touched = '0'; fBikes24.dataset.touched = '0'; fBikes26.dataset.touched = '0';
       }
-      bikesDetailsWrapper.style.display = 'none';
-      errBikesChoice.style.display = 'none';
-      errBikesDetails.style.display = 'none';
+      if(bikesDetailsWrapper) bikesDetailsWrapper.style.display = 'none';
+      if(errBikesChoice) errBikesChoice.style.display = 'none';
+      if(errBikesDetails) errBikesDetails.style.display = 'none';
 
       formatAddress();
       renderExtrasForSchool(currentKey || 'WE');
       updatePricePreview();
       goStep(1);
-      modalBack.style.display = 'flex';
+      if(modalBack) modalBack.style.display = 'flex';
       validateTimes();
       if(untrap) untrap(); 
-      untrap = trapFocus(bookingModal);
+      if(bookingModal) untrap = trapFocus(bookingModal);
     }
 
     function closeModal(){
-      modalBack.style.display = 'none';
-      form.reset();
-      fSchool.value = '';
-      alertConflict.style.display = 'none';
-      alertShort.style.display = 'none';
-      alertOverlap.style.display = 'none';
-      fOverlapConfirm.checked = false;
-      btnSubmit.disabled = true;
-      priceValue.textContent = '–';
-      priceBreakdown.style.display = 'none';
+      if(modalBack) modalBack.style.display = 'none';
+      if(form) form.reset();
+      if(fSchool) fSchool.value = '';
+      if(alertConflict) alertConflict.style.display = 'none';
+      if(alertShort) alertShort.style.display = 'none';
+      if(alertOverlap) alertOverlap.style.display = 'none';
+      if(fOverlapConfirm) fOverlapConfirm.checked = false;
+      if(btnSubmit) btnSubmit.disabled = true;
+      if(priceValue) priceValue.textContent = '–';
+      if(priceBreakdown) priceBreakdown.style.display = 'none';
       hidePopover();
       if(untrap) untrap();
     }
@@ -1744,6 +1765,7 @@
     }
 
     const updateStreetHints = debounce(async ()=>{
+      if(!fStreet) return;
       const base=(fStreet.value||'').trim();
       const city=(fCity.value||'').trim();
       const q = (base+' '+city).trim();
@@ -1756,33 +1778,39 @@
         const street = a.road || a.pedestrian || a.footway || a.path || '';
         if(street) hints.add(street);
       });
-      addrHintHelp.style.display = hints.size ? 'block' : 'none';
-      addrHintHelp.textContent = hints.size ? 'Tipp: Vorschläge nutzen' : '';
+      if(addrHintHelp){
+        addrHintHelp.style.display = hints.size ? 'block' : 'none';
+        addrHintHelp.textContent = hints.size ? 'Tipp: Vorschläge nutzen' : '';
+      }
     }, 450);
 
     const updateCityHints = debounce(async ()=>{
+      if(!fCity) return;
       const q=(fCity.value||'').trim();
       if(q.length<3) return;
       await nominatim(q);
     }, 450);
 
-    fStreet.addEventListener('input', updateStreetHints);
-    fCity.addEventListener('input', updateCityHints);
+    if(fStreet) fStreet.addEventListener('input', updateStreetHints);
+    if(fCity) fCity.addEventListener('input', updateCityHints);
 
     [fZip,fCity].forEach(el=>{ 
+      if(!el) return;
       el.addEventListener('input', ()=>{ formatAddress(); validateTimes(); }); 
       el.addEventListener('blur', ()=>{ el.dataset.touched='1'; validateTimes(); }); 
     });
 
     [fFrom,fTo,fPersons,fEmail,fPhoneNat,fAccept].forEach(el=>{
+      if(!el) return;
       el.addEventListener('change', validateTimes);
       el.addEventListener('input', validateTimes);
     });
 
     [fBikesYes, fBikesNo].forEach(el => {
+      if(!el) return;
       el.addEventListener('change', () => {
         el.dataset.touched = '1';
-        bikesDetailsWrapper.style.display = fBikesYes.checked ? 'block' : 'none';
+        if(bikesDetailsWrapper) bikesDetailsWrapper.style.display = fBikesYes.checked ? 'block' : 'none';
         validateTimes();
       });
     });
@@ -1809,14 +1837,17 @@
     });
 
     [fFrom,fTo,fPersons,fEmail,fPhoneNat,fStreet,fHouse,fZip,fCity].forEach(el=>{
+      if(!el) return;
       el.addEventListener('blur', ()=>{ el.dataset.touched = '1'; validateTimes(); });
     });
 
-    fPhoneNat.addEventListener('input', ()=>{
-      const cur = fPhoneNat.selectionStart;
-      fPhoneNat.value = (fPhoneNat.value || '').replace(/[^\d]/g,'');
-      fPhoneNat.setSelectionRange(cur, cur);
-    });
+    if(fPhoneNat){
+      fPhoneNat.addEventListener('input', ()=>{
+        const cur = fPhoneNat.selectionStart;
+        fPhoneNat.value = (fPhoneNat.value || '').replace(/[^\d]/g,'');
+        fPhoneNat.setSelectionRange(cur, cur);
+      });
+    }
 
     function formatDT(dt, lang){
       const d = (dt instanceof Date) ? dt : new Date(dt);
@@ -1841,35 +1872,41 @@
     function esc(s){ return String(s||"").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
 
     /* ===== Calendar loading ===== */
-    schoolSelect.addEventListener('change', (e)=> {
-      const key = e.target.value;
-      if(!availability[key]?.ok) return;
-      currentKey = key;
-      loadCalendar(key);
-    });
+    if(schoolSelect){
+      schoolSelect.addEventListener('change', (e)=> {
+        const key = e.target.value;
+        if(!availability[key]?.ok) return;
+        currentKey = key;
+        loadCalendar(key);
+      });
+    }
 
-    langSelect.addEventListener('change', applyI18n);
+    if(langSelect) langSelect.addEventListener('change', applyI18n);
 
-    mobileAdd.addEventListener('click', ()=>{
-      if (currentKey === 'WI') {
-        openWiInfo();
-        return;
-      }
-      const start = new Date(); start.setDate(start.getDate()+7); start.setHours(10,0,0,0);
-      const end = new Date(start.getTime() + DEFAULT_TAP_MINUTES*60000);
-      openModal({ school: SCHOOLS[currentKey]?.name || '', start, end });
-    });
+    if(mobileAdd){
+      mobileAdd.addEventListener('click', ()=>{
+        if (currentKey === 'WI') {
+          openWiInfo();
+          return;
+        }
+        const start = new Date(); start.setDate(start.getDate()+7); start.setHours(10,0,0,0);
+        const end = new Date(start.getTime() + DEFAULT_TAP_MINUTES*60000);
+        openModal({ school: SCHOOLS[currentKey]?.name || '', start, end });
+      });
+    }
 
     async function loadCalendar(key){
       if(!availability[key]?.ok) return;
       currentKey = key;
-      calendarLoading.style.display = 'block';
+      if(calendarLoading) calendarLoading.style.display = 'block';
       if(calendar) calendar.destroy();
 
-      if (currentKey === 'WI') {
-        calendarEl.classList.add('is-wi-mode');
-      } else {
-        calendarEl.classList.remove('is-wi-mode');
+      if(calendarEl){
+        if (currentKey === 'WI') {
+          calendarEl.classList.add('is-wi-mode');
+        } else {
+          calendarEl.classList.remove('is-wi-mode');
+        }
       }
 
       const raw = await fetchJson(SCHOOLS[key].file);
@@ -1897,9 +1934,9 @@
       } catch(_) {}
 
       calendar = new FullCalendar.Calendar(calendarEl, {
-        initialView: (calendarEl.clientWidth || window.innerWidth) < 700 ? 'timeGridDay' : 'timeGridWeek',
+        initialView: (calendarEl && calendarEl.clientWidth || window.innerWidth) < 700 ? 'timeGridDay' : 'timeGridWeek',
         firstDay: 1,
-        locale: langSelect.value === 'en' ? 'en-gb' : 'de',
+        locale: langSelect && langSelect.value === 'en' ? 'en-gb' : 'de',
         timeZone: 'local',
         slotMinTime: '12:00:00',
         slotMaxTime: '22:00:00',
@@ -1914,7 +1951,6 @@
   
         selectable: !isTouchDevice(),
         selectMinDistance: 8,
-        longPressDelay: 300,
         selectLongPressDelay: 300,
 
         selectAllow: selectAllowFn,
@@ -1960,18 +1996,19 @@
       calendar.render();
 
       holdEvents.forEach(ev => calendar.addEvent(ev));
-      mobileAdd.style.display = isTouchDevice() ? 'block' : 'none';
+      if(mobileAdd) mobileAdd.style.display = isTouchDevice() ? 'block' : 'none';
       applyResponsiveView();
-      calendarLoading.style.display = 'none';
-      calendarEl.classList.add('loaded');
-      fSchool.value = SCHOOLS[currentKey].name;
+      if(calendarLoading) calendarLoading.style.display = 'none';
+      if(calendarEl) calendarEl.classList.add('loaded');
+      if(fSchool) fSchool.value = SCHOOLS[currentKey].name;
       renderExtrasForSchool(key);
 
       (function refreshTerms(){
         const termsList = document.getElementById('termsList');
         if (!termsList) return;
         const L = I18N[langSelect.value] || I18N.de;
-        document.getElementById('termsSummary').textContent = L.termsSummary;
+        const ts = document.getElementById('termsSummary');
+        if (ts) ts.textContent = L.termsSummary;
         termsList.innerHTML = "";
         getTermsForSchool(langSelect.value, currentKey).forEach(t => {
           const li = document.createElement('li'); li.textContent = t; termsList.appendChild(li);
@@ -1984,29 +2021,29 @@
     /* ===== Price calculation ===== */
     function updatePricePreview(){
       const L = I18N[langSelect.value] || I18N.de;
-      const start   = parseLocalDT(fFrom.value);
-      const end     = parseLocalDT(fTo.value);
-      const persons = Number(fPersons.value || 0);
+      const start   = fFrom ? parseLocalDT(fFrom.value) : null;
+      const end     = fTo ? parseLocalDT(fTo.value) : null;
+      const persons = fPersons ? Number(fPersons.value || 0) : 0;
       CURRENT_PRICE = null;
 
       const showPriceOnReq = ()=> {
-        priceValue.textContent = L.priceOnReq;
-        bdBaseLabel.textContent = (langSelect.value==='en' ? 'Base' : 'Basis');
-        bdBase.textContent = '–';
-        bdPersonsLabel.textContent = (langSelect.value==='en' ? 'People tier' : 'Personen-Staffel');
-        bdPersons.textContent = (langSelect.value==='en' ? '€0.00' : '0,00 €');
-        bdTime.textContent = (langSelect.value==='en' ? '€0.00' : '0,00 €');
-        bdExtras.textContent = (L.bdNoExtras || (langSelect.value==='en' ? 'none' : 'keine'));
-        bdTotal.textContent = '–';
+        if(priceValue) priceValue.textContent = L.priceOnReq;
+        if(bdBaseLabel) bdBaseLabel.textContent = (langSelect.value==='en' ? 'Base' : 'Basis');
+        if(bdBase) bdBase.textContent = '–';
+        if(bdPersonsLabel) bdPersonsLabel.textContent = (langSelect.value==='en' ? 'People tier' : 'Personen-Staffel');
+        if(bdPersons) bdPersons.textContent = (langSelect.value==='en' ? '€0.00' : '0,00 €');
+        if(bdTime) bdTime.textContent = (langSelect.value==='en' ? '€0.00' : '0,00 €');
+        if(bdExtras) bdExtras.textContent = (L.bdNoExtras || (langSelect.value==='en' ? 'none' : 'keine'));
+        if(bdTotal) bdTotal.textContent = '–';
         if (bdDepositRow) bdDepositRow.style.display = 'none';
         if (bdGrandTotalRow) bdGrandTotalRow.style.display = 'none';
-        priceBreakdown.style.display = 'block';
+        if(priceBreakdown) priceBreakdown.style.display = 'block';
         updateSticky();
       };
 
       if (!(start && end) || end <= start){
-        priceValue.textContent = '–';
-        priceBreakdown.style.display = 'none';
+        if(priceValue) priceValue.textContent = '–';
+        if(priceBreakdown) priceBreakdown.style.display = 'none';
         hidePopover();
         updateSticky();
         return;
@@ -2021,20 +2058,20 @@
         if (!tier) {
           const depo = cfg.cautionFn ? cfg.cautionFn(persons) : null;
 
-          priceValue.textContent = depo
+          if(priceValue) priceValue.textContent = depo
             ? `${L.priceOnReq} + ${euro(depo)} Kaution`
             : L.priceOnReq;
 
-          bdBaseLabel.textContent    = (langSelect.value==='en' ? 'Base' : 'Basis');
-          bdBase.textContent         = '–';
-          bdPersonsLabel.textContent = (langSelect.value==='en' ? 'People tier' : 'Personen-Staffel');
-          bdPersons.textContent      = (langSelect.value==='en' ? '€0.00' : '0,00 €');
-          bdTime.textContent         = (langSelect.value==='en' ? '€0.00' : '0,00 €');
-          bdExtras.textContent       = (L.bdNoExtras || (langSelect.value==='en' ? 'none' : 'keine'));
-          bdTotal.textContent        = '–';
+          if(bdBaseLabel) bdBaseLabel.textContent    = (langSelect.value==='en' ? 'Base' : 'Basis');
+          if(bdBase) bdBase.textContent         = '–';
+          if(bdPersonsLabel) bdPersonsLabel.textContent = (langSelect.value==='en' ? 'People tier' : 'Personen-Staffel');
+          if(bdPersons) bdPersons.textContent      = (langSelect.value==='en' ? '€0.00' : '0,00 €');
+          if(bdTime) bdTime.textContent         = (langSelect.value==='en' ? '€0.00' : '0,00 €');
+          if(bdExtras) bdExtras.textContent       = (L.bdNoExtras || (langSelect.value==='en' ? 'none' : 'keine'));
+          if(bdTotal) bdTotal.textContent        = '–';
 
           if (bdDepositRow) {
-            if (depo) { bdDeposit.textContent = euro(depo); bdDepositRow.style.display = ''; }
+            if (depo) { if(bdDeposit) bdDeposit.textContent = euro(depo); bdDepositRow.style.display = ''; }
             else { bdDepositRow.style.display = 'none'; }
           }
           
@@ -2055,7 +2092,7 @@
             caution: depo
           };
 
-          priceBreakdown.style.display = 'block';
+          if(priceBreakdown) priceBreakdown.style.display = 'block';
           updateSticky();
           if(timePopover) {
             timePopover.textContent = (langSelect.value === 'en')
@@ -2074,7 +2111,7 @@
 
         const depo = cfg.cautionFn ? cfg.cautionFn(persons) : null;
 
-        priceValue.textContent = depo
+        if(priceValue) priceValue.textContent = depo
           ? `${euro(total)} + ${euro(depo)} Kaution`
           : euro(total);
 
@@ -2082,26 +2119,26 @@
           ? (tierHours === 12 ? 'Base (up to 12 h)' : 'Base (12–16 h)')
           : (tierHours === 12 ? 'Basis (bis 12 Std.)' : 'Basis (12–16 Std.)');
 
-        bdBaseLabel.textContent    = baseLabel;
-        bdBase.textContent         = euro(base);             
-        bdPersonsLabel.textContent = (langSelect.value==='en'
+        if(bdBaseLabel) bdBaseLabel.textContent    = baseLabel;
+        if(bdBase) bdBase.textContent         = euro(base);             
+        if(bdPersonsLabel) bdPersonsLabel.textContent = (langSelect.value==='en'
           ? `People tier (${personsLabel || ''})`
           : `Personen-Staffel (${personsLabel || ''})`);
-        bdPersons.textContent      = personsAdd ? euro(personsAdd) : (langSelect.value==='en' ? '€0.00' : '0,00 €');
-        bdTime.textContent         = (langSelect.value==='en' ? '€0.00' : '0,00 €');
-        bdExtras.textContent       = (L.bdNoExtras || (langSelect.value==='en' ? 'none' : 'keine'));
-        bdTotal.textContent        = euro(total);            
+        if(bdPersons) bdPersons.textContent      = personsAdd ? euro(personsAdd) : (langSelect.value==='en' ? '€0.00' : '0,00 €');
+        if(bdTime) bdTime.textContent         = (langSelect.value==='en' ? '€0.00' : '0,00 €');
+        if(bdExtras) bdExtras.textContent       = (L.bdNoExtras || (langSelect.value==='en' ? 'none' : 'keine'));
+        if(bdTotal) bdTotal.textContent        = euro(total);            
 
         if (bdDepositRow) {
-          if (depo) { bdDeposit.textContent = euro(depo); bdDepositRow.style.display = ''; }
+          if (depo) { if(bdDeposit) bdDeposit.textContent = euro(depo); bdDepositRow.style.display = ''; }
           else { bdDepositRow.style.display = 'none'; }
         }
 
         if (bdGrandTotalRow) {
           if (depo) {
-            bdGrandTotalLabel.textContent = (langSelect.value==='en')
+            if(bdGrandTotalLabel) bdGrandTotalLabel.textContent = (langSelect.value==='en')
               ? 'Total incl. deposit' : 'Summe inkl. Kaution';
-            bdGrandTotal.textContent = euro(total + depo);
+            if(bdGrandTotal) bdGrandTotal.textContent = euro(total + depo);
             bdGrandTotalRow.style.display = '';
           } else {
             bdGrandTotalRow.style.display = 'none';
@@ -2129,7 +2166,7 @@
             : 'Kein Personal-Zuschlag am Wassertorplatz.';
         }
 
-        priceBreakdown.style.display = 'block';
+        if(priceBreakdown) priceBreakdown.style.display = 'block';
         updateSticky();
         return;
       }
@@ -2172,14 +2209,14 @@
 
       const total = basePlusPersons + timeAdd + extrasCost;
 
-      priceValue.textContent = euro(total);
-      bdBaseLabel.textContent = (langSelect.value==='en' ? I18N.en.bdBase(tier.hoursLabel) : I18N.de.bdBase(tier.hoursLabel));
-      bdBase.textContent = euro(base);
-      bdPersonsLabel.textContent = (langSelect.value==='en' ? I18N.en.bdPersons(pplLabel) : I18N.de.bdPersons(pplLabel));
-      bdPersons.textContent = personsDelta === 0 ? (langSelect.value==='en' ? "€0.00" : "0,00 €") : euro(personsDelta);
-      bdTime.textContent = timeAdd ? euro(timeAdd) : (langSelect.value==='en' ? "€0.00" : "0,00 €");
-      bdExtras.textContent = extrasCost ? euro(extrasCost) : (L.bdNoExtras || (langSelect.value==='en' ? "none" : "keine"));
-      bdTotal.textContent = euro(total);
+      if(priceValue) priceValue.textContent = euro(total);
+      if(bdBaseLabel) bdBaseLabel.textContent = (langSelect.value==='en' ? I18N.en.bdBase(tier.hoursLabel) : I18N.de.bdBase(tier.hoursLabel));
+      if(bdBase) bdBase.textContent = euro(base);
+      if(bdPersonsLabel) bdPersonsLabel.textContent = (langSelect.value==='en' ? I18N.en.bdPersons(pplLabel) : I18N.de.bdPersons(pplLabel));
+      if(bdPersons) bdPersons.textContent = personsDelta === 0 ? (langSelect.value==='en' ? "€0.00" : "0,00 €") : euro(personsDelta);
+      if(bdTime) bdTime.textContent = timeAdd ? euro(timeAdd) : (langSelect.value==='en' ? "€0.00" : "0,00 €");
+      if(bdExtras) bdExtras.textContent = extrasCost ? euro(extrasCost) : (L.bdNoExtras || (langSelect.value==='en' ? "none" : "keine"));
+      if(bdTotal) bdTotal.textContent = euro(total);
 
       if (bdDepositRow) bdDepositRow.style.display = 'none';
       if (bdGrandTotalRow) bdGrandTotalRow.style.display = 'none';
@@ -2202,25 +2239,24 @@
         timePopover.textContent = L.bdTimeInfo;
       }
 
-      priceBreakdown.style.display = 'block';
+      if(priceBreakdown) priceBreakdown.style.display = 'block';
       updateSticky();
 
       if (extrasRunning) extrasRunning.textContent = `Extras: ${euro(extrasCost)}`;
     }
 
     /* ===== Popover help ===== */
-    const timeInfoIcon = document.getElementById('timeInfo');
-    const timePopover  = document.getElementById('timeInfoPopover');
-
-    function togglePopover(){ const isOpen = timePopover.classList.contains('show'); if(isOpen){ hidePopover(); return; } showPopover(); }
+    function togglePopover(){ if(!timePopover) return; const isOpen = timePopover.classList.contains('show'); if(isOpen){ hidePopover(); return; } showPopover(); }
     function showPopover(){
-      timePopover.classList.add('show'); timePopover.setAttribute('aria-hidden','false'); timeInfoIcon.setAttribute('aria-expanded','true');
+      if(!timePopover) return;
+      timePopover.classList.add('show'); timePopover.setAttribute('aria-hidden','false'); if(timeInfoIcon) timeInfoIcon.setAttribute('aria-expanded','true');
       const rect = timePopover.getBoundingClientRect();
       if(rect.right > window.innerWidth - 12){ timePopover.style.left = 'auto'; timePopover.style.right = '0'; }
       else { timePopover.style.left = '0'; timePopover.style.right = 'auto'; }
     }
     function hidePopover(){
-      timePopover.classList.remove('show'); timePopover.setAttribute('aria-hidden','true'); timeInfoIcon.setAttribute('aria-expanded','false');
+      if(!timePopover) return;
+      timePopover.classList.remove('show'); timePopover.setAttribute('aria-hidden','true'); if(timeInfoIcon) timeInfoIcon.setAttribute('aria-expanded','false');
     }
     
     if(timeInfoIcon) {
@@ -2250,8 +2286,8 @@
 
     function showSuccessOverlay(payload){
       const L = I18N[langSelect.value] || I18N.de;
-      successTitle.textContent = L.successTitle;
-      btnBackToCalendar.textContent = L.successBack;
+      if(successTitle) successTitle.textContent = L.successTitle;
+      if(btnBackToCalendar) btnBackToCalendar.textContent = L.successBack;
 
       const labels = L.successSummaryLabels;
       const extrasText = (CURRENT_PRICE && CURRENT_PRICE.extrasSelected && CURRENT_PRICE.extrasSelected.length)
@@ -2268,15 +2304,17 @@
         depositRow = `<div><strong>Kaution:</strong> ${euro(CURRENT_PRICE.caution)}</div>`;
       }
 
-      successSummary.innerHTML = `
-        <div><strong>${labels.school}:</strong> ${esc(payload.school || "")}</div>
-        <div><strong>${labels.from}:</strong> ${formatDT(start, langSelect.value)}</div>
-        <div><strong>${labels.to}:</strong> ${formatDT(end,   langSelect.value)}</div>
-        ${payload.persons ? `<div><strong>${labels.persons}:</strong> ${esc(payload.persons)}</div>` : ""}
-        ${depositRow}
-        <div><strong>${labels.extras}:</strong> ${extrasText.length ? esc(extrasText.join(", ")) : (L.bdNoExtras)}</div>
-        ${messageRow}
-      `;
+      if(successSummary){
+        successSummary.innerHTML = `
+          <div><strong>${labels.school}:</strong> ${esc(payload.school || "")}</div>
+          <div><strong>${labels.from}:</strong> ${formatDT(start, langSelect.value)}</div>
+          <div><strong>${labels.to}:</strong> ${formatDT(end,   langSelect.value)}</div>
+          ${payload.persons ? `<div><strong>${labels.persons}:</strong> ${esc(payload.persons)}</div>` : ""}
+          ${depositRow}
+          <div><strong>${labels.extras}:</strong> ${extrasText.length ? esc(extrasText.join(", ")) : (L.bdNoExtras)}</div>
+          ${messageRow}
+        `;
+      }
 
       const dateStr = start.toLocaleDateString(langSelect.value === 'en' ? 'en-GB' : 'de-DE');
       const startStr = start.toLocaleTimeString(langSelect.value === 'en' ? 'en-GB' : 'de-DE', { hour: '2-digit', minute: '2-digit' });
@@ -2284,28 +2322,31 @@
       const mailSubject = `Anfrage / Request Verkehrsschule ${payload.school || ""} - ${dateStr}`;
       const mailLink = `mailto:events@kidbike.de?subject=${encodeURIComponent(mailSubject)}`;
       
-      successLead.innerHTML = L.successAdditional(
-        esc(payload.school || ""), 
-        dateStr, 
-        startStr, 
-        endStr, 
-        mailLink
-      );
+      if(successLead){
+        successLead.innerHTML = L.successAdditional(
+          esc(payload.school || ""), 
+          dateStr, 
+          startStr, 
+          endStr, 
+          mailLink
+        );
+      }
 
-      successOverlay.style.display = 'flex';
-      btnBackToCalendar.focus();
+      if(successOverlay) successOverlay.style.display = 'flex';
+      if(btnBackToCalendar) btnBackToCalendar.focus();
 
       const escKeyHandler = (e)=>{ if(e.key === 'Escape') hideSuccessOverlay(); };
       document.addEventListener('keydown', escKeyHandler, { once:true });
 
-      btnBackToCalendar.onclick = hideSuccessOverlay;
+      if(btnBackToCalendar) btnBackToCalendar.onclick = hideSuccessOverlay;
 
       announceToScreenReader( langSelect.value === 'en' ? 'Request submitted successfully' : 'Anfrage erfolgreich gesendet' );
     }
 
-    function hideSuccessOverlay(){ successOverlay.style.display = 'none'; }
+    function hideSuccessOverlay(){ if(successOverlay) successOverlay.style.display = 'none'; }
 
     function showToast(text){
+      if(!successText || !successMsg) return;
       successText.textContent = text;
       successMsg.classList.add('show');
       setTimeout(()=> successMsg.classList.remove('show'), 3000);
@@ -2314,276 +2355,49 @@
     /* ===== Submit naar Apps Script ===== */
     const APPS_SCRIPT_URL = "/.netlify/functions/submit";
 
-    form.addEventListener('submit', async (e)=>{
-      e.preventDefault();
-      wasSubmitted = true;
-
-      const errBox = document.getElementById('submitError');
-      errBox.style.display = 'none';
-      errBox.textContent = '';
-
-      if(!validateTimes()) {
-        const firstErr = [fPersons,fFrom,fTo,fEmail,fPhoneNat,fStreet,fHouse,fZip,fCity]
-          .find(el=>el && el.classList && el.classList.contains('error'));
-        if(firstErr) firstErr.focus();
-        return;
-      }
-
-      btnSubmit.classList.add('loading');
-      btnSubmit.disabled = true;
-      btnSubmit.textContent = (langSelect.value==='en'?'Sending…':'Senden…');
-
-      const ctl = new AbortController();
-      const t = setTimeout(()=>ctl.abort(), 15000);
-
-      try {
-        const nameCombined = [fSalutation.value, fFirstName.value, fLastName.value].filter(Boolean).join(' ').trim();
-        const phoneCombined = [fPhoneCountry.value, (fPhoneNat.value||'').trim()].filter(Boolean).join(' ');
-
-        const extrasChecked = Array.from(document.querySelectorAll('#extrasContainer input:checked'));
-        const extrasList = extrasChecked.map(el =>
-          (langSelect.value === 'en' ? el.dataset.labelEn : el.dataset.labelDe) || el.id.replace(/^x_/, '')
-        );
-
-        let bikesValue = '';
-        if (currentKey === 'WE') {
-          if (fBikesYes.checked) {
-            let b = [];
-            if (parseInt(fBikesLauf.value)>0) b.push(`${fBikesLauf.value}x Laufrad (2-3 J.)`);
-            if (parseInt(fBikes12.value)>0) b.push(`${fBikes12.value}x 12" (3-4 J.)`);
-            if (parseInt(fBikes16.value)>0) b.push(`${fBikes16.value}x 16" (4-6 J.)`);
-            if (parseInt(fBikes20.value)>0) b.push(`${fBikes20.value}x 20" (6-8 J.)`);
-            if (parseInt(fBikes24.value)>0) b.push(`${fBikes24.value}x 24" (8-10 J.)`);
-            if (parseInt(fBikes26.value)>0) b.push(`${fBikes26.value}x 26" (10-14 J.)`);
-            bikesValue = 'Ja: ' + b.join(', ');
-          }
-          else if (fBikesNo.checked) bikesValue = 'Nein';
-        }
-
-        const start = parseLocalDT(fFrom.value);
-        const end   = parseLocalDT(fTo.value);
-        const isOverlapping = getOverlapState(start, end);
-        
-        let finalMessage = fMsg.value;
-        if (isOverlapping) {
-            finalMessage = "⚠️ ACHTUNG: Dieser Zeitraum ist bereits (teilweise) reserviert! Der Nutzer hat eine Warnung erhalten und sich dennoch für die Anfrage entschieden. ⚠️\n\n" + finalMessage;
-        }
-
-        const payload = {
-          school:  fSchool.value,              
-          from:    fFrom.value,
-          to:      fTo.value,
-          persons: fPersons.value,
-          type_free: fTypeFree.value,
-          bikes:   bikesValue,
-          salutation: fSalutation.value,
-          first_name: fFirstName.value,
-          last_name:  fLastName.value,
-          name:    nameCombined || (fFirstName.value + ' ' + fLastName.value).trim(),
-          email:   fEmail.value,
-          phone_country: fPhoneCountry.value,
-          phone_national: fPhoneNat.value,
-          phone:   phoneCombined,
-          street:  fStreet.value,
-          house:   fHouse.value,
-          zip:     fZip.value,
-          city:    fCity.value,
-          zipcity: fZipCity.value,
-          address: formatAddress(),
-          message: finalMessage, 
-          has_overlap: isOverlapping,
-          extras:  extrasList,
-          lang:    langSelect.value || 'de',
-          price:   CURRENT_PRICE,
-          priceText: priceValue.textContent,
-          accepted_terms: !!fAccept.checked
-        };
-
-        const res = await fetch(APPS_SCRIPT_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify(payload),
-          redirect: 'follow',
-          signal: ctl.signal
-        }).catch(err => {
-          throw new Error('Netzwerk- oder CORS-Fehler: ' + String(err && err.message ? err.message : err));
-        });
-
-        clearTimeout(t);
-
-        const text = await res.text().catch(()=> '');
-        if (!res.ok) {
-          errBox.textContent = `Serverfehler (HTTP ${res.status}):\n` + text.slice(0,1000);
-          errBox.style.display = 'block';
-          throw new Error('HTTP '+res.status);
-        }
-
-        let out;
-        try {
-          out = JSON.parse(text);
-        } catch {
-          errBox.textContent = 'Serverantwort ist KEINE JSON (vermutlich HTML/Redirect):\n' + text.slice(0,1000);
-          errBox.style.display = 'block';
-          throw new Error('Non-JSON response');
-        }
-
-        if (!out.ok) {
-          const msg = out.error || 'Unbekannter Fehler (ok:false).';
-          errBox.textContent = msg;
-          errBox.style.display = 'block';
-          throw new Error(msg);
-        }
-
-        showSuccessOverlay({
-          school: payload.school,
-          from:   payload.from,
-          to:     payload.to,
-          persons: payload.persons,
-          message: payload.message
-        });
-        closeModal();
-        reloadCalendarAfterSubmission(); 
-
-      } catch(err){
-        console.error('Submit failed:', err);
-      } finally {
-        clearTimeout(t);
-        btnSubmit.classList.remove('loading');
-        btnSubmit.disabled = false;
-        btnSubmit.textContent = (I18N[langSelect.value]||I18N.de).btnSend || 'Anfrage senden';
-      }
-    });
-
-    /* ===== embed-size throttle ===== */
-    function _sendHeight(){
-      var doc=document.documentElement, body=document.body;
-      var h=Math.max(body.scrollHeight, body.offsetHeight, doc.clientHeight, doc.scrollHeight, doc.offsetHeight);
-      parent.postMessage({ type:'embed-size', height:h }, '*');
-    }
-    const sendHeightThrottled = debounce(_sendHeight, 120);
-    window.addEventListener('load', sendHeightThrottled);
-    window.addEventListener('resize', sendHeightThrottled);
-    var ro = new ResizeObserver(()=>sendHeightThrottled());
-    ro.observe(document.body);
-
-    /* ===== Init ===== */
-    (async function init(){
-      try {
-        logoImg.style.display = 'block';
-        document.getElementById('calendarLoading').firstChild.nodeValue = (I18N[langSelect.value]||I18N.de).loadingCalendar;
-        await discoverSchools();
-        applyI18n();
-        window.addEventListener('resize', () => applyResponsiveView());
-        document.body.classList.toggle('touch', isTouchDevice());
-      } catch (err) {
-        console.error('Initialization error:', err);
-        document.getElementById('calendarLoading').textContent = "Fehler beim Laden. Bitte versuchen Sie es erneut.";
-      }
-    })();
-
-    /* ===== Auto-refresh holds every 30 seconds ===== */
-    setInterval(async () => {
-      if (currentKey && calendar) {
-        try {
-          const r = await fetch(`${APPS_SCRIPT_URL}?type=holds&school=${encodeURIComponent(currentKey)}&v=${Date.now()}`);
-          if (r.ok) {
-            const arr = await r.json();
-            if (Array.isArray(arr)) {
-              currentHolds = arr; // NIEUW
-              const holdEvents = arr.map(h => ({
-                title: (langSelect.value==='en'
-                  ? 'Tentative — awaiting confirmation'
-                  : 'Vorläufig reserviert — Bestätigung ausstehend'),
-                start: new Date(h.start),
-                end:   new Date(h.end),
-                editable: false,
-                overlap: true,
-                classNames: ['tentative']
-              }));
-              
-              calendar.getEvents()
-                .filter(ev => (ev.classNames || []).includes('tentative'))
-                .forEach(ev => ev.remove());
-              holdEvents.forEach(ev => calendar.addEvent(ev));
-            }
-          }
-        } catch(_) {}
-      }
-    }, 30000);
-
-    /* ===== Handle successful submission - reload holds ===== */
-    function reloadCalendarAfterSubmission() {
-      if (currentKey && calendar) {
-        setTimeout(async () => {
-          try {
-            const r = await fetch(`${APPS_SCRIPT_URL}?type=holds&school=${encodeURIComponent(currentKey)}&v=${Date.now()}`);
-            if (r.ok) {
-              const arr = await r.json();
-              if (Array.isArray(arr)) {
-                const holdEvents = arr.map(h => ({
-                  title: (langSelect.value==='en'
-                    ? 'Tentative — awaiting confirmation'
-                    : 'Vorläufig reserviert — Bestätigung ausstehend'),
-                  start: new Date(h.start),
-                  end:   new Date(h.end),
-                  editable: false,
-                  overlap: true,
-                  classNames: ['tentative']
-                }));
-                
-                calendar.getEvents()
-                  .filter(ev => (ev.classNames || []).includes('tentative'))
-                  .forEach(ev => ev.remove());
-                holdEvents.forEach(ev => calendar.addEvent(ev));
-              }
-            }
-          } catch(_) {}
-        }, 1000);
-      }
-    }
-
-    /* ===== Window message handler for embed communication ===== */
-    window.addEventListener('message', (event) => {
-      if (event.data && event.data.type === 'calendar-refresh') {
-        if (currentKey) {
-          loadCalendar(currentKey);
-        }
-      }
-    });
-
-    /* ===== Keyboard shortcuts ===== */
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-         if (modalBack.style.display === 'flex') closeModal();
-      }
-      if ((e.ctrlKey && e.key === 'r') || e.key === 'F5') {
+    if(form){
+      form.addEventListener('submit', async (e)=>{
         e.preventDefault();
-        if (currentKey) loadCalendar(currentKey);
-      }
-    });
+        wasSubmitted = true;
 
-    /* ===== Touch device enhancements ===== */
-    if (isTouchDevice()) {
-      document.addEventListener('touchstart', (e) => {
-        if (e.target.closest('.fc-event')) {
-          e.target.style.opacity = '0.7';
-          setTimeout(() => {
-            if (e.target.style) e.target.style.opacity = '';
-          }, 150);
+        const errBox = document.getElementById('submitError');
+        if(errBox){
+          errBox.style.display = 'none';
+          errBox.textContent = '';
         }
-      });
-      let lastTouchEnd = 0;
-      document.addEventListener('touchend', (e) => {
-        const now = (new Date()).getTime();
-        if (now - lastTouchEnd <= 300) e.preventDefault();
-        lastTouchEnd = now;
-      }, false);
-    }
 
-    /* ===== Error handling and user feedback ===== */
-    window.addEventListener('error', (event) => { console.error('Application error:', event.error); });
-    window.addEventListener('unhandledrejection', (event) => { console.error('Unhandled promise rejection:', event.reason); event.preventDefault(); });
+        if(!validateTimes()) {
+          const firstErr = [fPersons,fFrom,fTo,fEmail,fPhoneNat,fStreet,fHouse,fZip,fCity]
+            .find(el=>el && el.classList && el.classList.contains('error'));
+          if(firstErr) firstErr.focus();
+          return;
+        }
 
-  </script>
-</body>
-</html>
+        if(btnSubmit){
+          btnSubmit.classList.add('loading');
+          btnSubmit.disabled = true;
+          btnSubmit.textContent = (langSelect.value==='en'?'Sending…':'Senden…');
+        }
+
+        const ctl = new AbortController();
+        const t = setTimeout(()=>ctl.abort(), 15000);
+
+        try {
+          const nameCombined = [fSalutation.value, fFirstName.value, fLastName.value].filter(Boolean).join(' ').trim();
+          const phoneCombined = [fPhoneCountry.value, (fPhoneNat.value||'').trim()].filter(Boolean).join(' ');
+
+          const extrasChecked = Array.from(document.querySelectorAll('#extrasContainer input:checked'));
+          const extrasList = extrasChecked.map(el =>
+            (langSelect.value === 'en' ? el.dataset.labelEn : el.dataset.labelDe) || el.id.replace(/^x_/, '')
+          );
+
+          let bikesValue = '';
+          if (currentKey === 'WE') {
+            if (fBikesYes.checked) {
+              let b = [];
+              if (parseInt(fBikesLauf.value)>0) b.push(`${fBikesLauf.value}x Laufrad (2-3 J.)`);
+              if (parseInt(fBikes12.value)>0) b.push(`${fBikes12.value}x 12" (3-4 J.)`);
+              if (parseInt(fBikes16.value)>0) b.push(`${fBikes16.value}x 16" (4-6 J.)`);
+              if (parseInt(fBikes20.value)>0) b.push(`${fBikes20.value}x 20" (6-8 J.)`);
+              if (parseInt(fBikes24.value)>0) b.push(`${fBikes24.value}x 24" (8-10 J.)`);
+              if (parseInt(fBikes26.value)>0) b.push(`${fBikes26.value}x 26" (10
