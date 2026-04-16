@@ -249,9 +249,11 @@
     .tooltip-icon{cursor:pointer;font-weight:bold;margin-left:6px;user-select:none;background:var(--brand);color:white;border-radius:50%;width:16px;height:16px;
       display:inline-flex;align-items:center;justify-content:center;font-size:10px;}
     .tooltip-icon:hover{filter:brightness(1.1)}
+    
+    /* TOOLTIP POPUP BREEDTE FIX */
     .popover{position:absolute; top:100%; left:0; transform:translateY(8px); background:var(--popover-bg); color:var(--popover);
-      border:1px solid var(--popover-border); border-radius:10px; padding:10px 12px; max-width:320px; box-shadow:0 8px 24px rgba(0,0,0,.08);
-      font-size:12px; line-height:1.4; z-index:60; display:none;}
+      border:1px solid var(--popover-border); border-radius:10px; padding:10px 12px; width:260px; max-width:85vw; box-shadow:0 8px 24px rgba(0,0,0,.08);
+      font-size:12px; line-height:1.4; z-index:60; display:none; white-space:normal;}
     .popover.show{display:block}
     .popover::after{content:""; position:absolute; top:-6px; left:14px; width:10px; height:10px; background:var(--popover-bg); transform:rotate(45deg); border-left:1px solid var(--popover-border); border-top:1px solid var(--popover-border);}
 
@@ -791,7 +793,7 @@
         bdTotal: "Summe",
         bdNoExtras: "keine",
         priceOnReq: "Preis nach Vereinbarung",
-        bdTimeInfo: "35 € Personal-Zuschlag für das Öffnen bzw. Schließen der Anlage. Dieser fällt an, wenn der Beginn oder das Ende außerhalb der regulären Zeiten (Mo-Sa 9:00–17:30 Uhr) oder auf einen Sonntag fällt. Liegen sowohl Beginn als auch Ende außerhalb, wird der Zuschlag zweimal (70 €) berechnet.",
+        bdTimeInfo: "35 € Personal-Zuschlag pro Öffnung/Schließung außerhalb der regulären Zeiten (Mo-Sa 9:00-17:30 Uhr) oder sonntags. Max. 70 € wenn beides zutrifft.",
         successTitle: "Anfrage gesendet",
         successLead: "Vielen Dank. Ihre Anfrage ist noch nicht verbindlich. Wir prüfen die Angaben und melden uns per E-Mail. Sie erhalten dann die Nutzungsvereinbarung sowie weitere Hinweise.",
         successBack: "Zurück zum Kalender",
@@ -873,7 +875,7 @@
         bdTotal: "Total",
         bdNoExtras: "none",
         priceOnReq: "Price on request",
-        bdTimeInfo: "€35 staff surcharge for opening or closing the facility. This applies if the start or end time falls outside regular hours (Mon-Sat 9:00–17:30) or on a Sunday. If both start and end are outside these hours, the surcharge is applied twice (€70).",
+        bdTimeInfo: "€35 staff surcharge per opening/closing outside regular hours (Mon-Sat 9:00-17:30) or on Sundays. Max €70 if both apply.",
         successTitle: "Request submitted",
         successLead: "Thank you. Your request is not yet binding. We will review the details and contact you by email. You will then receive the usage agreement and further instructions.",
         successBack: "Back to calendar",
@@ -931,13 +933,13 @@
     const PRICING = {
       WE: {
         tiers: [
-          { maxMin: 240, hoursLabel: 4,  base: 100 },
-          { maxMin: 360, hoursLabel: 6,  base: 130 },
-          { maxMin: 480, hoursLabel: 8,  base: 160 },
-          { maxMin: 600, hoursLabel:10,  base: 190 },
-          { maxMin: 720, hoursLabel:12,  base: 220 },
-          { maxMin: 960, hoursLabel:16,  base: 280 },
-          { maxMin:1440, hoursLabel:24,  base: 360 },
+          { maxMin: 240, hoursLabel: 4,  base: 80 },
+          { maxMin: 360, hoursLabel: 6,  base: 110 },
+          { maxMin: 480, hoursLabel: 8,  base: 140 },
+          { maxMin: 600, hoursLabel:10,  base: 170 },
+          { maxMin: 720, hoursLabel:12,  base: 200 },
+          { maxMin: 960, hoursLabel:16,  base: 260 },
+          { maxMin:1440, hoursLabel:24,  base: 340 },
         ],
         personTiers: [
           { max: 30, mult: 1.00, label: "≤30" },
@@ -955,13 +957,13 @@
       },
       WI: {
         tiers: [
-          { maxMin: 240, hoursLabel: 4,  base: 100 },
-          { maxMin: 360, hoursLabel: 6,  base: 130 },
-          { maxMin: 480, hoursLabel: 8,  base: 160 },
-          { maxMin: 600, hoursLabel:10,  base: 190 },
-          { maxMin: 720, hoursLabel:12,  base: 220 },
-          { maxMin: 960, hoursLabel:16,  base: 280 },
-          { maxMin:1440, hoursLabel:24,  base: 360 },
+          { maxMin: 240, hoursLabel: 4,  base: 80 },
+          { maxMin: 360, hoursLabel: 6,  base: 110 },
+          { maxMin: 480, hoursLabel: 8,  base: 140 },
+          { maxMin: 600, hoursLabel:10,  base: 170 },
+          { maxMin: 720, hoursLabel:12,  base: 200 },
+          { maxMin: 960, hoursLabel:16,  base: 260 },
+          { maxMin:1440, hoursLabel:24,  base: 340 },
         ],
         personTiers: [
           { max: 30, mult: 1.00, label: "≤30" },
@@ -975,8 +977,8 @@
       },
       WA: {
         tiers: [
-          { maxMin: 720, hoursLabel: 12, base: 140 },
-          { maxMin: 960, hoursLabel: 16, base: 200 },
+          { maxMin: 720, hoursLabel: 12, base: 120 },
+          { maxMin: 960, hoursLabel: 16, base: 180 },
         ],
         usePersonBands: true,
         personBands: [
@@ -2281,303 +2283,4 @@
       btnBackToCalendar.focus();
 
       const escKeyHandler = (e)=>{ if(e.key === 'Escape') hideSuccessOverlay(); };
-      document.addEventListener('keydown', escKeyHandler, { once:true });
-
-      btnBackToCalendar.onclick = hideSuccessOverlay;
-    }
-
-    function hideSuccessOverlay(){ successOverlay.style.display = 'none'; }
-
-    function showToast(text){
-      successText.textContent = text;
-      successMsg.classList.add('show');
-      setTimeout(()=> successMsg.classList.remove('show'), 3000);
-    }
-
-    /* ===== Submit naar Apps Script ===== */
-    const APPS_SCRIPT_URL = "/.netlify/functions/submit";
-
-    form.addEventListener('submit', async (e)=>{
-      e.preventDefault();
-      wasSubmitted = true;
-
-      const errBox = document.getElementById('submitError');
-      errBox.style.display = 'none';
-      errBox.textContent = '';
-
-      if(!validateTimes()) {
-        const firstErr = [fPersons,fFrom,fTo,fEmail,fPhoneNat,fStreet,fHouse,fZip,fCity]
-          .find(el=>el && el.classList && el.classList.contains('error'));
-        if(firstErr) firstErr.focus();
-        return;
-      }
-
-      btnSubmit.classList.add('loading');
-      btnSubmit.disabled = true;
-      btnSubmit.textContent = (langSelect.value==='en'?'Sending…':'Senden…');
-
-      const ctl = new AbortController();
-      const t = setTimeout(()=>ctl.abort(), 15000);
-
-      try {
-        const nameCombined = [fSalutation.value, fFirstName.value, fLastName.value].filter(Boolean).join(' ').trim();
-        const phoneCombined = [fPhoneCountry.value, (fPhoneNat.value||'').trim()].filter(Boolean).join(' ');
-
-        const extrasChecked = Array.from(document.querySelectorAll('#extrasContainer input:checked'));
-        const extrasList = extrasChecked.map(el =>
-          (langSelect.value === 'en' ? el.dataset.labelEn : el.dataset.labelDe) || el.id.replace(/^x_/, '')
-        );
-
-        let bikesValue = '';
-        if (currentKey === 'WE') {
-          if (fBikesYes.checked) {
-            let b = [];
-            if (parseInt(fBikesLauf.value)>0) b.push(`${fBikesLauf.value}x Laufrad (2-3 J.)`);
-            if (parseInt(fBikes12.value)>0) b.push(`${fBikes12.value}x 12" (3-4 J.)`);
-            if (parseInt(fBikes16.value)>0) b.push(`${fBikes16.value}x 16" (4-6 J.)`);
-            if (parseInt(fBikes20.value)>0) b.push(`${fBikes20.value}x 20" (6-8 J.)`);
-            if (parseInt(fBikes24.value)>0) b.push(`${fBikes24.value}x 24" (8-10 J.)`);
-            if (parseInt(fBikes26.value)>0) b.push(`${fBikes26.value}x 26" (10-14 J.)`);
-            bikesValue = 'Ja: ' + b.join(', ');
-          }
-          else if (fBikesNo.checked) bikesValue = 'Nein';
-        }
-
-        const start = parseLocalDT(fFrom.value);
-        const end   = parseLocalDT(fTo.value);
-        const isOverlapping = getOverlapState(start, end);
-        
-        let finalMessage = fMsg.value;
-        if (isOverlapping) {
-            finalMessage = "⚠️ ACHTUNG: Dieser Zeitraum ist bereits (teilweise) reserviert! Der Nutzer hat eine Warnung erhalten und sich dennoch für die Anfrage entschieden. ⚠️\n\n" + finalMessage;
-        }
-
-        const payload = {
-          school:  fSchool.value,              
-          from:    fFrom.value,
-          to:      fTo.value,
-          persons: fPersons.value,
-          type_free: fTypeFree.value,
-          bikes:   bikesValue,
-          salutation: fSalutation.value,
-          first_name: fFirstName.value,
-          last_name:  fLastName.value,
-          name:    nameCombined || (fFirstName.value + ' ' + fLastName.value).trim(),
-          email:   fEmail.value,
-          phone_country: fPhoneCountry.value,
-          phone_national: fPhoneNat.value,
-          phone:   phoneCombined,
-          street:  fStreet.value,
-          house:   fHouse.value,
-          zip:     fZip.value,
-          city:    fCity.value,
-          zipcity: fZipCity.value,
-          address: formatAddress(),
-          message: finalMessage, 
-          has_overlap: isOverlapping,
-          extras:  extrasList,
-          lang:    langSelect.value || 'de',
-          price:   CURRENT_PRICE,
-          priceText: priceValue.textContent,
-          accepted_terms: !!fAccept.checked
-        };
-
-        const res = await fetch(APPS_SCRIPT_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify(payload),
-          redirect: 'follow',
-          signal: ctl.signal
-        }).catch(err => {
-          throw new Error('Netzwerk- oder CORS-Fehler: ' + String(err && err.message ? err.message : err));
-        });
-
-        clearTimeout(t);
-
-        const text = await res.text().catch(()=> '');
-        if (!res.ok) {
-          errBox.textContent = `Serverfehler (HTTP ${res.status}):\n` + text.slice(0,1000);
-          errBox.style.display = 'block';
-          throw new Error('HTTP '+res.status);
-        }
-
-        let out;
-        try {
-          out = JSON.parse(text);
-        } catch {
-          errBox.textContent = 'Serverantwort ist KEINE JSON (vermutlich HTML/Redirect):\n' + text.slice(0,1000);
-          errBox.style.display = 'block';
-          throw new Error('Non-JSON response');
-        }
-
-        if (!out.ok) {
-          const msg = out.error || 'Unbekannter Fehler (ok:false).';
-          errBox.textContent = msg;
-          errBox.style.display = 'block';
-          throw new Error(msg);
-        }
-
-        showSuccessOverlay({
-          school: payload.school,
-          from:   payload.from,
-          to:     payload.to,
-          persons: payload.persons,
-          message: payload.message
-        });
-        closeModal();
-        reloadCalendarAfterSubmission(); 
-
-      } catch(err){
-        console.error('Submit failed:', err);
-      } finally {
-        clearTimeout(t);
-        btnSubmit.classList.remove('loading');
-        btnSubmit.disabled = false;
-        btnSubmit.textContent = (I18N[langSelect.value]||I18N.de).btnSend || 'Anfrage senden';
-      }
-    });
-
-    /* ===== embed-size throttle ===== */
-    function _sendHeight(){
-      var doc=document.documentElement, body=document.body;
-      var h=Math.max(body.scrollHeight, body.offsetHeight, doc.clientHeight, doc.scrollHeight, doc.offsetHeight);
-      parent.postMessage({ type:'embed-size', height:h }, '*');
-    }
-    const sendHeightThrottled = debounce(_sendHeight, 120);
-    window.addEventListener('load', sendHeightThrottled);
-    window.addEventListener('resize', sendHeightThrottled);
-    var ro = new ResizeObserver(()=>sendHeightThrottled());
-    ro.observe(document.body);
-
-    /* ===== Init ===== */
-    (async function init(){
-      logoImg.style.display = 'block';
-      document.getElementById('calendarLoading').firstChild.nodeValue = (I18N[langSelect.value]||I18N.de).loadingCalendar;
-      await discoverSchools();
-      applyI18n();
-      window.addEventListener('resize', () => applyResponsiveView());
-      document.body.classList.toggle('touch', isTouchDevice());
-    })();
-
-    /* ===== Auto-refresh holds every 30 seconds ===== */
-    setInterval(async () => {
-      if (currentKey && calendar) {
-        try {
-          const r = await fetch(`${APPS_SCRIPT_URL}?type=holds&school=${encodeURIComponent(currentKey)}&v=${Date.now()}`);
-          if (r.ok) {
-            const arr = await r.json();
-            if (Array.isArray(arr)) {
-              currentHolds = arr; // NIEUW
-              const holdEvents = arr.map(h => ({
-                title: (langSelect.value==='en'
-                  ? 'Tentative — awaiting confirmation'
-                  : 'Vorläufig reserviert — Bestätigung ausstehend'),
-                start: new Date(h.start),
-                end:   new Date(h.end),
-                editable: false,
-                overlap: true,
-                classNames: ['tentative']
-              }));
-              
-              calendar.getEvents()
-                .filter(ev => (ev.classNames || []).includes('tentative'))
-                .forEach(ev => ev.remove());
-              holdEvents.forEach(ev => calendar.addEvent(ev));
-            }
-          }
-        } catch(_) {}
-      }
-    }, 30000);
-
-    /* ===== Handle successful submission - reload holds ===== */
-    function reloadCalendarAfterSubmission() {
-      if (currentKey && calendar) {
-        setTimeout(async () => {
-          try {
-            const r = await fetch(`${APPS_SCRIPT_URL}?type=holds&school=${encodeURIComponent(currentKey)}&v=${Date.now()}`);
-            if (r.ok) {
-              const arr = await r.json();
-              if (Array.isArray(arr)) {
-                const holdEvents = arr.map(h => ({
-                  title: (langSelect.value==='en'
-                    ? 'Tentative — awaiting confirmation'
-                    : 'Vorläufig reserviert — Bestätigung ausstehend'),
-                  start: new Date(h.start),
-                  end:   new Date(h.end),
-                  editable: false,
-                  overlap: true,
-                  classNames: ['tentative']
-                }));
-                
-                calendar.getEvents()
-                  .filter(ev => (ev.classNames || []).includes('tentative'))
-                  .forEach(ev => ev.remove());
-                holdEvents.forEach(ev => calendar.addEvent(ev));
-              }
-            }
-          } catch(_) {}
-        }, 1000);
-      }
-    }
-
-    /* ===== Window message handler for embed communication ===== */
-    window.addEventListener('message', (event) => {
-      if (event.data && event.data.type === 'calendar-refresh') {
-        if (currentKey) {
-          loadCalendar(currentKey);
-        }
-      }
-    });
-
-    /* ===== Keyboard shortcuts ===== */
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-         if (modalBack.style.display === 'flex') closeModal();
-      }
-      if ((e.ctrlKey && e.key === 'r') || e.key === 'F5') {
-        e.preventDefault();
-        if (currentKey) loadCalendar(currentKey);
-      }
-    });
-
-    /* ===== Touch device enhancements ===== */
-    if (isTouchDevice()) {
-      document.addEventListener('touchstart', (e) => {
-        if (e.target.closest('.fc-event')) {
-          e.target.style.opacity = '0.7';
-          setTimeout(() => {
-            if (e.target.style) e.target.style.opacity = '';
-          }, 150);
-        }
-      });
-      let lastTouchEnd = 0;
-      document.addEventListener('touchend', (e) => {
-        const now = (new Date()).getTime();
-        if (now - lastTouchEnd <= 300) e.preventDefault();
-        lastTouchEnd = now;
-      }, false);
-    }
-
-    /* ===== Error handling and user feedback ===== */
-    window.addEventListener('error', (event) => { console.error('Application error:', event.error); });
-    window.addEventListener('unhandledrejection', (event) => { console.error('Unhandled promise rejection:', event.reason); event.preventDefault(); });
-
-    /* ===== Accessibility enhancements ===== */
-    function announceToScreenReader(message) {
-      const announcement = document.createElement('div');
-      announcement.setAttribute('aria-live', 'polite');
-      announcement.setAttribute('aria-atomic', 'true');
-      announcement.className = 'visually-hidden';
-      announcement.textContent = message;
-      document.body.appendChild(announcement);
-      setTimeout(() => { document.body.removeChild(announcement); }, 1000);
-    }
-
-    const _origShowSuccessOverlay = showSuccessOverlay;
-    showSuccessOverlay = function(payload) {
-      _origShowSuccessOverlay(payload);
-      announceToScreenReader( langSelect.value === 'en' ? 'Request submitted successfully' : 'Anfrage erfolgreich gesendet' );
-    };
-  </script>
-</body>
-</html>
+      document.addEventListener('keydown', escKey
