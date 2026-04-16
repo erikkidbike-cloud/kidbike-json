@@ -249,11 +249,9 @@
     .tooltip-icon{cursor:pointer;font-weight:bold;margin-left:6px;user-select:none;background:var(--brand);color:white;border-radius:50%;width:16px;height:16px;
       display:inline-flex;align-items:center;justify-content:center;font-size:10px;}
     .tooltip-icon:hover{filter:brightness(1.1)}
-    
-    /* TOOLTIP POPUP BREEDTE FIX */
     .popover{position:absolute; top:100%; left:0; transform:translateY(8px); background:var(--popover-bg); color:var(--popover);
-      border:1px solid var(--popover-border); border-radius:10px; padding:10px 12px; width:260px; max-width:85vw; box-shadow:0 8px 24px rgba(0,0,0,.08);
-      font-size:12px; line-height:1.4; z-index:60; display:none; white-space:normal;}
+      border:1px solid var(--popover-border); border-radius:10px; padding:10px 12px; max-width:320px; box-shadow:0 8px 24px rgba(0,0,0,.08);
+      font-size:12px; line-height:1.4; z-index:60; display:none;}
     .popover.show{display:block}
     .popover::after{content:""; position:absolute; top:-6px; left:14px; width:10px; height:10px; background:var(--popover-bg); transform:rotate(45deg); border-left:1px solid var(--popover-border); border-top:1px solid var(--popover-border);}
 
@@ -285,6 +283,7 @@
     
     .school-card .status{font-size:12px;color:#065f46;background:#ecfdf5;border:1px solid #a7f3d0;padding:4px 8px;border-radius:999px;width:max-content;}
     
+    /* ==== NIEUW: Oranje label voor Telefonisch Buchbar ==== */
     .school-card .status.phone{color:#c2410c;background:#ffedd5;border-color:#fdba74;}
     
     .school-card.disabled{opacity:.55;filter:grayscale(0.2);background:var(--disabled-bg);}
@@ -520,7 +519,7 @@
             <div class="row"><span id="bdPersonsLabel" class="muted">Personen-Staffel</span><span id="bdPersons">–</span></div>
             <div class="row">
               <span class="muted tooltip-wrap">
-                <span id="bdTimeLabel">Personal-Zuschlag</span>
+                <span id="bdTimeLabel">Zeit-Zuschlag</span>
                 <span id="timeInfo" class="tooltip-icon" aria-haspopup="dialog" aria-expanded="false" tabindex="0">?</span>
                 <div id="timeInfoPopover" class="popover" role="dialog" aria-hidden="true"></div>
               </span>
@@ -787,12 +786,12 @@
         phType: "z. B. Kindergeburtstag, Jubiläum, …",
         bdBase: (tier)=>`Basis (bis ${tier} Std.)`,
         bdPersons: (label)=>`Personen-Staffel (${label})`,
-        bdTime: "Personal-Zuschlag",
+        bdTime: "Zeit-Zuschlag",
         bdExtras: "Extras",
         bdTotal: "Summe",
         bdNoExtras: "keine",
         priceOnReq: "Preis nach Vereinbarung",
-        bdTimeInfo: "35 € Personal-Zuschlag pro Öffnung/Schließung außerhalb der regulären Zeiten (Mo-Sa 9:00-17:30) oder sonntags. Max. 70 € wenn beides zutrifft.",
+        bdTimeInfo: "30 € Zuschlag, wenn Beginn UND Ende nicht zwischen 9:00–17:30 Uhr liegen oder wenn der Zeitraum (auch teilweise) am Wochenende liegt.",
         successTitle: "Anfrage gesendet",
         successLead: "Vielen Dank. Ihre Anfrage ist noch nicht verbindlich. Wir prüfen die Angaben und melden uns per E-Mail. Sie erhalten dann die Nutzungsvereinbarung sowie weitere Hinweise.",
         successBack: "Zurück zum Kalender",
@@ -869,12 +868,12 @@
         phType: "e.g. kids' birthday, anniversary …",
         bdBase: (tier)=>`Base (up to ${tier} h)`,
         bdPersons: (label)=>`People tier (${label})`,
-        bdTime: "Staff Surcharge",
+        bdTime: "Time surcharge",
         bdExtras: "Extras",
         bdTotal: "Total",
         bdNoExtras: "none",
         priceOnReq: "Price on request",
-        bdTimeInfo: "€35 staff surcharge per opening/closing outside regular hours (Mon-Sat 9:00-17:30) or on Sundays. Max €70 if both apply.",
+        bdTimeInfo: "€30 surcharge if start AND end are not between 9:00–17:30, or if any part of the booking falls on a weekend.",
         successTitle: "Request submitted",
         successLead: "Thank you. Your request is not yet binding. We will review the details and contact you by email. You will then receive the usage agreement and further instructions.",
         successBack: "Back to calendar",
@@ -914,31 +913,32 @@
     };
     const FORCE_OFFLINE = {};
 
-    function staffSurcharge(start, end){
-      const isOutside = (dt) => {
-        const day = dt.getDay();
-        if (day === 0) return true; // Zondag is altijd "outside"
+    function defaultSurcharge30(start, end){
+      const validTime = (dt)=> {
         const m = dt.getHours()*60 + dt.getMinutes();
-        return (m < 9*60 || m > 17*60 + 30);
+        return (m >= 9*60) && (m <= 17*60 + 30);
       };
-      
-      let count = 0;
-      if (isOutside(start)) count++;
-      if (isOutside(end)) count++;
-      
-      return count * 35;
+      const bothOutside = !(validTime(start) && validTime(end));
+
+      function touchesWeekend(s,e){
+        const cur = new Date(s); cur.setHours(0,0,0,0);
+        const endDay = new Date(e); endDay.setHours(23,59,59,999);
+        while(cur <= endDay){ const d=cur.getDay(); if(d===0||d===6) return true; cur.setDate(cur.getDate()+1); }
+        return false;
+      }
+      return (bothOutside || touchesWeekend(start,end)) ? 30 : 0;
     }
 
     const PRICING = {
       WE: {
         tiers: [
-          { maxMin: 240, hoursLabel: 4,  base: 60 },
-          { maxMin: 360, hoursLabel: 6,  base: 90 },
-          { maxMin: 480, hoursLabel: 8,  base: 120 },
-          { maxMin: 600, hoursLabel:10,  base: 150 },
-          { maxMin: 720, hoursLabel:12,  base: 180 },
-          { maxMin: 960, hoursLabel:16,  base: 240 },
-          { maxMin:1440, hoursLabel:24,  base: 320 },
+          { maxMin: 240, hoursLabel: 4,  base: 100 },
+          { maxMin: 360, hoursLabel: 6,  base: 130 },
+          { maxMin: 480, hoursLabel: 8,  base: 160 },
+          { maxMin: 600, hoursLabel:10,  base: 190 },
+          { maxMin: 720, hoursLabel:12,  base: 220 },
+          { maxMin: 960, hoursLabel:16,  base: 280 },
+          { maxMin:1440, hoursLabel:24,  base: 360 },
         ],
         personTiers: [
           { max: 30, mult: 1.00, label: "≤30" },
@@ -947,7 +947,7 @@
           { max: 75, mult: 1.75, label: "≤75" },
           { max:100, mult: 2.00, label: "≤100" },
         ],
-        surcharge: staffSurcharge,
+        surcharge: defaultSurcharge30,
         extras: [
           { id: "parcours",  price: 10, labelDe: "Fahrradparcours",  labelEn: "Bike course" },
           { id: "grill",     price: 10, labelDe: "Grill",            labelEn: "Grill" },
@@ -956,13 +956,13 @@
       },
       WI: {
         tiers: [
-          { maxMin: 240, hoursLabel: 4,  base: 60 },
-          { maxMin: 360, hoursLabel: 6,  base: 90 },
-          { maxMin: 480, hoursLabel: 8,  base: 120 },
-          { maxMin: 600, hoursLabel:10,  base: 150 },
-          { maxMin: 720, hoursLabel:12,  base: 180 },
-          { maxMin: 960, hoursLabel:16,  base: 240 },
-          { maxMin:1440, hoursLabel:24,  base: 320 },
+          { maxMin: 240, hoursLabel: 4,  base: 100 },
+          { maxMin: 360, hoursLabel: 6,  base: 130 },
+          { maxMin: 480, hoursLabel: 8,  base: 160 },
+          { maxMin: 600, hoursLabel:10,  base: 190 },
+          { maxMin: 720, hoursLabel:12,  base: 220 },
+          { maxMin: 960, hoursLabel:16,  base: 280 },
+          { maxMin:1440, hoursLabel:24,  base: 360 },
         ],
         personTiers: [
           { max: 30, mult: 1.00, label: "≤30" },
@@ -971,13 +971,13 @@
           { max: 75, mult: 1.75, label: "≤75" },
           { max:100, mult: 2.00, label: "≤100" },
         ],
-        surcharge: staffSurcharge,
+        surcharge: defaultSurcharge30,
         extras: []
       },
       WA: {
         tiers: [
-          { maxMin: 720, hoursLabel: 12, base: 100 },
-          { maxMin: 960, hoursLabel: 16, base: 160 },
+          { maxMin: 720, hoursLabel: 12, base: 140 },
+          { maxMin: 960, hoursLabel: 16, base: 200 },
         ],
         usePersonBands: true,
         personBands: [
@@ -1049,7 +1049,9 @@
 
     const startOverlay = document.getElementById('startOverlay');
     const startTitle = document.getElementById('startTitle');
+    const startLead = document.getElementById('startLead');
     const startHintBelow = document.getElementById('startHintBelow');
+    const startGrid = startOverlay.querySelector('.start-grid');
 
     const modalBack    = document.getElementById('modalBackdrop');
     const bookingModal = document.getElementById('bookingModal');
@@ -1185,85 +1187,79 @@
     /* ===== I18N apply ===== */
     function applyI18n(){
       const L = I18N[langSelect.value] || I18N.de;
-      if (titleApp) titleApp.textContent = L.appTitle;
-      if (labelSchool) labelSchool.textContent = L.labelSchool;
-      if (labelLang) labelLang.textContent = L.labelLang;
-      if (introLine1) introLine1.textContent = L.intro1;
-      if (introHint) introHint.textContent  = L.introHint;
+      titleApp.textContent = L.appTitle;
+      labelSchool.textContent = L.labelSchool;
+      labelLang.textContent = L.labelLang;
+      introLine1.textContent = L.intro1;
+      introHint.textContent  = L.introHint;
+      document.getElementById('calendarLoading').firstChild.nodeValue = L.loadingCalendar;
+
+      modalTitle.textContent = L.modalTitle;
+      labelFormSchool.textContent = L.formSchool;
+      labelPersons.textContent = L.persons;
+      labelFrom.textContent = L.from;
+      labelTo.textContent = L.to;
+      labelType.textContent = L.type;
       
-      const calLoad = document.getElementById('calendarLoading');
-      if (calLoad && calLoad.firstChild) calLoad.firstChild.nodeValue = L.loadingCalendar;
+      if(labelBikesQuestion) labelBikesQuestion.textContent = L.bikesQuestion;
+      if(labelBikesYes) labelBikesYes.textContent = L.bikesYes;
+      if(labelBikesNo) labelBikesNo.textContent = L.bikesNo;
+      if(labelBikesDetails) labelBikesDetails.textContent = L.bikesDetails;
+      if(errBikesChoice) errBikesChoice.textContent = L.errBikesChoice;
+      if(errBikesDetails) errBikesDetails.textContent = L.errBikesDetails;
 
-      if (modalTitle) modalTitle.textContent = L.modalTitle;
-      if (labelFormSchool) labelFormSchool.textContent = L.formSchool;
-      if (labelPersons) labelPersons.textContent = L.persons;
-      if (labelFrom) labelFrom.textContent = L.from;
-      if (labelTo) labelTo.textContent = L.to;
-      if (labelType) labelType.textContent = L.type;
-      
-      if (labelBikesQuestion) labelBikesQuestion.textContent = L.bikesQuestion;
-      if (labelBikesYes) labelBikesYes.textContent = L.bikesYes;
-      if (labelBikesNo) labelBikesNo.textContent = L.bikesNo;
-      if (labelBikesDetails) labelBikesDetails.textContent = L.bikesDetails;
-      if (errBikesChoice) errBikesChoice.textContent = L.errBikesChoice;
-      if (errBikesDetails) errBikesDetails.textContent = L.errBikesDetails;
+      labelEmail.textContent = L.email;
+      labelPhone.textContent = (langSelect.value==='en'?'Phone number *':'Telefon *');
+      labelPhoneCountry.textContent = L.phoneCountry;
+      labelAddress.textContent = L.address;
+      labelSalutation.textContent = L.salutation;
+      labelFirstName.textContent = L.firstName;
+      labelLastName.textContent = L.lastName;
+      labelMsg.textContent = L.message;
+      labelAccept.textContent = L.accept;
 
-      if (labelEmail) labelEmail.textContent = L.email;
-      if (labelPhone) labelPhone.textContent = (langSelect.value==='en'?'Phone number *':'Telefon *');
-      if (labelPhoneCountry) labelPhoneCountry.textContent = L.phoneCountry;
-      if (labelAddress) labelAddress.textContent = L.address;
-      if (labelSalutation) labelSalutation.textContent = L.salutation;
-      if (labelFirstName) labelFirstName.textContent = L.firstName;
-      if (labelLastName) labelLastName.textContent = L.lastName;
-      if (labelMsg) labelMsg.textContent = L.message;
-      if (labelAccept) labelAccept.textContent = L.accept;
+      overlapWarningText.textContent = L.overlapWarning;
+      labelOverlapConfirm.textContent = L.overlapCheck;
 
-      if (overlapWarningText) overlapWarningText.textContent = L.overlapWarning;
-      if (labelOverlapConfirm) labelOverlapConfirm.textContent = L.overlapCheck;
-
-      if (priceTitle) priceTitle.textContent = L.priceTitle;
-      if (priceHint) priceHint.textContent = L.priceHint;
-      
-      const ts = document.getElementById('termsSummary');
-      if (ts) ts.textContent = L.termsSummary;
+      priceTitle.textContent = L.priceTitle;
+      priceHint.textContent = L.priceHint;
+      document.getElementById('termsSummary').textContent = L.termsSummary;
 
       const termsList = document.getElementById('termsList');
-      if (termsList) {
-        termsList.innerHTML = "";
-        const termsToRender = getTermsForSchool(langSelect.value, currentKey);
-        termsToRender.forEach(t => { const li = document.createElement('li'); li.textContent = t; termsList.appendChild(li); });
-      }
+      termsList.innerHTML = "";
+      const termsToRender = getTermsForSchool(langSelect.value, currentKey);
+      termsToRender.forEach(t => { const li = document.createElement('li'); li.textContent = t; termsList.appendChild(li); });
 
-      if (document.getElementById('bdTimeLabel')) document.getElementById('bdTimeLabel').textContent = L.bdTime;
-      if (document.getElementById('bdExtrasLabel')) document.getElementById('bdExtrasLabel').textContent = L.bdExtras;
-      if (document.getElementById('bdTotalLabel')) document.getElementById('bdTotalLabel').textContent = L.bdTotal;
+      document.getElementById('bdTimeLabel').textContent = L.bdTime;
+      document.getElementById('bdExtrasLabel').textContent = L.bdExtras;
+      document.getElementById('bdTotalLabel').textContent = L.bdTotal;
       
-      if (bdGrandTotalLabel) bdGrandTotalLabel.textContent = (langSelect.value==='en')
+      bdGrandTotalLabel.textContent = (langSelect.value==='en')
         ? 'Total incl. deposit'
         : 'Summe inkl. Kaution';
 
-      if (btnSubmit) btnSubmit.textContent = L.btnSend;
+      btnSubmit.textContent = L.btnSend;
 
-      if (fPersons) fPersons.placeholder = L.phPersons;
-      if (fTypeFree) fTypeFree.placeholder = L.phType;
+      fPersons.placeholder = L.phPersons;
+      fTypeFree.placeholder = L.phType;
 
-      if (successTitle) successTitle.textContent = L.successTitle;
-      if (btnBackToCalendar) btnBackToCalendar.textContent = L.successBack;
+      successTitle.textContent = L.successTitle;
+      btnBackToCalendar.textContent = L.successBack;
 
-      if (startTitle) startTitle.textContent = L.startTitle;
-      if (startHintBelow) startHintBelow.textContent = L.startHint;
+      startTitle.textContent = L.startTitle;
+      startLead.textContent = L.startLead;
+      startHintBelow.textContent = L.startHint;
 
-      if (wiInfoTitle) wiInfoTitle.textContent = L.wiInfoTitle;
-      if (wiInfoText) wiInfoText.innerHTML = L.wiInfoText;
-      if (btnWiOk) btnWiOk.textContent = L.wiInfoOk;
+      // WI-specific texts
+      wiInfoTitle.textContent = L.wiInfoTitle;
+      wiInfoText.innerHTML = L.wiInfoText;
+      btnWiOk.textContent = L.wiInfoOk;
 
       if(calendar) calendar.setOption('locale', langSelect.value === 'en' ? 'en-gb' : 'de');
 
       renderExtrasForSchool(currentKey || 'WE');
       updatePricePreview();
-      
-      if(timePopover) timePopover.textContent = L.bdTimeInfo;
-      
+      timePopover.textContent = L.bdTimeInfo;
       renderStartCards();
       renderSchoolSelectOptions();
     }
@@ -1295,6 +1291,7 @@
         if((e - s) > MS_24H) e = new Date(s.getTime() + MS_24H);
 
         const isFrauen = String(ev.frauenprojekt || '').toLowerCase() === 'true';
+        // Check of dit een speciaal 'FREI' blok is voor de Wiener Straße
         const isFrei = String(ev.isFrei || '').toLowerCase() === 'true';
 
         let classNames = Array.isArray(ev.classNames) ? [...ev.classNames] : [];
@@ -1339,14 +1336,13 @@
       }
       renderSchoolSelectOptions();
       renderStartCards();
-      if(startOverlay) startOverlay.style.display = 'flex';
+      startOverlay.style.display = 'flex';
       if (startMapObj) setTimeout(() => startMapObj.invalidateSize(), 150);
     }
 
 
     function renderSchoolSelectOptions(){
       const L = I18N[langSelect.value] || I18N.de;
-      if(!schoolSelect) return;
       schoolSelect.innerHTML = '';
       const placeholder = document.createElement('option');
       placeholder.value = ''; placeholder.disabled = true; placeholder.selected = !currentKey;
@@ -1380,11 +1376,9 @@
 
     function renderStartCards(){
       const T = I18N[langSelect.value] || I18N.de;
-      const startGrid = document.querySelector('.start-grid');
-      if(!startGrid) return;
       startGrid.innerHTML = '';
       
-      if (!startMapObj && window.L && document.getElementById('startMap')) {
+      if (!startMapObj && window.L) {
         startMapObj = window.L.map('startMap').setView([52.505, 13.42], 12);
         window.L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
           attribution: '&copy; OSM contributors'
@@ -1421,9 +1415,9 @@
         card.addEventListener('click', ()=>{
           if(!ok) return;
           currentKey = key;
-          if(startOverlay) startOverlay.style.display = 'none';
+          startOverlay.style.display = 'none';
           renderSchoolSelectOptions();
-          if(schoolSelect) schoolSelect.value = key;
+          schoolSelect.value = key;
           loadCalendar(key);
         });
 
@@ -1442,7 +1436,7 @@
            m.on('mouseout', () => { card.classList.remove('highlighted'); });
            m.on('click', () => { 
              if(ok) {
-                currentKey = key; if(startOverlay) startOverlay.style.display = 'none'; renderSchoolSelectOptions(); if(schoolSelect) schoolSelect.value = key; loadCalendar(key);
+                currentKey = key; startOverlay.style.display = 'none'; renderSchoolSelectOptions(); schoolSelect.value = key; loadCalendar(key);
              } else {
                 card.scrollIntoView({behavior: 'smooth', block: 'nearest'});
                 card.classList.add('highlighted'); setTimeout(()=>card.classList.remove('highlighted'), 1000);
@@ -1457,7 +1451,6 @@
     function overlaps(aStart,aEnd,bStart,bEnd){ return (aStart < bEnd) && (aEnd > bStart); }
 
     function formatAddress(){
-      if(!fStreet) return '';
       const street=(fStreet.value||'').trim();
       const house=(fHouse.value||'').trim();
       const zip=(fZip.value||'').trim();
@@ -1469,7 +1462,6 @@
     }
 
     function highlight(el, on){
-      if(!el) return;
       const shouldShow = on && (wasSubmitted || el.dataset.touched === '1');
       el.classList.toggle('error', !!shouldShow);
       
@@ -1483,6 +1475,7 @@
       if (msg) msg.style.display = shouldShow ? 'block' : 'none';
     }
 
+    // HULPFUNCTIE: Controleert over de geselecteerde tijd overlapt
     function getOverlapState(start, end) {
       if (!start || !end) return false;
       for (const ev of busyEvents) {
@@ -1498,7 +1491,6 @@
     }
 
     function validateTimes(){
-      if(!fFrom || !fTo) return false;
       const start = parseLocalDT(fFrom.value);
       const end   = parseLocalDT(fTo.value);
 
@@ -1510,66 +1502,63 @@
       const isOverlapping = !isInvalidTime && getOverlapState(start, end);
 
       const showConflict = isInvalidTime && (wasSubmitted || (fFrom.dataset.touched==='1' && fTo.dataset.touched==='1'));
-      if(alertConflict){
-        alertConflict.style.display = showConflict ? 'block':'none';
-        alertConflict.textContent = (I18N[langSelect.value]||I18N.de).conflict;
+      alertConflict.style.display = showConflict ? 'block':'none';
+      alertConflict.textContent = (I18N[langSelect.value]||I18N.de).conflict;
+
+      // Toon de waarschuwing bij overlap
+      if (isOverlapping) {
+        alertOverlap.style.display = 'block';
+      } else {
+        alertOverlap.style.display = 'none';
+        fOverlapConfirm.checked = false; // Reset als er geen overlap meer is
       }
 
-      if(alertOverlap){
-        if (isOverlapping) {
-          alertOverlap.style.display = 'block';
-        } else {
-          alertOverlap.style.display = 'none';
-          if(fOverlapConfirm) fOverlapConfirm.checked = false;
-        }
-      }
+      if(start && start < minStartDate()) { alertShort.style.display='block'; alertShort.innerHTML = (I18N[langSelect.value]||I18N.de).shortTermWarning; }
+      else { alertShort.style.display='none'; }
 
-      if(alertShort){
-        if(start && start < minStartDate()) { alertShort.style.display='block'; alertShort.innerHTML = (I18N[langSelect.value]||I18N.de).shortTermWarning; }
-        else { alertShort.style.display='none'; }
-      }
-
-      const phoneOk = (fPhoneNat && fPhoneNat.value||'').replace(/[^\d]/g,'').length >= 6;
+      const phoneOk = (fPhoneNat.value||'').replace(/[^\d]/g,'').length >= 6;
       const addrOk  = !!formatAddress();
 
-      highlight(fPersons, fPersons && !fPersons.value);
-      highlight(fEmail, fEmail && !fEmail.validity.valid);
+      highlight(fPersons, !fPersons.value);
+      highlight(fEmail, !fEmail.validity.valid);
       highlight(fPhoneNat, !phoneOk);
-      highlight(fStreet, fStreet && !(fStreet.value||'').trim());
-      highlight(fHouse,  fHouse && !(fHouse.value||'').trim());
-      highlight(fZip,    fZip && !(fZip.value||'').trim());
-      highlight(fCity,   fCity && !(fCity.value||'').trim());
+      highlight(fStreet, !(fStreet.value||'').trim());
+      highlight(fHouse,  !(fHouse.value||'').trim());
+      highlight(fZip,    !(fZip.value||'').trim());
+      highlight(fCity,   !(fCity.value||'').trim());
 
       let bikesOk = true;
-      if (currentKey === 'WE' && fBikesYes && fBikesNo) {
+      if (currentKey === 'WE') {
         const isBikesTouched = fBikesYes.dataset.touched === '1' || fBikesNo.dataset.touched === '1';
         if (!fBikesYes.checked && !fBikesNo.checked) {
           bikesOk = false;
-          if(errBikesChoice) errBikesChoice.style.display = (wasSubmitted || isBikesTouched) ? 'block' : 'none';
+          errBikesChoice.style.display = (wasSubmitted || isBikesTouched) ? 'block' : 'none';
         } else {
-          if(errBikesChoice) errBikesChoice.style.display = 'none';
+          errBikesChoice.style.display = 'none';
           if (fBikesYes.checked) {
             const totalBikes = (parseInt(fBikesLauf.value)||0) + (parseInt(fBikes12.value)||0) + (parseInt(fBikes16.value)||0) + (parseInt(fBikes20.value)||0) + (parseInt(fBikes24.value)||0) + (parseInt(fBikes26.value)||0);
             if (totalBikes < 1) bikesOk = false;
             
             const bTouch = (fBikesLauf.dataset.touched==='1' || fBikes12.dataset.touched==='1' || fBikes16.dataset.touched==='1' || fBikes20.dataset.touched==='1' || fBikes24.dataset.touched==='1' || fBikes26.dataset.touched==='1');
-            if(errBikesDetails) errBikesDetails.style.display = (bikesOk === false && (wasSubmitted || bTouch)) ? 'block' : 'none';
+            errBikesDetails.style.display = (bikesOk === false && (wasSubmitted || bTouch)) ? 'block' : 'none';
           } else {
-            if(errBikesDetails) errBikesDetails.style.display = 'none';
+            errBikesDetails.style.display = 'none';
           }
         }
       }
 
-      const requireAccept = (step2 && step2.style.display !== 'none');
-      const timeOk = !isInvalidTime && (!isOverlapping || (fOverlapConfirm && fOverlapConfirm.checked));
-      const requiredOk = fSchool && fSchool.value && fPersons && fPersons.value && start && end && phoneOk && addrOk && bikesOk && fEmail && fEmail.validity.valid && (!requireAccept || (fAccept && fAccept.checked));
+      const requireAccept = (step2.style.display !== 'none');
+      // Verplicht om de overlap checkbox aan te vinken indien overlappend!
+      const timeOk = !isInvalidTime && (!isOverlapping || fOverlapConfirm.checked);
+      const requiredOk = fSchool.value && fPersons.value && start && end && phoneOk && addrOk && bikesOk && fEmail.validity.valid && (!requireAccept || fAccept.checked);
       
-      if(btnSubmit) btnSubmit.disabled = !(timeOk && requiredOk);
+      btnSubmit.disabled = !(timeOk && requiredOk);
       updatePricePreview(); 
       updateSticky();
       return timeOk && requiredOk;
     }
 
+    // Laat de blokkade in de kalender los, zodat ze het blokje wél kunnen selecteren (en de warning zien)
     function selectAllowFn(selectInfo){
       const selStart = selectInfo.start, selEnd = selectInfo.end;
       if((selEnd - selStart)/60000 < 30) return false;
@@ -1581,21 +1570,17 @@
 
     /* ===== Wizard & sticky bar ===== */
     function goStep(n){
-      if(!step1 || !step2) return;
       if(n===1){ step1.style.display='block'; step2.style.display='none'; }
       else { step1.style.display='none'; step2.style.display='block'; }
 
-      if(fAccept){
-        const agreeWrap = fAccept.closest('.checkline');
-        if(agreeWrap){ agreeWrap.style.display = (n===2 ? 'inline-flex' : 'none'); }
-      }
-      if(btnSubmit) btnSubmit.style.display = (n===2 ? 'inline-flex' : 'none');
+      const agreeWrap = document.getElementById('fAccept').closest('.checkline');
+      if(agreeWrap){ agreeWrap.style.display = (n===2 ? 'inline-flex' : 'none'); }
+      btnSubmit.style.display = (n===2 ? 'inline-flex' : 'none');
 
       sendHeightThrottled();
     }
 
     function updateSticky(){
-      if(!stickyPrice) return;
       let stickyText = '–';
       if (currentKey === 'WA' && CURRENT_PRICE && CURRENT_PRICE.total != null) {
         if (CURRENT_PRICE.caution) {
@@ -1605,17 +1590,17 @@
         }
       } else if (CURRENT_PRICE && CURRENT_PRICE.total != null) {
         stickyText = euro(CURRENT_PRICE.total);
-      } else if (priceValue && priceValue.textContent) {
+      } else if (priceValue.textContent) {
         stickyText = priceValue.textContent;
       }
       stickyPrice.textContent = stickyText;
 
       const s = parseLocalDT(fFrom.value), e = parseLocalDT(fTo.value);
-      if(stickyWhen) stickyWhen.textContent = (s&&e)? `${formatDT(s, langSelect.value)} – ${formatDT(e, langSelect.value)}` : '–';
-      if(stickyPersons) stickyPersons.textContent = fPersons.value ? `${fPersons.value} Pers.` : '';
+      stickyWhen.textContent = (s&&e)? `${formatDT(s, langSelect.value)} – ${formatDT(e, langSelect.value)}` : '–';
+      stickyPersons.textContent = fPersons.value ? `${fPersons.value} Pers.` : '';
     }
 
-    if(btnToStep2) btnToStep2.addEventListener('click', ()=>{ 
+    btnToStep2.addEventListener('click', ()=>{ 
       const start = parseLocalDT(fFrom.value);
       const end   = parseLocalDT(fTo.value);
       
@@ -1627,49 +1612,43 @@
       const isOverlapping = !isInvalidTime && getOverlapState(start, end);
       
       const showConflict = isInvalidTime && (fFrom.dataset.touched==='1' && fTo.dataset.touched==='1');
-      if(alertConflict){
-        alertConflict.style.display = showConflict ? 'block':'none';
-        alertConflict.textContent = (I18N[langSelect.value]||I18N.de).conflict;
+      alertConflict.style.display = showConflict ? 'block':'none';
+      alertConflict.textContent = (I18N[langSelect.value]||I18N.de).conflict;
+      
+      if (isOverlapping) {
+         alertOverlap.style.display = 'block';
       }
       
-      if(alertOverlap){
-        if (isOverlapping) {
-           alertOverlap.style.display = 'block';
-        }
+      if(start && start < minStartDate()) { 
+        alertShort.style.display='block'; 
+        alertShort.innerHTML = (I18N[langSelect.value]||I18N.de).shortTermWarning; 
+      } else { 
+        alertShort.style.display='none'; 
       }
       
-      if(alertShort){
-        if(start && start < minStartDate()) { 
-          alertShort.style.display='block'; 
-          alertShort.innerHTML = (I18N[langSelect.value]||I18N.de).shortTermWarning; 
-        } else { 
-          alertShort.style.display='none'; 
-        }
-      }
+      highlight(fPersons, !fPersons.value);
       
-      highlight(fPersons, fPersons && !fPersons.value);
-      
-      const timeOk = !isInvalidTime && (!isOverlapping || (fOverlapConfirm && fOverlapConfirm.checked));
+      const timeOk = !isInvalidTime && (!isOverlapping || fOverlapConfirm.checked);
 
       if(timeOk && fPersons.value) {
         goStep(2);
       } else {
-        if(fFrom) fFrom.dataset.touched = '1';
-        if(fTo) fTo.dataset.touched = '1';
-        if(fPersons) fPersons.dataset.touched = '1';
+        fFrom.dataset.touched = '1';
+        fTo.dataset.touched = '1';
+        fPersons.dataset.touched = '1';
         validateTimes();
       }
     });
 
-    if(fOverlapConfirm) fOverlapConfirm.addEventListener('change', validateTimes);
+    fOverlapConfirm.addEventListener('change', validateTimes);
 
-    if(btnBackStep1) btnBackStep1.addEventListener('click', ()=> goStep(1));
-    if(btnCloseX) btnCloseX.addEventListener('click', closeModal);
-    if(btnWiCloseX) btnWiCloseX.addEventListener('click', closeModal);
-    if(btnWiOk) btnWiOk.addEventListener('click', closeModal);
+    btnBackStep1.addEventListener('click', ()=> goStep(1));
+    btnCloseX.addEventListener('click', closeModal);
+    btnWiCloseX.addEventListener('click', closeModal);
+    btnWiOk.addEventListener('click', closeModal);
 
-    if(priceToggle) priceToggle.addEventListener('click', ()=>{
-      if(priceBreakdown) priceBreakdown.style.display = priceBreakdown.style.display==='none' ? 'block':'none';
+    priceToggle.addEventListener('click', ()=>{
+      priceBreakdown.style.display = priceBreakdown.style.display==='none' ? 'block':'none';
       sendHeightThrottled();
     });
 
@@ -1688,67 +1667,71 @@
       return ()=>container.removeEventListener('keydown', onKey);
     }
 
+    // Aparte functie voor WI popup
     function openWiInfo(){
-      if(bookingModal) bookingModal.style.display = 'none';
-      if(wiInfoModal) wiInfoModal.style.display = 'block';
-      if(modalBack) modalBack.style.display = 'flex';
+      bookingModal.style.display = 'none';
+      wiInfoModal.style.display = 'block';
+      modalBack.style.display = 'flex';
       if(untrap) untrap(); 
-      if(wiInfoModal) untrap = trapFocus(wiInfoModal);
+      untrap = trapFocus(wiInfoModal);
     }
 
     function openModal(prefill){
+      // Als de Wiener Straße geselecteerd is, gooi een custom popup open
       if (currentKey === 'WI') {
         openWiInfo();
         return;
       }
 
-      if(bookingModal) bookingModal.style.display = 'block';
-      if(wiInfoModal) wiInfoModal.style.display = 'none';
+      bookingModal.style.display = 'block';
+      wiInfoModal.style.display = 'none';
 
-      if(fSchool) fSchool.value = prefill.school;
-      if(fFrom) fFrom.value = toInputLocal(prefill.start);
-      if(fTo) fTo.value   = toInputLocal(prefill.end);
-      if(alertConflict) alertConflict.style.display = 'none';
-      if(alertShort) alertShort.style.display = 'none';
-      if(alertOverlap) alertOverlap.style.display = 'none';
-      if(fOverlapConfirm) fOverlapConfirm.checked = false;
-      if(fAccept) fAccept.checked = false;
-      if(btnSubmit) btnSubmit.disabled = true;
+      fSchool.value = prefill.school;
+      fFrom.value = toInputLocal(prefill.start);
+      fTo.value   = toInputLocal(prefill.end);
+      alertConflict.style.display = 'none';
+      alertShort.style.display = 'none';
+      alertOverlap.style.display = 'none';
+      fOverlapConfirm.checked = false;
+      fAccept.checked = false;
+      btnSubmit.disabled = true;
 
       if (bikesWrapper) {
         bikesWrapper.style.display = (currentKey === 'WE') ? 'block' : 'none';
       }
-      if(fBikesYes){ fBikesYes.dataset.touched = '0'; fBikesYes.checked = false; }
-      if(fBikesNo){ fBikesNo.dataset.touched = '0'; fBikesNo.checked = false; }
+      fBikesYes.dataset.touched = '0';
+      fBikesNo.dataset.touched = '0';
+      fBikesYes.checked = false;
+      fBikesNo.checked = false;
       if(fBikes12) {
           fBikesLauf.value = 0; fBikes12.value = 0; fBikes16.value = 0; fBikes20.value = 0; fBikes24.value = 0; fBikes26.value = 0;
           fBikesLauf.dataset.touched = '0'; fBikes12.dataset.touched = '0'; fBikes16.dataset.touched = '0'; fBikes20.dataset.touched = '0'; fBikes24.dataset.touched = '0'; fBikes26.dataset.touched = '0';
       }
-      if(bikesDetailsWrapper) bikesDetailsWrapper.style.display = 'none';
-      if(errBikesChoice) errBikesChoice.style.display = 'none';
-      if(errBikesDetails) errBikesDetails.style.display = 'none';
+      bikesDetailsWrapper.style.display = 'none';
+      errBikesChoice.style.display = 'none';
+      errBikesDetails.style.display = 'none';
 
       formatAddress();
       renderExtrasForSchool(currentKey || 'WE');
       updatePricePreview();
       goStep(1);
-      if(modalBack) modalBack.style.display = 'flex';
+      modalBack.style.display = 'flex';
       validateTimes();
       if(untrap) untrap(); 
-      if(bookingModal) untrap = trapFocus(bookingModal);
+      untrap = trapFocus(bookingModal);
     }
 
     function closeModal(){
-      if(modalBack) modalBack.style.display = 'none';
-      if(form) form.reset();
-      if(fSchool) fSchool.value = '';
-      if(alertConflict) alertConflict.style.display = 'none';
-      if(alertShort) alertShort.style.display = 'none';
-      if(alertOverlap) alertOverlap.style.display = 'none';
-      if(fOverlapConfirm) fOverlapConfirm.checked = false;
-      if(btnSubmit) btnSubmit.disabled = true;
-      if(priceValue) priceValue.textContent = '–';
-      if(priceBreakdown) priceBreakdown.style.display = 'none';
+      modalBack.style.display = 'none';
+      form.reset();
+      fSchool.value = '';
+      alertConflict.style.display = 'none';
+      alertShort.style.display = 'none';
+      alertOverlap.style.display = 'none';
+      fOverlapConfirm.checked = false;
+      btnSubmit.disabled = true;
+      priceValue.textContent = '–';
+      priceBreakdown.style.display = 'none';
       hidePopover();
       if(untrap) untrap();
     }
@@ -1765,7 +1748,6 @@
     }
 
     const updateStreetHints = debounce(async ()=>{
-      if(!fStreet) return;
       const base=(fStreet.value||'').trim();
       const city=(fCity.value||'').trim();
       const q = (base+' '+city).trim();
@@ -1778,43 +1760,38 @@
         const street = a.road || a.pedestrian || a.footway || a.path || '';
         if(street) hints.add(street);
       });
-      if(addrHintHelp){
-        addrHintHelp.style.display = hints.size ? 'block' : 'none';
-        addrHintHelp.textContent = hints.size ? 'Tipp: Vorschläge nutzen' : '';
-      }
+      addrHintHelp.style.display = hints.size ? 'block' : 'none';
+      addrHintHelp.textContent = hints.size ? 'Tipp: Vorschläge nutzen' : '';
     }, 450);
 
     const updateCityHints = debounce(async ()=>{
-      if(!fCity) return;
       const q=(fCity.value||'').trim();
       if(q.length<3) return;
       await nominatim(q);
     }, 450);
 
-    if(fStreet) fStreet.addEventListener('input', updateStreetHints);
-    if(fCity) fCity.addEventListener('input', updateCityHints);
+    fStreet.addEventListener('input', updateStreetHints);
+    fCity.addEventListener('input', updateCityHints);
 
     [fZip,fCity].forEach(el=>{ 
-      if(!el) return;
       el.addEventListener('input', ()=>{ formatAddress(); validateTimes(); }); 
       el.addEventListener('blur', ()=>{ el.dataset.touched='1'; validateTimes(); }); 
     });
 
     [fFrom,fTo,fPersons,fEmail,fPhoneNat,fAccept].forEach(el=>{
-      if(!el) return;
       el.addEventListener('change', validateTimes);
       el.addEventListener('input', validateTimes);
     });
 
     [fBikesYes, fBikesNo].forEach(el => {
-      if(!el) return;
       el.addEventListener('change', () => {
         el.dataset.touched = '1';
-        if(bikesDetailsWrapper) bikesDetailsWrapper.style.display = fBikesYes.checked ? 'block' : 'none';
+        bikesDetailsWrapper.style.display = fBikesYes.checked ? 'block' : 'none';
         validateTimes();
       });
     });
 
+    // Stepper logic - AANGEPAST VOOR MAX
     document.querySelectorAll('.stepper button').forEach(btn => {
       btn.addEventListener('click', (e) => {
         const targetId = e.currentTarget.dataset.target;
@@ -1837,17 +1814,14 @@
     });
 
     [fFrom,fTo,fPersons,fEmail,fPhoneNat,fStreet,fHouse,fZip,fCity].forEach(el=>{
-      if(!el) return;
       el.addEventListener('blur', ()=>{ el.dataset.touched = '1'; validateTimes(); });
     });
 
-    if(fPhoneNat){
-      fPhoneNat.addEventListener('input', ()=>{
-        const cur = fPhoneNat.selectionStart;
-        fPhoneNat.value = (fPhoneNat.value || '').replace(/[^\d]/g,'');
-        fPhoneNat.setSelectionRange(cur, cur);
-      });
-    }
+    fPhoneNat.addEventListener('input', ()=>{
+      const cur = fPhoneNat.selectionStart;
+      fPhoneNat.value = (fPhoneNat.value || '').replace(/[^\d]/g,'');
+      fPhoneNat.setSelectionRange(cur, cur);
+    });
 
     function formatDT(dt, lang){
       const d = (dt instanceof Date) ? dt : new Date(dt);
@@ -1872,41 +1846,36 @@
     function esc(s){ return String(s||"").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
 
     /* ===== Calendar loading ===== */
-    if(schoolSelect){
-      schoolSelect.addEventListener('change', (e)=> {
-        const key = e.target.value;
-        if(!availability[key]?.ok) return;
-        currentKey = key;
-        loadCalendar(key);
-      });
-    }
+    schoolSelect.addEventListener('change', (e)=> {
+      const key = e.target.value;
+      if(!availability[key]?.ok) return;
+      currentKey = key;
+      loadCalendar(key);
+    });
 
-    if(langSelect) langSelect.addEventListener('change', applyI18n);
+    langSelect.addEventListener('change', applyI18n);
 
-    if(mobileAdd){
-      mobileAdd.addEventListener('click', ()=>{
-        if (currentKey === 'WI') {
-          openWiInfo();
-          return;
-        }
-        const start = new Date(); start.setDate(start.getDate()+7); start.setHours(10,0,0,0);
-        const end = new Date(start.getTime() + DEFAULT_TAP_MINUTES*60000);
-        openModal({ school: SCHOOLS[currentKey]?.name || '', start, end });
-      });
-    }
+    mobileAdd.addEventListener('click', ()=>{
+      if (currentKey === 'WI') {
+        openWiInfo();
+        return;
+      }
+      const start = new Date(); start.setDate(start.getDate()+7); start.setHours(10,0,0,0);
+      const end = new Date(start.getTime() + DEFAULT_TAP_MINUTES*60000);
+      openModal({ school: SCHOOLS[currentKey]?.name || '', start, end });
+    });
 
     async function loadCalendar(key){
       if(!availability[key]?.ok) return;
       currentKey = key;
-      if(calendarLoading) calendarLoading.style.display = 'block';
+      calendarLoading.style.display = 'block';
       if(calendar) calendar.destroy();
 
-      if(calendarEl){
-        if (currentKey === 'WI') {
-          calendarEl.classList.add('is-wi-mode');
-        } else {
-          calendarEl.classList.remove('is-wi-mode');
-        }
+      // CSS Klasse toevoegen als het WI is (zodat de kalender gearceerd is)
+      if (currentKey === 'WI') {
+        calendarEl.classList.add('is-wi-mode');
+      } else {
+        calendarEl.classList.remove('is-wi-mode');
       }
 
       const raw = await fetchJson(SCHOOLS[key].file);
@@ -1918,7 +1887,7 @@
         if (r.ok) {
           const arr = await r.json();
           if (Array.isArray(arr)) {
-            currentHolds = arr;
+            currentHolds = arr; // NIEUW
             holdEvents = arr.map(h => ({
               title: (langSelect.value==='en'
                 ? 'Tentative — awaiting confirmation'
@@ -1934,9 +1903,9 @@
       } catch(_) {}
 
       calendar = new FullCalendar.Calendar(calendarEl, {
-        initialView: (calendarEl && calendarEl.clientWidth || window.innerWidth) < 700 ? 'timeGridDay' : 'timeGridWeek',
+        initialView: (calendarEl.clientWidth || window.innerWidth) < 700 ? 'timeGridDay' : 'timeGridWeek',
         firstDay: 1,
-        locale: langSelect && langSelect.value === 'en' ? 'en-gb' : 'de',
+        locale: langSelect.value === 'en' ? 'en-gb' : 'de',
         timeZone: 'local',
         slotMinTime: '12:00:00',
         slotMaxTime: '22:00:00',
@@ -1951,6 +1920,7 @@
   
         selectable: !isTouchDevice(),
         selectMinDistance: 8,
+        longPressDelay: 300,
         selectLongPressDelay: 300,
 
         selectAllow: selectAllowFn,
@@ -1996,19 +1966,18 @@
       calendar.render();
 
       holdEvents.forEach(ev => calendar.addEvent(ev));
-      if(mobileAdd) mobileAdd.style.display = isTouchDevice() ? 'block' : 'none';
+      mobileAdd.style.display = isTouchDevice() ? 'block' : 'none';
       applyResponsiveView();
-      if(calendarLoading) calendarLoading.style.display = 'none';
-      if(calendarEl) calendarEl.classList.add('loaded');
-      if(fSchool) fSchool.value = SCHOOLS[currentKey].name;
+      calendarLoading.style.display = 'none';
+      calendarEl.classList.add('loaded');
+      fSchool.value = SCHOOLS[currentKey].name;
       renderExtrasForSchool(key);
 
       (function refreshTerms(){
         const termsList = document.getElementById('termsList');
         if (!termsList) return;
         const L = I18N[langSelect.value] || I18N.de;
-        const ts = document.getElementById('termsSummary');
-        if (ts) ts.textContent = L.termsSummary;
+        document.getElementById('termsSummary').textContent = L.termsSummary;
         termsList.innerHTML = "";
         getTermsForSchool(langSelect.value, currentKey).forEach(t => {
           const li = document.createElement('li'); li.textContent = t; termsList.appendChild(li);
@@ -2021,29 +1990,29 @@
     /* ===== Price calculation ===== */
     function updatePricePreview(){
       const L = I18N[langSelect.value] || I18N.de;
-      const start   = fFrom ? parseLocalDT(fFrom.value) : null;
-      const end     = fTo ? parseLocalDT(fTo.value) : null;
-      const persons = fPersons ? Number(fPersons.value || 0) : 0;
+      const start   = parseLocalDT(fFrom.value);
+      const end     = parseLocalDT(fTo.value);
+      const persons = Number(fPersons.value || 0);
       CURRENT_PRICE = null;
 
       const showPriceOnReq = ()=> {
-        if(priceValue) priceValue.textContent = L.priceOnReq;
-        if(bdBaseLabel) bdBaseLabel.textContent = (langSelect.value==='en' ? 'Base' : 'Basis');
-        if(bdBase) bdBase.textContent = '–';
-        if(bdPersonsLabel) bdPersonsLabel.textContent = (langSelect.value==='en' ? 'People tier' : 'Personen-Staffel');
-        if(bdPersons) bdPersons.textContent = (langSelect.value==='en' ? '€0.00' : '0,00 €');
-        if(bdTime) bdTime.textContent = (langSelect.value==='en' ? '€0.00' : '0,00 €');
-        if(bdExtras) bdExtras.textContent = (L.bdNoExtras || (langSelect.value==='en' ? 'none' : 'keine'));
-        if(bdTotal) bdTotal.textContent = '–';
+        priceValue.textContent = L.priceOnReq;
+        bdBaseLabel.textContent = (langSelect.value==='en' ? 'Base' : 'Basis');
+        bdBase.textContent = '–';
+        bdPersonsLabel.textContent = (langSelect.value==='en' ? 'People tier' : 'Personen-Staffel');
+        bdPersons.textContent = (langSelect.value==='en' ? '€0.00' : '0,00 €');
+        bdTime.textContent = (langSelect.value==='en' ? '€0.00' : '0,00 €');
+        bdExtras.textContent = (L.bdNoExtras || (langSelect.value==='en' ? 'none' : 'keine'));
+        bdTotal.textContent = '–';
         if (bdDepositRow) bdDepositRow.style.display = 'none';
         if (bdGrandTotalRow) bdGrandTotalRow.style.display = 'none';
-        if(priceBreakdown) priceBreakdown.style.display = 'block';
+        priceBreakdown.style.display = 'block';
         updateSticky();
       };
 
       if (!(start && end) || end <= start){
-        if(priceValue) priceValue.textContent = '–';
-        if(priceBreakdown) priceBreakdown.style.display = 'none';
+        priceValue.textContent = '–';
+        priceBreakdown.style.display = 'none';
         hidePopover();
         updateSticky();
         return;
@@ -2058,20 +2027,20 @@
         if (!tier) {
           const depo = cfg.cautionFn ? cfg.cautionFn(persons) : null;
 
-          if(priceValue) priceValue.textContent = depo
+          priceValue.textContent = depo
             ? `${L.priceOnReq} + ${euro(depo)} Kaution`
             : L.priceOnReq;
 
-          if(bdBaseLabel) bdBaseLabel.textContent    = (langSelect.value==='en' ? 'Base' : 'Basis');
-          if(bdBase) bdBase.textContent         = '–';
-          if(bdPersonsLabel) bdPersonsLabel.textContent = (langSelect.value==='en' ? 'People tier' : 'Personen-Staffel');
-          if(bdPersons) bdPersons.textContent      = (langSelect.value==='en' ? '€0.00' : '0,00 €');
-          if(bdTime) bdTime.textContent         = (langSelect.value==='en' ? '€0.00' : '0,00 €');
-          if(bdExtras) bdExtras.textContent       = (L.bdNoExtras || (langSelect.value==='en' ? 'none' : 'keine'));
-          if(bdTotal) bdTotal.textContent        = '–';
+          bdBaseLabel.textContent    = (langSelect.value==='en' ? 'Base' : 'Basis');
+          bdBase.textContent         = '–';
+          bdPersonsLabel.textContent = (langSelect.value==='en' ? 'People tier' : 'Personen-Staffel');
+          bdPersons.textContent      = (langSelect.value==='en' ? '€0.00' : '0,00 €');
+          bdTime.textContent         = (langSelect.value==='en' ? '€0.00' : '0,00 €');
+          bdExtras.textContent       = (L.bdNoExtras || (langSelect.value==='en' ? 'none' : 'keine'));
+          bdTotal.textContent        = '–';
 
           if (bdDepositRow) {
-            if (depo) { if(bdDeposit) bdDeposit.textContent = euro(depo); bdDepositRow.style.display = ''; }
+            if (depo) { bdDeposit.textContent = euro(depo); bdDepositRow.style.display = ''; }
             else { bdDepositRow.style.display = 'none'; }
           }
           
@@ -2092,13 +2061,11 @@
             caution: depo
           };
 
-          if(priceBreakdown) priceBreakdown.style.display = 'block';
+          priceBreakdown.style.display = 'block';
           updateSticky();
-          if(timePopover) {
-            timePopover.textContent = (langSelect.value === 'en')
-              ? 'No time surcharge at Wassertorplatz.'
-              : 'Kein Personal-Zuschlag am Wassertorplatz.';
-          }
+          timePopover.textContent = (langSelect.value === 'en')
+            ? 'No time surcharge at Wassertorplatz.'
+            : 'Kein Zeit-Zuschlag am Wassertorplatz.';
           return;
         }
 
@@ -2111,7 +2078,7 @@
 
         const depo = cfg.cautionFn ? cfg.cautionFn(persons) : null;
 
-        if(priceValue) priceValue.textContent = depo
+        priceValue.textContent = depo
           ? `${euro(total)} + ${euro(depo)} Kaution`
           : euro(total);
 
@@ -2119,26 +2086,26 @@
           ? (tierHours === 12 ? 'Base (up to 12 h)' : 'Base (12–16 h)')
           : (tierHours === 12 ? 'Basis (bis 12 Std.)' : 'Basis (12–16 Std.)');
 
-        if(bdBaseLabel) bdBaseLabel.textContent    = baseLabel;
-        if(bdBase) bdBase.textContent         = euro(base);             
-        if(bdPersonsLabel) bdPersonsLabel.textContent = (langSelect.value==='en'
+        bdBaseLabel.textContent    = baseLabel;
+        bdBase.textContent         = euro(base);             
+        bdPersonsLabel.textContent = (langSelect.value==='en'
           ? `People tier (${personsLabel || ''})`
           : `Personen-Staffel (${personsLabel || ''})`);
-        if(bdPersons) bdPersons.textContent      = personsAdd ? euro(personsAdd) : (langSelect.value==='en' ? '€0.00' : '0,00 €');
-        if(bdTime) bdTime.textContent         = (langSelect.value==='en' ? '€0.00' : '0,00 €');
-        if(bdExtras) bdExtras.textContent       = (L.bdNoExtras || (langSelect.value==='en' ? 'none' : 'keine'));
-        if(bdTotal) bdTotal.textContent        = euro(total);            
+        bdPersons.textContent      = personsAdd ? euro(personsAdd) : (langSelect.value==='en' ? '€0.00' : '0,00 €');
+        bdTime.textContent         = (langSelect.value==='en' ? '€0.00' : '0,00 €');
+        bdExtras.textContent       = (L.bdNoExtras || (langSelect.value==='en' ? 'none' : 'keine'));
+        bdTotal.textContent        = euro(total);            
 
         if (bdDepositRow) {
-          if (depo) { if(bdDeposit) bdDeposit.textContent = euro(depo); bdDepositRow.style.display = ''; }
+          if (depo) { bdDeposit.textContent = euro(depo); bdDepositRow.style.display = ''; }
           else { bdDepositRow.style.display = 'none'; }
         }
 
         if (bdGrandTotalRow) {
           if (depo) {
-            if(bdGrandTotalLabel) bdGrandTotalLabel.textContent = (langSelect.value==='en')
+            bdGrandTotalLabel.textContent = (langSelect.value==='en')
               ? 'Total incl. deposit' : 'Summe inkl. Kaution';
-            if(bdGrandTotal) bdGrandTotal.textContent = euro(total + depo);
+            bdGrandTotal.textContent = euro(total + depo);
             bdGrandTotalRow.style.display = '';
           } else {
             bdGrandTotalRow.style.display = 'none';
@@ -2160,13 +2127,11 @@
           caution: depo          
         };
 
-        if(timePopover) {
-          timePopover.textContent = (langSelect.value === 'en')
-            ? 'No time surcharge at Wassertorplatz.'
-            : 'Kein Personal-Zuschlag am Wassertorplatz.';
-        }
+        timePopover.textContent = (langSelect.value === 'en')
+          ? 'No time surcharge at Wassertorplatz.'
+          : 'Kein Zeit-Zuschlag am Wassertorplatz.';
 
-        if(priceBreakdown) priceBreakdown.style.display = 'block';
+        priceBreakdown.style.display = 'block';
         updateSticky();
         return;
       }
@@ -2193,6 +2158,7 @@
       let extrasCost = checked.reduce((sum, el)=> sum + Number(el.dataset.price||0), 0);
       const extrasSelected = checked.map(el => (langSelect.value==='en' ? el.dataset.labelEn : el.dataset.labelDe) || '');
 
+      // NIEUW: Fietsen prijs toevoegen
       let totalBikes = 0;
       if (currentKey === 'WE' && document.getElementById('fBikesYes') && document.getElementById('fBikesYes').checked) {
         totalBikes = (parseInt(document.getElementById('fBikesLauf').value)||0) +
@@ -2201,7 +2167,7 @@
                      (parseInt(document.getElementById('fBikes20').value)||0) +
                      (parseInt(document.getElementById('fBikes24').value)||0) +
                      (parseInt(document.getElementById('fBikes26').value)||0);
-        extrasCost += (totalBikes * 1);
+        extrasCost += (totalBikes * 1); // 1 Euro per fiets
         if (totalBikes > 0) {
           extrasSelected.push(langSelect.value === 'en' ? `${totalBikes}x Kids bike(s)` : `${totalBikes}x Kinderfahrrad`);
         }
@@ -2209,14 +2175,14 @@
 
       const total = basePlusPersons + timeAdd + extrasCost;
 
-      if(priceValue) priceValue.textContent = euro(total);
-      if(bdBaseLabel) bdBaseLabel.textContent = (langSelect.value==='en' ? I18N.en.bdBase(tier.hoursLabel) : I18N.de.bdBase(tier.hoursLabel));
-      if(bdBase) bdBase.textContent = euro(base);
-      if(bdPersonsLabel) bdPersonsLabel.textContent = (langSelect.value==='en' ? I18N.en.bdPersons(pplLabel) : I18N.de.bdPersons(pplLabel));
-      if(bdPersons) bdPersons.textContent = personsDelta === 0 ? (langSelect.value==='en' ? "€0.00" : "0,00 €") : euro(personsDelta);
-      if(bdTime) bdTime.textContent = timeAdd ? euro(timeAdd) : (langSelect.value==='en' ? "€0.00" : "0,00 €");
-      if(bdExtras) bdExtras.textContent = extrasCost ? euro(extrasCost) : (L.bdNoExtras || (langSelect.value==='en' ? "none" : "keine"));
-      if(bdTotal) bdTotal.textContent = euro(total);
+      priceValue.textContent = euro(total);
+      bdBaseLabel.textContent = (langSelect.value==='en' ? I18N.en.bdBase(tier.hoursLabel) : I18N.de.bdBase(tier.hoursLabel));
+      bdBase.textContent = euro(base);
+      bdPersonsLabel.textContent = (langSelect.value==='en' ? I18N.en.bdPersons(pplLabel) : I18N.de.bdPersons(pplLabel));
+      bdPersons.textContent = personsDelta === 0 ? (langSelect.value==='en' ? "€0.00" : "0,00 €") : euro(personsDelta);
+      bdTime.textContent = timeAdd ? euro(timeAdd) : (langSelect.value==='en' ? "€0.00" : "0,00 €");
+      bdExtras.textContent = extrasCost ? euro(extrasCost) : (L.bdNoExtras || (langSelect.value==='en' ? "none" : "keine"));
+      bdTotal.textContent = euro(total);
 
       if (bdDepositRow) bdDepositRow.style.display = 'none';
       if (bdGrandTotalRow) bdGrandTotalRow.style.display = 'none';
@@ -2235,59 +2201,33 @@
         extrasSelected
       };
 
-      if(timePopover) {
-        timePopover.textContent = L.bdTimeInfo;
-      }
-
-      if(priceBreakdown) priceBreakdown.style.display = 'block';
+      priceBreakdown.style.display = 'block';
       updateSticky();
 
       if (extrasRunning) extrasRunning.textContent = `Extras: ${euro(extrasCost)}`;
     }
 
     /* ===== Popover help ===== */
-    function togglePopover(){ if(!timePopover) return; const isOpen = timePopover.classList.contains('show'); if(isOpen){ hidePopover(); return; } showPopover(); }
+    function togglePopover(){ const isOpen = timePopover.classList.contains('show'); if(isOpen){ hidePopover(); return; } showPopover(); }
     function showPopover(){
-      if(!timePopover) return;
-      timePopover.classList.add('show'); timePopover.setAttribute('aria-hidden','false'); if(timeInfoIcon) timeInfoIcon.setAttribute('aria-expanded','true');
+      timePopover.classList.add('show'); timePopover.setAttribute('aria-hidden','false'); timeInfoIcon.setAttribute('aria-expanded','true');
       const rect = timePopover.getBoundingClientRect();
       if(rect.right > window.innerWidth - 12){ timePopover.style.left = 'auto'; timePopover.style.right = '0'; }
       else { timePopover.style.left = '0'; timePopover.style.right = 'auto'; }
     }
     function hidePopover(){
-      if(!timePopover) return;
-      timePopover.classList.remove('show'); timePopover.setAttribute('aria-hidden','true'); if(timeInfoIcon) timeInfoIcon.setAttribute('aria-expanded','false');
+      timePopover.classList.remove('show'); timePopover.setAttribute('aria-hidden','true'); timeInfoIcon.setAttribute('aria-expanded','false');
     }
-    
-    if(timeInfoIcon) {
-      timeInfoIcon.addEventListener('mouseenter', showPopover);
-      timeInfoIcon.addEventListener('mouseleave', hidePopover);
-      timeInfoIcon.addEventListener('click', (e)=>{ e.stopPropagation(); togglePopover(); });
-      timeInfoIcon.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); togglePopover(); } });
-    }
-    if(timePopover) {
-      timePopover.addEventListener('mouseenter', showPopover);
-      timePopover.addEventListener('mouseleave', hidePopover);
-    }
-
-    document.addEventListener('click', (e)=>{ if(timePopover && !timePopover.classList.contains('show')) return; const within = e.target.closest('.tooltip-wrap'); if(!within) hidePopover(); });
-    document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') hidePopover(); if(timeInfoIcon && (e.key === 'Enter' || e.key === ' ') && document.activeElement === timeInfoIcon){ e.preventDefault(); togglePopover(); } });
+    document.addEventListener('click', (e)=>{ if(!timePopover.classList.contains('show')) return; const within = e.target.closest('.tooltip-wrap'); if(!within) hidePopover(); });
+    document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') hidePopover(); if((e.key === 'Enter' || e.key === ' ') && document.activeElement === timeInfoIcon){ e.preventDefault(); togglePopover(); } });
+    timeInfoIcon.addEventListener('click', (e)=>{ e.stopPropagation(); togglePopover(); });
+    timeInfoIcon.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); togglePopover(); } });
 
     /* ===== Success overlay ===== */
-    function announceToScreenReader(message) {
-      const announcement = document.createElement('div');
-      announcement.setAttribute('aria-live', 'polite');
-      announcement.setAttribute('aria-atomic', 'true');
-      announcement.className = 'visually-hidden';
-      announcement.textContent = message;
-      document.body.appendChild(announcement);
-      setTimeout(() => { document.body.removeChild(announcement); }, 1000);
-    }
-
     function showSuccessOverlay(payload){
       const L = I18N[langSelect.value] || I18N.de;
-      if(successTitle) successTitle.textContent = L.successTitle;
-      if(btnBackToCalendar) btnBackToCalendar.textContent = L.successBack;
+      successTitle.textContent = L.successTitle;
+      btnBackToCalendar.textContent = L.successBack;
 
       const labels = L.successSummaryLabels;
       const extrasText = (CURRENT_PRICE && CURRENT_PRICE.extrasSelected && CURRENT_PRICE.extrasSelected.length)
@@ -2304,17 +2244,15 @@
         depositRow = `<div><strong>Kaution:</strong> ${euro(CURRENT_PRICE.caution)}</div>`;
       }
 
-      if(successSummary){
-        successSummary.innerHTML = `
-          <div><strong>${labels.school}:</strong> ${esc(payload.school || "")}</div>
-          <div><strong>${labels.from}:</strong> ${formatDT(start, langSelect.value)}</div>
-          <div><strong>${labels.to}:</strong> ${formatDT(end,   langSelect.value)}</div>
-          ${payload.persons ? `<div><strong>${labels.persons}:</strong> ${esc(payload.persons)}</div>` : ""}
-          ${depositRow}
-          <div><strong>${labels.extras}:</strong> ${extrasText.length ? esc(extrasText.join(", ")) : (L.bdNoExtras)}</div>
-          ${messageRow}
-        `;
-      }
+      successSummary.innerHTML = `
+        <div><strong>${labels.school}:</strong> ${esc(payload.school || "")}</div>
+        <div><strong>${labels.from}:</strong> ${formatDT(start, langSelect.value)}</div>
+        <div><strong>${labels.to}:</strong> ${formatDT(end,   langSelect.value)}</div>
+        ${payload.persons ? `<div><strong>${labels.persons}:</strong> ${esc(payload.persons)}</div>` : ""}
+        ${depositRow}
+        <div><strong>${labels.extras}:</strong> ${extrasText.length ? esc(extrasText.join(", ")) : (L.bdNoExtras)}</div>
+        ${messageRow}
+      `;
 
       const dateStr = start.toLocaleDateString(langSelect.value === 'en' ? 'en-GB' : 'de-DE');
       const startStr = start.toLocaleTimeString(langSelect.value === 'en' ? 'en-GB' : 'de-DE', { hour: '2-digit', minute: '2-digit' });
@@ -2322,31 +2260,26 @@
       const mailSubject = `Anfrage / Request Verkehrsschule ${payload.school || ""} - ${dateStr}`;
       const mailLink = `mailto:events@kidbike.de?subject=${encodeURIComponent(mailSubject)}`;
       
-      if(successLead){
-        successLead.innerHTML = L.successAdditional(
-          esc(payload.school || ""), 
-          dateStr, 
-          startStr, 
-          endStr, 
-          mailLink
-        );
-      }
+      successLead.innerHTML = L.successAdditional(
+        esc(payload.school || ""), 
+        dateStr, 
+        startStr, 
+        endStr, 
+        mailLink
+      );
 
-      if(successOverlay) successOverlay.style.display = 'flex';
-      if(btnBackToCalendar) btnBackToCalendar.focus();
+      successOverlay.style.display = 'flex';
+      btnBackToCalendar.focus();
 
       const escKeyHandler = (e)=>{ if(e.key === 'Escape') hideSuccessOverlay(); };
       document.addEventListener('keydown', escKeyHandler, { once:true });
 
-      if(btnBackToCalendar) btnBackToCalendar.onclick = hideSuccessOverlay;
-
-      announceToScreenReader( langSelect.value === 'en' ? 'Request submitted successfully' : 'Anfrage erfolgreich gesendet' );
+      btnBackToCalendar.onclick = hideSuccessOverlay;
     }
 
-    function hideSuccessOverlay(){ if(successOverlay) successOverlay.style.display = 'none'; }
+    function hideSuccessOverlay(){ successOverlay.style.display = 'none'; }
 
     function showToast(text){
-      if(!successText || !successMsg) return;
       successText.textContent = text;
       successMsg.classList.add('show');
       setTimeout(()=> successMsg.classList.remove('show'), 3000);
@@ -2355,49 +2288,287 @@
     /* ===== Submit naar Apps Script ===== */
     const APPS_SCRIPT_URL = "/.netlify/functions/submit";
 
-    if(form){
-      form.addEventListener('submit', async (e)=>{
-        e.preventDefault();
-        wasSubmitted = true;
+    form.addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      wasSubmitted = true;
 
-        const errBox = document.getElementById('submitError');
-        if(errBox){
-          errBox.style.display = 'none';
-          errBox.textContent = '';
+      const errBox = document.getElementById('submitError');
+      errBox.style.display = 'none';
+      errBox.textContent = '';
+
+      if(!validateTimes()) {
+        const firstErr = [fPersons,fFrom,fTo,fEmail,fPhoneNat,fStreet,fHouse,fZip,fCity]
+          .find(el=>el && el.classList && el.classList.contains('error'));
+        if(firstErr) firstErr.focus();
+        return;
+      }
+
+      btnSubmit.classList.add('loading');
+      btnSubmit.disabled = true;
+      btnSubmit.textContent = (langSelect.value==='en'?'Sending…':'Senden…');
+
+      const ctl = new AbortController();
+      const t = setTimeout(()=>ctl.abort(), 15000);
+
+      try {
+        const nameCombined = [fSalutation.value, fFirstName.value, fLastName.value].filter(Boolean).join(' ').trim();
+        const phoneCombined = [fPhoneCountry.value, (fPhoneNat.value||'').trim()].filter(Boolean).join(' ');
+
+        const extrasChecked = Array.from(document.querySelectorAll('#extrasContainer input:checked'));
+        const extrasList = extrasChecked.map(el =>
+          (langSelect.value === 'en' ? el.dataset.labelEn : el.dataset.labelDe) || el.id.replace(/^x_/, '')
+        );
+
+        let bikesValue = '';
+        if (currentKey === 'WE') {
+          if (fBikesYes.checked) {
+            let b = [];
+            if (parseInt(fBikesLauf.value)>0) b.push(`${fBikesLauf.value}x Laufrad (2-3 J.)`);
+            if (parseInt(fBikes12.value)>0) b.push(`${fBikes12.value}x 12" (3-4 J.)`);
+            if (parseInt(fBikes16.value)>0) b.push(`${fBikes16.value}x 16" (4-6 J.)`);
+            if (parseInt(fBikes20.value)>0) b.push(`${fBikes20.value}x 20" (6-8 J.)`);
+            if (parseInt(fBikes24.value)>0) b.push(`${fBikes24.value}x 24" (8-10 J.)`);
+            if (parseInt(fBikes26.value)>0) b.push(`${fBikes26.value}x 26" (10-14 J.)`);
+            bikesValue = 'Ja: ' + b.join(', ');
+          }
+          else if (fBikesNo.checked) bikesValue = 'Nein';
         }
 
-        if(!validateTimes()) {
-          const firstErr = [fPersons,fFrom,fTo,fEmail,fPhoneNat,fStreet,fHouse,fZip,fCity]
-            .find(el=>el && el.classList && el.classList.contains('error'));
-          if(firstErr) firstErr.focus();
-          return;
+        const start = parseLocalDT(fFrom.value);
+        const end   = parseLocalDT(fTo.value);
+        const isOverlapping = getOverlapState(start, end);
+        
+        let finalMessage = fMsg.value;
+        if (isOverlapping) {
+            finalMessage = "⚠️ ACHTUNG: Dieser Zeitraum ist bereits (teilweise) reserviert! Der Nutzer hat eine Warnung erhalten und sich dennoch für die Anfrage entschieden. ⚠️\n\n" + finalMessage;
         }
 
-        if(btnSubmit){
-          btnSubmit.classList.add('loading');
-          btnSubmit.disabled = true;
-          btnSubmit.textContent = (langSelect.value==='en'?'Sending…':'Senden…');
+        const payload = {
+          school:  fSchool.value,              
+          from:    fFrom.value,
+          to:      fTo.value,
+          persons: fPersons.value,
+          type_free: fTypeFree.value,
+          bikes:   bikesValue,
+          salutation: fSalutation.value,
+          first_name: fFirstName.value,
+          last_name:  fLastName.value,
+          name:    nameCombined || (fFirstName.value + ' ' + fLastName.value).trim(),
+          email:   fEmail.value,
+          phone_country: fPhoneCountry.value,
+          phone_national: fPhoneNat.value,
+          phone:   phoneCombined,
+          street:  fStreet.value,
+          house:   fHouse.value,
+          zip:     fZip.value,
+          city:    fCity.value,
+          zipcity: fZipCity.value,
+          address: formatAddress(),
+          message: finalMessage, 
+          has_overlap: isOverlapping,
+          extras:  extrasList,
+          lang:    langSelect.value || 'de',
+          price:   CURRENT_PRICE,
+          priceText: priceValue.textContent,
+          accepted_terms: !!fAccept.checked
+        };
+
+        const res = await fetch(APPS_SCRIPT_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify(payload),
+          redirect: 'follow',
+          signal: ctl.signal
+        }).catch(err => {
+          throw new Error('Netzwerk- oder CORS-Fehler: ' + String(err && err.message ? err.message : err));
+        });
+
+        clearTimeout(t);
+
+        const text = await res.text().catch(()=> '');
+        if (!res.ok) {
+          errBox.textContent = `Serverfehler (HTTP ${res.status}):\n` + text.slice(0,1000);
+          errBox.style.display = 'block';
+          throw new Error('HTTP '+res.status);
         }
 
-        const ctl = new AbortController();
-        const t = setTimeout(()=>ctl.abort(), 15000);
-
+        let out;
         try {
-          const nameCombined = [fSalutation.value, fFirstName.value, fLastName.value].filter(Boolean).join(' ').trim();
-          const phoneCombined = [fPhoneCountry.value, (fPhoneNat.value||'').trim()].filter(Boolean).join(' ');
+          out = JSON.parse(text);
+        } catch {
+          errBox.textContent = 'Serverantwort ist KEINE JSON (vermutlich HTML/Redirect):\n' + text.slice(0,1000);
+          errBox.style.display = 'block';
+          throw new Error('Non-JSON response');
+        }
 
-          const extrasChecked = Array.from(document.querySelectorAll('#extrasContainer input:checked'));
-          const extrasList = extrasChecked.map(el =>
-            (langSelect.value === 'en' ? el.dataset.labelEn : el.dataset.labelDe) || el.id.replace(/^x_/, '')
-          );
+        if (!out.ok) {
+          const msg = out.error || 'Unbekannter Fehler (ok:false).';
+          errBox.textContent = msg;
+          errBox.style.display = 'block';
+          throw new Error(msg);
+        }
 
-          let bikesValue = '';
-          if (currentKey === 'WE') {
-            if (fBikesYes.checked) {
-              let b = [];
-              if (parseInt(fBikesLauf.value)>0) b.push(`${fBikesLauf.value}x Laufrad (2-3 J.)`);
-              if (parseInt(fBikes12.value)>0) b.push(`${fBikes12.value}x 12" (3-4 J.)`);
-              if (parseInt(fBikes16.value)>0) b.push(`${fBikes16.value}x 16" (4-6 J.)`);
-              if (parseInt(fBikes20.value)>0) b.push(`${fBikes20.value}x 20" (6-8 J.)`);
-              if (parseInt(fBikes24.value)>0) b.push(`${fBikes24.value}x 24" (8-10 J.)`);
-              if (parseInt(fBikes26.value)>0) b.push(`${fBikes26.value}x 26" (10
+        showSuccessOverlay({
+          school: payload.school,
+          from:   payload.from,
+          to:     payload.to,
+          persons: payload.persons,
+          message: payload.message
+        });
+        closeModal();
+        reloadCalendarAfterSubmission(); 
+
+      } catch(err){
+        console.error('Submit failed:', err);
+      } finally {
+        clearTimeout(t);
+        btnSubmit.classList.remove('loading');
+        btnSubmit.disabled = false;
+        btnSubmit.textContent = (I18N[langSelect.value]||I18N.de).btnSend || 'Anfrage senden';
+      }
+    });
+
+    /* ===== embed-size throttle ===== */
+    function _sendHeight(){
+      var doc=document.documentElement, body=document.body;
+      var h=Math.max(body.scrollHeight, body.offsetHeight, doc.clientHeight, doc.scrollHeight, doc.offsetHeight);
+      parent.postMessage({ type:'embed-size', height:h }, '*');
+    }
+    const sendHeightThrottled = debounce(_sendHeight, 120);
+    window.addEventListener('load', sendHeightThrottled);
+    window.addEventListener('resize', sendHeightThrottled);
+    var ro = new ResizeObserver(()=>sendHeightThrottled());
+    ro.observe(document.body);
+
+    /* ===== Init ===== */
+    (async function init(){
+      logoImg.style.display = 'block';
+      document.getElementById('calendarLoading').firstChild.nodeValue = (I18N[langSelect.value]||I18N.de).loadingCalendar;
+      await discoverSchools();
+      applyI18n();
+      window.addEventListener('resize', () => applyResponsiveView());
+      document.body.classList.toggle('touch', isTouchDevice());
+    })();
+
+    /* ===== Auto-refresh holds every 30 seconds ===== */
+    setInterval(async () => {
+      if (currentKey && calendar) {
+        try {
+          const r = await fetch(`${APPS_SCRIPT_URL}?type=holds&school=${encodeURIComponent(currentKey)}&v=${Date.now()}`);
+          if (r.ok) {
+            const arr = await r.json();
+            if (Array.isArray(arr)) {
+              currentHolds = arr; // NIEUW
+              const holdEvents = arr.map(h => ({
+                title: (langSelect.value==='en'
+                  ? 'Tentative — awaiting confirmation'
+                  : 'Vorläufig reserviert — Bestätigung ausstehend'),
+                start: new Date(h.start),
+                end:   new Date(h.end),
+                editable: false,
+                overlap: true,
+                classNames: ['tentative']
+              }));
+              
+              calendar.getEvents()
+                .filter(ev => (ev.classNames || []).includes('tentative'))
+                .forEach(ev => ev.remove());
+              holdEvents.forEach(ev => calendar.addEvent(ev));
+            }
+          }
+        } catch(_) {}
+      }
+    }, 30000);
+
+    /* ===== Handle successful submission - reload holds ===== */
+    function reloadCalendarAfterSubmission() {
+      if (currentKey && calendar) {
+        setTimeout(async () => {
+          try {
+            const r = await fetch(`${APPS_SCRIPT_URL}?type=holds&school=${encodeURIComponent(currentKey)}&v=${Date.now()}`);
+            if (r.ok) {
+              const arr = await r.json();
+              if (Array.isArray(arr)) {
+                const holdEvents = arr.map(h => ({
+                  title: (langSelect.value==='en'
+                    ? 'Tentative — awaiting confirmation'
+                    : 'Vorläufig reserviert — Bestätigung ausstehend'),
+                  start: new Date(h.start),
+                  end:   new Date(h.end),
+                  editable: false,
+                  overlap: true,
+                  classNames: ['tentative']
+                }));
+                
+                calendar.getEvents()
+                  .filter(ev => (ev.classNames || []).includes('tentative'))
+                  .forEach(ev => ev.remove());
+                holdEvents.forEach(ev => calendar.addEvent(ev));
+              }
+            }
+          } catch(_) {}
+        }, 1000);
+      }
+    }
+
+    /* ===== Window message handler for embed communication ===== */
+    window.addEventListener('message', (event) => {
+      if (event.data && event.data.type === 'calendar-refresh') {
+        if (currentKey) {
+          loadCalendar(currentKey);
+        }
+      }
+    });
+
+    /* ===== Keyboard shortcuts ===== */
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+         if (modalBack.style.display === 'flex') closeModal();
+      }
+      if ((e.ctrlKey && e.key === 'r') || e.key === 'F5') {
+        e.preventDefault();
+        if (currentKey) loadCalendar(currentKey);
+      }
+    });
+
+    /* ===== Touch device enhancements ===== */
+    if (isTouchDevice()) {
+      document.addEventListener('touchstart', (e) => {
+        if (e.target.closest('.fc-event')) {
+          e.target.style.opacity = '0.7';
+          setTimeout(() => {
+            if (e.target.style) e.target.style.opacity = '';
+          }, 150);
+        }
+      });
+      let lastTouchEnd = 0;
+      document.addEventListener('touchend', (e) => {
+        const now = (new Date()).getTime();
+        if (now - lastTouchEnd <= 300) e.preventDefault();
+        lastTouchEnd = now;
+      }, false);
+    }
+
+    /* ===== Error handling and user feedback ===== */
+    window.addEventListener('error', (event) => { console.error('Application error:', event.error); });
+    window.addEventListener('unhandledrejection', (event) => { console.error('Unhandled promise rejection:', event.reason); event.preventDefault(); });
+
+    /* ===== Accessibility enhancements ===== */
+    function announceToScreenReader(message) {
+      const announcement = document.createElement('div');
+      announcement.setAttribute('aria-live', 'polite');
+      announcement.setAttribute('aria-atomic', 'true');
+      announcement.className = 'visually-hidden';
+      announcement.textContent = message;
+      document.body.appendChild(announcement);
+      setTimeout(() => { document.body.removeChild(announcement); }, 1000);
+    }
+
+    const _origShowSuccessOverlay = showSuccessOverlay;
+    showSuccessOverlay = function(payload) {
+      _origShowSuccessOverlay(payload);
+      announceToScreenReader( langSelect.value === 'en' ? 'Request submitted successfully' : 'Anfrage erfolgreich gesendet' );
+    };
+  </script>
+</body>
+</html>
