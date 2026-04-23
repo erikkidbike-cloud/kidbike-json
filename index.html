@@ -283,13 +283,13 @@
     
     .school-card .status{font-size:12px;color:#065f46;background:#ecfdf5;border:1px solid #a7f3d0;padding:4px 8px;border-radius:999px;width:max-content;}
     
-    /* ==== NIEUW: Oranje label voor Telefonisch Buchbar ==== */
+    /* ==== NIEUW: Oranje label für Telefonisch Buchbar ==== */
     .school-card .status.phone{color:#c2410c;background:#ffedd5;border-color:#fdba74;}
     
     .school-card.disabled{opacity:.55;filter:grayscale(0.2);background:var(--disabled-bg);}
     .school-card.disabled .status{color:#92400e;background:#fef3c7;border-color:#fde68a;}
 
-    /* Fix voor radiobuttons */
+    /* Fix für radiobuttons */
     .field input[type="radio"] {
       width: 16px;
       min-height: 16px;
@@ -305,7 +305,7 @@
     .field input.error + .error-msg,
     .field select.error + .error-msg{display:block}
 
-    /* Stepper UI voor Fietsen */
+    /* Stepper UI für Fietsen */
     .bike-list { display: flex; flex-direction: column; gap: 8px; border: 1px solid var(--border); border-radius: 10px; padding: 8px; background: #fff; }
     .bike-item { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; }
     .bike-item:not(:last-child) { border-bottom: 1px solid #f1f5f9; }
@@ -464,11 +464,8 @@
       <div class="alert warn" id="alertConflict" style="display:none;"></div>
       <div class="alert note" id="alertShort" style="display:none;"></div>
       
-      <div class="alert warn" id="alertOverlap" style="display:none; background:#fffbeb; border-color:#fef08a; color:#854d0e;">
-        <strong style="display:block; margin-bottom:6px;">⚠️ <span id="overlapWarningText"></span></strong>
-        <label class="checkline">
-          <input type="checkbox" id="fOverlapConfirm"> <span id="labelOverlapConfirm">Ja, ich möchte trotzdem anfragen</span>
-        </label>
+      <div class="alert warn" id="alertOverlap" style="display:none; background:#fef2f2; border-color:#fecaca; color:#991b1b;">
+        <strong style="display:block;">⚠️ <span id="overlapWarningText"></span></strong>
       </div>
 
       <form id="requestForm" name="requestForm" novalidate>
@@ -761,8 +758,7 @@
         extraTisch: "Tischtennisplatte",
         message: "Nachricht (optional)",
         accept: "Ich habe die wesentlichen Bedingungen gelesen und akzeptiere sie.",
-        overlapWarning: "In diesem Zeitraum liegt bereits eine Reservierung vor. Wahrscheinlich ist keine Buchung mehr möglich. Möchten Sie trotzdem eine Anfrage senden?",
-        overlapCheck: "Ja, ich möchte trotzdem eine Anfrage senden",
+        overlapWarning: "In diesem Zeitraum liegt bereits eine Reservierung vor. Eine Buchung ist leider nicht möglich.",
         conflict: "Ungültige Zeit (Ende vor Beginn) oder Zeitraum zu kurz (min. 30 Min).",
         shortTermWarning: "<strong>Kurzfristige Anfrage:</strong> Da Ihr gewünschter Termin in weniger als 7 Tagen liegt, können wir nicht garantieren, dass wir Ihre Anfrage rechtzeitig bearbeiten können.",
         priceTitle: "Vorläufige Preisindikation:",
@@ -843,8 +839,7 @@
         extraTisch: "Table tennis",
         message: "Message (optional)",
         accept: "I have read and accept the key conditions.",
-        overlapWarning: "There is already a reservation in this time slot. It is likely not possible to book these times. Do you still want to send a request?",
-        overlapCheck: "Yes, I want to send a request anyway",
+        overlapWarning: "There is already a reservation in this time slot. Booking is not possible.",
         conflict: "Invalid time (end before start) or too short (min. 30 mins).",
         shortTermWarning: "<strong>Short-notice request:</strong> As your requested time is in less than 7 days, we cannot guarantee timely processing.",
         priceTitle: "Preliminary price indication:",
@@ -1074,8 +1069,6 @@
     const alertShort = document.getElementById('alertShort');
     const alertOverlap = document.getElementById('alertOverlap');
     const overlapWarningText = document.getElementById('overlapWarningText');
-    const fOverlapConfirm = document.getElementById('fOverlapConfirm');
-    const labelOverlapConfirm = document.getElementById('labelOverlapConfirm');
 
     const fSchool = document.getElementById('fSchool');
     const fFrom   = document.getElementById('fFrom');
@@ -1219,7 +1212,6 @@
       labelAccept.textContent = L.accept;
 
       overlapWarningText.textContent = L.overlapWarning;
-      labelOverlapConfirm.textContent = L.overlapCheck;
 
       priceTitle.textContent = L.priceTitle;
       priceHint.textContent = L.priceHint;
@@ -1291,7 +1283,7 @@
         if((e - s) > MS_24H) e = new Date(s.getTime() + MS_24H);
 
         const isFrauen = String(ev.frauenprojekt || '').toLowerCase() === 'true';
-        // Check of dit een speciaal 'FREI' blok is voor de Wiener Straße
+        // Check of dit een speciaal 'FREI' blok is für die Wiener Straße
         const isFrei = String(ev.isFrei || '').toLowerCase() === 'true';
 
         let classNames = Array.isArray(ev.classNames) ? [...ev.classNames] : [];
@@ -1510,7 +1502,6 @@
         alertOverlap.style.display = 'block';
       } else {
         alertOverlap.style.display = 'none';
-        fOverlapConfirm.checked = false; // Reset als er geen overlap meer is
       }
 
       if(start && start < minStartDate()) { alertShort.style.display='block'; alertShort.innerHTML = (I18N[langSelect.value]||I18N.de).shortTermWarning; }
@@ -1548,8 +1539,7 @@
       }
 
       const requireAccept = (step2.style.display !== 'none');
-      // Verplicht om de overlap checkbox aan te vinken indien overlappend!
-      const timeOk = !isInvalidTime && (!isOverlapping || fOverlapConfirm.checked);
+      const timeOk = !isInvalidTime && !isOverlapping;
       const requiredOk = fSchool.value && fPersons.value && start && end && phoneOk && addrOk && bikesOk && fEmail.validity.valid && (!requireAccept || fAccept.checked);
       
       btnSubmit.disabled = !(timeOk && requiredOk);
@@ -1628,7 +1618,7 @@
       
       highlight(fPersons, !fPersons.value);
       
-      const timeOk = !isInvalidTime && (!isOverlapping || fOverlapConfirm.checked);
+      const timeOk = !isInvalidTime && !isOverlapping;
 
       if(timeOk && fPersons.value) {
         goStep(2);
@@ -1639,8 +1629,6 @@
         validateTimes();
       }
     });
-
-    fOverlapConfirm.addEventListener('change', validateTimes);
 
     btnBackStep1.addEventListener('click', ()=> goStep(1));
     btnCloseX.addEventListener('click', closeModal);
@@ -1667,7 +1655,7 @@
       return ()=>container.removeEventListener('keydown', onKey);
     }
 
-    // Aparte functie voor WI popup
+    // Aparte functie für WI popup
     function openWiInfo(){
       bookingModal.style.display = 'none';
       wiInfoModal.style.display = 'block';
@@ -1692,7 +1680,6 @@
       alertConflict.style.display = 'none';
       alertShort.style.display = 'none';
       alertOverlap.style.display = 'none';
-      fOverlapConfirm.checked = false;
       fAccept.checked = false;
       btnSubmit.disabled = true;
 
@@ -1728,7 +1715,6 @@
       alertConflict.style.display = 'none';
       alertShort.style.display = 'none';
       alertOverlap.style.display = 'none';
-      fOverlapConfirm.checked = false;
       btnSubmit.disabled = true;
       priceValue.textContent = '–';
       priceBreakdown.style.display = 'none';
@@ -2334,15 +2320,6 @@
           else if (fBikesNo.checked) bikesValue = 'Nein';
         }
 
-        const start = parseLocalDT(fFrom.value);
-        const end   = parseLocalDT(fTo.value);
-        const isOverlapping = getOverlapState(start, end);
-        
-        let finalMessage = fMsg.value;
-        if (isOverlapping) {
-            finalMessage = "⚠️ ACHTUNG: Dieser Zeitraum ist bereits (teilweise) reserviert! Der Nutzer hat eine Warnung erhalten und sich dennoch für die Anfrage entschieden. ⚠️\n\n" + finalMessage;
-        }
-
         const payload = {
           school:  fSchool.value,              
           from:    fFrom.value,
@@ -2364,8 +2341,8 @@
           city:    fCity.value,
           zipcity: fZipCity.value,
           address: formatAddress(),
-          message: finalMessage, 
-          has_overlap: isOverlapping,
+          message: fMsg.value, 
+          has_overlap: false,
           extras:  extrasList,
           lang:    langSelect.value || 'de',
           price:   CURRENT_PRICE,
