@@ -249,9 +249,7 @@
     .tooltip-icon{cursor:pointer;font-weight:bold;margin-left:6px;user-select:none;background:var(--brand);color:white;border-radius:50%;width:16px;height:16px;
       display:inline-flex;align-items:center;justify-content:center;font-size:10px;}
     .tooltip-icon:hover{filter:brightness(1.1)}
-    .popover{position:absolute; top:100%; left:0; transform:translateY(8px); background:var(--popover-bg); color:var(--popover);
-      border:1px solid var(--popover-border); border-radius:10px; padding:10px 12px; max-width:640px; box-shadow:0 8px 24px rgba(0,0,0,.08);
-      font-size:12px; line-height:1.4; z-index:60; display:none;}
+    .popover{position:absolute; top:100%; left:0; transform:translateY(8px); background:var(--popover-bg); color:var(--popover); border:1px solid var(--popover-border); border-radius:10px; padding:10px 12px; box-shadow:0 8px 24px rgba(0,0,0,.08); font-size:12px; line-height:1.4; z-index:60; display:none; min-width:260px; max-width:min(90vw, 360px);}
     .popover.show{display:block}
     .popover::after{content:""; position:absolute; top:-6px; left:14px; width:10px; height:10px; background:var(--popover-bg); transform:rotate(45deg); border-left:1px solid var(--popover-border); border-top:1px solid var(--popover-border);}
 
