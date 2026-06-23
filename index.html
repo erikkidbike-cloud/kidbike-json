@@ -787,7 +787,7 @@
         bdTotal: "Summe",
         bdNoExtras: "keine",
         priceOnReq: "Preis nach Vereinbarung",
-        bdTimeInfo: "30 € Zuschlag, wenn Beginn UND Ende nicht zwischen 9:00–17:30 Uhr liegen oder wenn der Zeitraum (auch teilweise) am Wochenende liegt.",
+        bdTimeInfo: "35 € Zuschlag, wenn Beginn UND Ende nicht zwischen 9:00–17:30 Uhr liegen oder wenn der Zeitraum (auch teilweise) am Wochenende liegt.",
         successTitle: "Anfrage gesendet",
         successLead: "Vielen Dank. Ihre Anfrage ist noch nicht verbindlich. Wir prüfen die Angaben und melden uns per E-Mail. Sie erhalten dann die Nutzungsvereinbarung sowie weitere Hinweise.",
         successBack: "Zurück zum Kalender",
@@ -868,7 +868,7 @@
         bdTotal: "Total",
         bdNoExtras: "none",
         priceOnReq: "Price on request",
-        bdTimeInfo: "€30 surcharge if start AND end are not between 9:00–17:30, or if any part of the booking falls on a weekend.",
+        bdTimeInfo: "€35 surcharge if start AND end are not between 9:00–17:30, or if any part of the booking falls on a weekend.",
         successTitle: "Request submitted",
         successLead: "Thank you. Your request is not yet binding. We will review the details and contact you by email. You will then receive the usage agreement and further instructions.",
         successBack: "Back to calendar",
@@ -921,7 +921,7 @@
         while(cur <= endDay){ const d=cur.getDay(); if(d===0||d===6) return true; cur.setDate(cur.getDate()+1); }
         return false;
       }
-      return (bothOutside || touchesWeekend(start,end)) ? 30 : 0;
+      return (bothOutside || touchesWeekend(start,end)) ? 35 : 0;
     }
 
     const PRICING = {
