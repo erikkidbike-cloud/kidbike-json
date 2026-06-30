@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <title>Kalender</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --accent: #5bb1c0;
+      --accent-hover: #4a9dae;
+      --bg: transparent;
+      --card-bg: #ffffff;
+      --text-main: #1f2937;
+      --text-muted: #6b7280;
+      --border: #e5e7eb;
+    }
+
+    /* Reset & Basis voor embeds */
+    html, body {
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text-main);
+      overflow-x: hidden;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 16px;
+    }
+
+    h1 {
+      font-size: 24px;
+      margin: 0 0 24px 0;
+      color: var(--text-main);
+      border-bottom: 2px solid var(--accent);
+      display: inline-block;
+      padding-bottom: 6px;
+    }
+
+    /* Grid layout */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    /* Card Styling */
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      background: var(--accent);
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+      border-color: var(--accent);
+    }
+
+    .card .date {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .card h3 {
+      margin: 0;
+      font-size: 18px;
+      line-height: 1.3;
+    }
+
+    .card p {
+      margin: 0;
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.5;
+      flex-grow: 1; /* Pushes potential empty space down */
+    }
+
+    .card .link-hint {
+      margin-top: auto;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--accent);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .card:hover .link-hint {
+      color: var(--accent-hover);
+    }
+
+    /* Statussen */
+    .loading, .empty, .error {
+      color: var(--text-muted);
+      font-size: 15px;
+      padding: 20px 0;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>Kalender</h1>
+    <div id="events-grid" class="grid">
+      <div class="loading">Termine werden geladen...</div>
+    </div>
+  </div>
+
+  <script>
+    // URL naar je gegenereerde JSON file
+    const JSON_URL = 'events-we.json'; 
+
+    async function loadEvents() {
+      const grid = document.getElementById('events-grid');
+      
+      try {
+        const res = await fetch(JSON_URL + '?v=' + Date.now()); // cachebuster
+        if (!res.ok) throw new Error('Netzwerkfehler');
+        const rawData = await res.json();
+        
+        const now = new Date();
+
+        // Filter events
+        const filteredEvents = rawData.filter(ev => {
+          // Check of het project "WAHR" of "TRUE" of boolean true is in Excel
+          const isProject = String(ev.frauengefaengnis || '').toUpperCase() === 'WAHR' || 
+                            String(ev.frauengefaengnis || '').toUpperCase() === 'TRUE' ||
+                            ev.frauengefaengnis === true ||
+                            ev.frauengefaengnis === '1';
+                            
+          // Check of het event nog in de toekomst ligt
+          const eventDate = new Date(ev.start);
+          const isFuture = eventDate >= now || new Date(ev.end || eventDate) >= now;
+
+          return isProject && isFuture;
+        });
+
+        // Sorteer op datum (dichtstbijzijnde eerst)
+        filteredEvents.sort((a, b) => new Date(a.start) - new Date(b.start));
+
+        grid.innerHTML = '';
+
+        if (filteredEvents.length === 0) {
+          grid.innerHTML = '<div class="empty">Momentan stehen keine Termine an.</div>';
+          notifyEmbedResize();
+          return;
+        }
+
+        // Render de kaarten
+        filteredEvents.forEach(ev => {
+          const startObj = new Date(ev.start);
+          
+          const dateOptions = { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' };
+          const dateStr = startObj.toLocaleDateString('de-DE', dateOptions);
+          const timeStr = startObj.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+
+          const title = ev.titelFrauengefaengnis || 'Veranstaltung';
+          const desc = ev.beschreibungFrauengefaengnis || '';
+          const url = ev.linkFrauengefaengnis || '#';
+
+          // Bouw het HTML element op
+          const card = document.createElement(url !== '#' ? 'a' : 'div');
+          card.className = 'card';
+          if (url !== '#') {
+            card.href = url;
+            card.target = '_blank';
+            card.rel = 'noopener noreferrer';
+          }
+
+          card.innerHTML = `
+            <div class="date">${dateStr} · ${timeStr} Uhr</div>
+            <h3>${title}</h3>
+            ${desc ? `<p>${desc}</p>` : ''}
+            ${url !== '#' ? `<div class="link-hint">Mehr erfahren &rarr;</div>` : ''}
+          `;
+
+          grid.appendChild(card);
+        });
+
+        notifyEmbedResize();
+
+      } catch (error) {
+        console.error("Fout bij ophalen van events:", error);
+        grid.innerHTML = '<div class="error">Die Termine konnten leider nicht geladen werden.</div>';
+      }
+    }
+
+    // Handige functie om de hoogte door te geven aan het iframe-parent (als je dat gebruikt)
+    function notifyEmbedResize() {
+      setTimeout(() => {
+        const height = document.body.scrollHeight || document.documentElement.scrollHeight;
+        window.parent.postMessage({ type: 'embed-size', height: height }, '*');
+      }, 100);
+    }
+
+    // Luister naar resize events om iframe hoogte kloppend te houden
+    window.addEventListener('resize', notifyEmbedResize);
+
+    // Start
+    loadEvents();
+  </script>
+</body>
+</html>
