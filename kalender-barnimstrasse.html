@@ -8,6 +8,7 @@
     :root {
       --accent: #5bb1c0;
       --accent-hover: #4a9dae;
+      --accent-light: #eaf6f8;
       --bg: transparent;
       --card-bg: #ffffff;
       --text-main: #1f2937;
@@ -25,7 +26,7 @@
     }
 
     .container {
-      max-width: 1200px;
+      max-width: 800px;
       margin: 0 auto;
       padding: 16px;
     }
@@ -40,62 +41,98 @@
     }
 
     .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
     }
 
     .card {
       background: var(--card-bg);
       border: 1px solid var(--border);
       border-radius: 12px;
-      padding: 20px;
       text-decoration: none;
       color: inherit;
       display: flex;
-      flex-direction: column;
-      gap: 10px;
+      flex-direction: row;
+      align-items: stretch;
       transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
-      position: relative;
       overflow: hidden;
     }
 
-    .card::before {
-      content: "";
-      position: absolute;
-      left: 0;
-      top: 0;
-      bottom: 0;
-      width: 4px;
-      background: var(--accent);
-    }
-
     .card:hover {
-      transform: translateY(-4px);
+      transform: translateY(-3px);
       box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
       border-color: var(--accent);
     }
 
-    .card .date {
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--accent);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
+    .date-badge {
+      flex: 0 0 96px;
+      background: var(--accent-light);
+      color: var(--accent-hover);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 14px 8px;
+      border-right: 1px solid var(--border);
+      text-align: center;
     }
 
-    .card h3 {
+    .date-badge .weekday {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--accent);
+      margin-bottom: 2px;
+    }
+
+    .date-badge .day {
+      font-size: 30px;
+      font-weight: 800;
+      line-height: 1;
+      color: var(--accent-hover);
+    }
+
+    .date-badge .month {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .date-badge .time {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-main);
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px solid var(--border);
+      width: 100%;
+    }
+
+    .card-body {
+      flex: 1;
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .card-body h3 {
       margin: 0;
       font-size: 18px;
       line-height: 1.3;
     }
 
-    .card p {
+    .card-body p {
       margin: 0;
       font-size: 14px;
       color: var(--text-muted);
       line-height: 1.5;
-      flex-grow: 1;
     }
 
     .card .link-hint {
@@ -116,6 +153,19 @@
       color: var(--text-muted);
       font-size: 15px;
       padding: 20px 0;
+    }
+
+    @media (max-width: 480px) {
+      .date-badge {
+        flex: 0 0 76px;
+        padding: 10px 6px;
+      }
+      .date-badge .day {
+        font-size: 24px;
+      }
+      .card-body {
+        padding: 14px 16px;
+      }
     }
   </style>
 </head>
@@ -166,8 +216,9 @@
 
         filteredEvents.forEach(ev => {
           const startObj = new Date(ev.start);
-          const dateOptions = { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' };
-          const dateStr = startObj.toLocaleDateString('de-DE', dateOptions);
+          const weekdayStr = startObj.toLocaleDateString('de-DE', { weekday: 'short' });
+          const dayStr = startObj.toLocaleDateString('de-DE', { day: '2-digit' });
+          const monthStr = startObj.toLocaleDateString('de-DE', { month: 'short' });
           const timeStr = startObj.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
 
           // Gebruik de nieuwe korte sleutels
@@ -184,10 +235,17 @@
           }
 
           card.innerHTML = `
-            <div class="date">${dateStr} · ${timeStr} Uhr</div>
-            <h3>${title}</h3>
-            ${desc ? `<p>${desc}</p>` : ''}
-            ${url !== '#' ? `<div class="link-hint">Mehr erfahren &rarr;</div>` : ''}
+            <div class="date-badge">
+              <div class="weekday">${weekdayStr}</div>
+              <div class="day">${dayStr}</div>
+              <div class="month">${monthStr}</div>
+              <div class="time">${timeStr} Uhr</div>
+            </div>
+            <div class="card-body">
+              <h3>${title}</h3>
+              ${desc ? `<p>${desc}</p>` : ''}
+              ${url !== '#' ? `<div class="link-hint">Mehr erfahren &rarr;</div>` : ''}
+            </div>
           `;
 
           grid.appendChild(card);
