@@ -15,7 +15,6 @@
       --border: #e5e7eb;
     }
 
-    /* Reset & Basis voor embeds */
     html, body {
       margin: 0;
       padding: 0;
@@ -40,14 +39,12 @@
       padding-bottom: 6px;
     }
 
-    /* Grid layout */
     .grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
       gap: 20px;
     }
 
-    /* Card Styling */
     .card {
       background: var(--card-bg);
       border: 1px solid var(--border);
@@ -98,7 +95,7 @@
       font-size: 14px;
       color: var(--text-muted);
       line-height: 1.5;
-      flex-grow: 1; /* Pushes potential empty space down */
+      flex-grow: 1;
     }
 
     .card .link-hint {
@@ -115,7 +112,6 @@
       color: var(--accent-hover);
     }
 
-    /* Statussen */
     .loading, .empty, .error {
       color: var(--text-muted);
       font-size: 15px;
@@ -133,35 +129,31 @@
   </div>
 
   <script>
-    // URL naar je gegenereerde JSON file
     const JSON_URL = 'events-we.json'; 
 
     async function loadEvents() {
       const grid = document.getElementById('events-grid');
       
       try {
-        const res = await fetch(JSON_URL + '?v=' + Date.now()); // cachebuster
+        const res = await fetch(JSON_URL + '?v=' + Date.now());
         if (!res.ok) throw new Error('Netzwerkfehler');
         const rawData = await res.json();
         
         const now = new Date();
 
-        // Filter events
+        // Filter op basis van nieuwe korte sleutel 'fg'
         const filteredEvents = rawData.filter(ev => {
-          // Check of het project "WAHR" of "TRUE" of boolean true is in Excel
-          const isProject = String(ev.frauengefaengnis || '').toUpperCase() === 'WAHR' || 
-                            String(ev.frauengefaengnis || '').toUpperCase() === 'TRUE' ||
-                            ev.frauengefaengnis === true ||
-                            ev.frauengefaengnis === '1';
+          const isProject = String(ev.fg || '').toUpperCase() === 'WAHR' || 
+                            String(ev.fg || '').toUpperCase() === 'TRUE' ||
+                            ev.fg === true ||
+                            ev.fg === '1';
                             
-          // Check of het event nog in de toekomst ligt
           const eventDate = new Date(ev.start);
           const isFuture = eventDate >= now || new Date(ev.end || eventDate) >= now;
 
           return isProject && isFuture;
         });
 
-        // Sorteer op datum (dichtstbijzijnde eerst)
         filteredEvents.sort((a, b) => new Date(a.start) - new Date(b.start));
 
         grid.innerHTML = '';
@@ -172,19 +164,17 @@
           return;
         }
 
-        // Render de kaarten
         filteredEvents.forEach(ev => {
           const startObj = new Date(ev.start);
-          
           const dateOptions = { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' };
           const dateStr = startObj.toLocaleDateString('de-DE', dateOptions);
           const timeStr = startObj.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
 
-          const title = ev.titelFrauengefaengnis || 'Veranstaltung';
-          const desc = ev.beschreibungFrauengefaengnis || '';
-          const url = ev.linkFrauengefaengnis || '#';
+          // Gebruik de nieuwe korte sleutels
+          const title = ev.titelFg || 'Veranstaltung';
+          const desc = ev.beschrFg || '';
+          const url = ev.linkFg || '#';
 
-          // Bouw het HTML element op
           const card = document.createElement(url !== '#' ? 'a' : 'div');
           card.className = 'card';
           if (url !== '#') {
@@ -206,12 +196,11 @@
         notifyEmbedResize();
 
       } catch (error) {
-        console.error("Fout bij ophalen van events:", error);
+        console.error("Fout:", error);
         grid.innerHTML = '<div class="error">Die Termine konnten leider nicht geladen werden.</div>';
       }
     }
 
-    // Handige functie om de hoogte door te geven aan het iframe-parent (als je dat gebruikt)
     function notifyEmbedResize() {
       setTimeout(() => {
         const height = document.body.scrollHeight || document.documentElement.scrollHeight;
@@ -219,10 +208,7 @@
       }, 100);
     }
 
-    // Luister naar resize events om iframe hoogte kloppend te houden
     window.addEventListener('resize', notifyEmbedResize);
-
-    // Start
     loadEvents();
   </script>
 </body>
