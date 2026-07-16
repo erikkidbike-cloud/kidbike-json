@@ -945,7 +945,40 @@
           { id: "parcours",  price: 10, labelDe: "Fahrradparcours",  labelEn: "Bike course" },
           { id: "grill",     price: 10, labelDe: "Grill",            labelEn: "Grill" },
           { id: "tisch",     price: 10, labelDe: "Tischtennisplatte",labelEn: "Table tennis" },
-        ]
+        ],
+        // Kaution-regels Weinstraße:
+        // - ≤50 pers., volledig binnen 9:00–17:30 op ma–za  -> geen Kaution
+        // - >50 pers., binnen 9:00–17:30 op ma–za           -> 200 €
+        // - >50 pers. buiten dat venster OF eind later dan 22:00 -> 500 €
+        // - alle overige gevallen                            -> 200 €
+        cautionFn(persons, start, end){
+          const p = Number(persons || 0);
+          if (!p || !start || !end) return null;
+
+          const withinDayTimes = (dt)=>{
+            const m = dt.getHours()*60 + dt.getMinutes();
+            return (m >= 9*60) && (m <= 17*60 + 30);
+          };
+          const crossesMidnight = start.toDateString() !== end.toDateString();
+          const touchesSunday = (()=>{
+            const cur = new Date(start); cur.setHours(0,0,0,0);
+            const endDay = new Date(end); endDay.setHours(23,59,59,999);
+            while(cur <= endDay){ if(cur.getDay() === 0) return true; cur.setDate(cur.getDate()+1); }
+            return false;
+          })();
+          const runsPast22 = crossesMidnight
+            || (end.getHours()*60 + end.getMinutes()) > 22*60
+            || (start.getHours()*60 + start.getMinutes()) > 22*60;
+
+          // Volledig binnen 9:00–17:30 én uitsluitend ma–za
+          const inWindow = !crossesMidnight && withinDayTimes(start) && withinDayTimes(end) && !touchesSunday;
+
+          if (runsPast22) return 500;          // loopt tot na 22:00
+          if (p > 50 && !inWindow) return 500; // >50 personen buiten het venster
+          if (p > 50) return 200;              // >50 personen binnen het venster
+          if (inWindow) return null;           // ≤50 personen binnen het venster: geen Kaution
+          return 200;                          // alle overige gevallen
+        }
       },
       WI: {
         tiers: [
@@ -1570,14 +1603,12 @@
 
     function updateSticky(){
       let stickyText = '–';
-      if (currentKey === 'WA' && CURRENT_PRICE && CURRENT_PRICE.total != null) {
+      if (CURRENT_PRICE && CURRENT_PRICE.total != null) {
         if (CURRENT_PRICE.caution) {
           stickyText = `${euro(CURRENT_PRICE.total)} + ${euro(CURRENT_PRICE.caution)} Kaution`;
         } else {
           stickyText = euro(CURRENT_PRICE.total);
         }
-      } else if (CURRENT_PRICE && CURRENT_PRICE.total != null) {
-        stickyText = euro(CURRENT_PRICE.total);
       } else if (priceValue.textContent) {
         stickyText = priceValue.textContent;
       }
@@ -1980,7 +2011,10 @@
       CURRENT_PRICE = null;
 
       const showPriceOnReq = ()=> {
-        priceValue.textContent = L.priceOnReq;
+        const depo = (typeof cfg.cautionFn === 'function') ? cfg.cautionFn(persons, start, end) : null;
+        priceValue.textContent = depo
+          ? `${L.priceOnReq} + ${euro(depo)} Kaution`
+          : L.priceOnReq;
         bdBaseLabel.textContent = (langSelect.value==='en' ? 'Base' : 'Basis');
         bdBase.textContent = '–';
         bdPersonsLabel.textContent = (langSelect.value==='en' ? 'People tier' : 'Personen-Staffel');
@@ -1988,8 +2022,14 @@
         bdTime.textContent = (langSelect.value==='en' ? '€0.00' : '0,00 €');
         bdExtras.textContent = (L.bdNoExtras || (langSelect.value==='en' ? 'none' : 'keine'));
         bdTotal.textContent = '–';
-        if (bdDepositRow) bdDepositRow.style.display = 'none';
+        if (bdDepositRow) {
+          if (depo) { bdDeposit.textContent = euro(depo); bdDepositRow.style.display = ''; }
+          else { bdDepositRow.style.display = 'none'; }
+        }
         if (bdGrandTotalRow) bdGrandTotalRow.style.display = 'none';
+        CURRENT_PRICE = depo
+          ? { currency:'EUR', total:null, caution:depo, extrasSelected:[] }
+          : null;
         priceBreakdown.style.display = 'block';
         updateSticky();
       };
@@ -2159,7 +2199,11 @@
 
       const total = basePlusPersons + timeAdd + extrasCost;
 
-      priceValue.textContent = euro(total);
+      const depo = (typeof cfg.cautionFn === 'function') ? cfg.cautionFn(persons, start, end) : null;
+
+      priceValue.textContent = depo
+        ? `${euro(total)} + ${euro(depo)} Kaution`
+        : euro(total);
       bdBaseLabel.textContent = (langSelect.value==='en' ? I18N.en.bdBase(tier.hoursLabel) : I18N.de.bdBase(tier.hoursLabel));
       bdBase.textContent = euro(base);
       bdPersonsLabel.textContent = (langSelect.value==='en' ? I18N.en.bdPersons(pplLabel) : I18N.de.bdPersons(pplLabel));
@@ -2168,8 +2212,21 @@
       bdExtras.textContent = extrasCost ? euro(extrasCost) : (L.bdNoExtras || (langSelect.value==='en' ? "none" : "keine"));
       bdTotal.textContent = euro(total);
 
-      if (bdDepositRow) bdDepositRow.style.display = 'none';
-      if (bdGrandTotalRow) bdGrandTotalRow.style.display = 'none';
+      if (bdDepositRow) {
+        if (depo) { bdDeposit.textContent = euro(depo); bdDepositRow.style.display = ''; }
+        else { bdDepositRow.style.display = 'none'; }
+      }
+
+      if (bdGrandTotalRow) {
+        if (depo) {
+          bdGrandTotalLabel.textContent = (langSelect.value==='en')
+            ? 'Total incl. deposit' : 'Summe inkl. Kaution';
+          bdGrandTotal.textContent = euro(total + depo);
+          bdGrandTotalRow.style.display = '';
+        } else {
+          bdGrandTotalRow.style.display = 'none';
+        }
+      }
 
       CURRENT_PRICE = {
         currency: 'EUR',
@@ -2182,7 +2239,8 @@
         extrasCount: checked.length + (totalBikes > 0 ? 1 : 0),
         extrasCost: Number(extrasCost),
         total: Number(total),
-        extrasSelected
+        extrasSelected,
+        caution: depo
       };
 
       priceBreakdown.style.display = 'block';
