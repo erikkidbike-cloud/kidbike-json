@@ -393,6 +393,20 @@
       font-size:13px;
       white-space:pre-wrap;
     }
+    /* Compactere verticale spacing in de boekingspopup (zodat de knop past) */
+    #bookingModal{padding:12px}
+    #bookingModal h3{margin-bottom:6px}
+    #bookingModal .field{margin-bottom:4px}
+    #bookingModal .field label{margin:0 0 2px 0}
+    #bookingModal .form-grid{gap:8px}
+    #bookingModal .field input,
+    #bookingModal .field select,
+    #bookingModal .field textarea{min-height:36px;padding:6px 10px}
+    #bookingModal .alert{margin:4px 0 6px}
+    #bookingModal #priceHint{margin-top:2px}
+    #bookingModal .breakdown{margin-top:4px}
+    #bookingModal .modal-actions{margin-top:6px}
+    #bookingModal .sticky-bar{padding:6px 12px}
   </style>
 </head>
 <body>
@@ -476,7 +490,13 @@
             </div>
 
             <div class="field field--persons">
-              <label id="labelPersons">Anzahl Personen *</label>
+              <label style="display:flex;align-items:center;">
+                <span id="labelPersons">Anzahl Personen *</span>
+                <span class="tooltip-wrap" id="personsInfoWrap">
+                  <span id="personsInfo" class="tooltip-icon" role="button" aria-haspopup="dialog" aria-expanded="false" tabindex="0">?</span>
+                  <div id="personsInfoPopover" class="popover" role="dialog" aria-hidden="true"></div>
+                </span>
+              </label>
               <input id="fPersons" name="persons" type="number" min="1" step="1" placeholder="z. B. 30" required aria-describedby="err-persons">
               <div class="error-msg" id="err-persons">Bitte Anzahl eingeben</div>
             </div>
@@ -786,6 +806,7 @@
         bdNoExtras: "keine",
         priceOnReq: "Preis nach Vereinbarung",
         bdTimeInfo: "35 € Zuschlag, wenn Beginn und/oder Ende nicht zwischen 9:00–17:30 Uhr liegen oder wenn der Zeitraum (auch teilweise) am Wochenende liegt.",
+        personsInfo: "Die angegebene Personenzahl ist Grundlage für Planung und Nutzungsentgelt und bis zur Veranstaltung anpassbar. Kommen unangemeldet mehr Gäste, fällt ein Aufschlag an.",
         successTitle: "Anfrage gesendet",
         successLead: "Vielen Dank. Ihre Anfrage ist noch nicht verbindlich. Wir prüfen die Angaben und melden uns per E-Mail. Sie erhalten dann die Nutzungsvereinbarung sowie weitere Hinweise.",
         successBack: "Zurück zum Kalender",
@@ -867,6 +888,7 @@
         bdNoExtras: "none",
         priceOnReq: "Price on request",
         bdTimeInfo: "€35 surcharge if start AND end are not between 9:00–17:30, or if any part of the booking falls on a weekend.",
+        personsInfo: "The number you enter is the basis for planning and the fee, and can be adjusted until the event. If more guests attend unannounced, a surcharge applies.",
         successTitle: "Request submitted",
         successLead: "Thank you. Your request is not yet binding. We will review the details and contact you by email. You will then receive the usage agreement and further instructions.",
         successBack: "Back to calendar",
@@ -1186,6 +1208,10 @@
     const timeInfoIcon = document.getElementById('timeInfo');
     const timePopover  = document.getElementById('timeInfoPopover');
 
+    const personsInfoIcon = document.getElementById('personsInfo');
+    const personsPopover  = document.getElementById('personsInfoPopover');
+    const personsInfoWrap = document.getElementById('personsInfoWrap');
+
     const successMsg  = document.getElementById('successMsg');
     const successText = document.getElementById('successText');
     const successOverlay = document.getElementById('successOverlay');
@@ -1283,6 +1309,7 @@
       renderExtrasForSchool(currentKey || 'WE');
       updatePricePreview();
       timePopover.textContent = L.bdTimeInfo;
+      if (personsPopover) personsPopover.textContent = L.personsInfo;
       renderStartCards();
       renderSchoolSelectOptions();
     }
@@ -1715,6 +1742,7 @@
       if (bikesWrapper) {
         bikesWrapper.style.display = (currentKey === 'WE') ? 'block' : 'none';
       }
+      if (personsInfoWrap) personsInfoWrap.style.display = (currentKey === 'WE') ? 'inline-flex' : 'none';
       fBikesYes.dataset.touched = '0';
       fBikesNo.dataset.touched = '0';
       fBikesYes.checked = false;
@@ -1748,6 +1776,7 @@
       priceValue.textContent = '–';
       priceBreakdown.style.display = 'none';
       hidePopover();
+      hidePersonsPopover();
       if(untrap) untrap();
     }
 
@@ -2264,6 +2293,20 @@
     document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') hidePopover(); if((e.key === 'Enter' || e.key === ' ') && document.activeElement === timeInfoIcon){ e.preventDefault(); togglePopover(); } });
     timeInfoIcon.addEventListener('click', (e)=>{ e.stopPropagation(); togglePopover(); });
     timeInfoIcon.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); togglePopover(); } });
+
+    /* ===== Popover help (Personen / Weinstraße) ===== */
+    function showPersonsPopover(){
+      personsPopover.classList.add('show'); personsPopover.setAttribute('aria-hidden','false'); personsInfoIcon.setAttribute('aria-expanded','true');
+      const rect = personsPopover.getBoundingClientRect();
+      if(rect.right > window.innerWidth - 12){ personsPopover.style.left='auto'; personsPopover.style.right='0'; }
+      else { personsPopover.style.left='0'; personsPopover.style.right='auto'; }
+    }
+    function hidePersonsPopover(){ personsPopover.classList.remove('show'); personsPopover.setAttribute('aria-hidden','true'); personsInfoIcon.setAttribute('aria-expanded','false'); }
+    function togglePersonsPopover(){ personsPopover.classList.contains('show') ? hidePersonsPopover() : showPersonsPopover(); }
+    personsInfoIcon.addEventListener('click', (e)=>{ e.stopPropagation(); togglePersonsPopover(); });
+    personsInfoIcon.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); togglePersonsPopover(); } });
+    document.addEventListener('click', (e)=>{ if(!personsPopover.classList.contains('show')) return; if(!e.target.closest('.tooltip-wrap')) hidePersonsPopover(); });
+    document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') hidePersonsPopover(); });
 
     /* ===== Success overlay ===== */
     function showSuccessOverlay(payload){
