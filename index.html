@@ -494,7 +494,7 @@
                 <span id="labelPersons">Anzahl Personen *</span>
                 <span class="tooltip-wrap" id="personsInfoWrap">
                   <span id="personsInfo" class="tooltip-icon" role="button" aria-haspopup="dialog" aria-expanded="false" tabindex="0">?</span>
-                  <div id="personsInfoPopover" class="popover" role="dialog" aria-hidden="true"></div>
+                  <div id="personsInfoPopover" class="popover" role="dialog" aria-hidden="true">Die angegebene Personenzahl ist Grundlage für Planung und Nutzungsentgelt und bis zur Veranstaltung anpassbar. Kommen unangemeldet mehr Gäste, fällt ein Aufschlag an.</div>
                 </span>
               </label>
               <input id="fPersons" name="persons" type="number" min="1" step="1" placeholder="z. B. 30" required aria-describedby="err-persons">
@@ -1296,7 +1296,7 @@
       btnBackToCalendar.textContent = L.successBack;
 
       startTitle.textContent = L.startTitle;
-      startLead.textContent = L.startLead;
+      if (startLead) startLead.textContent = L.startLead;
       startHintBelow.textContent = L.startHint;
 
       // WI-specific texts
