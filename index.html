@@ -954,6 +954,27 @@
     /* ===== Sluitingstijd (alleen Weinstraße) ===== */
     const CLOSING_SCHOOLS = { WE: 22 };  // key -> sluitingsuur
 
+    /* Hoe ver het rooster maximaal mag doorlopen ná middernacht (28 = tot 04:00).
+       Evenementen die over middernacht heen lopen blijven zo volledig zichtbaar. */
+    const GRID_MAX_END_HOUR = 28;
+
+    /* Bepaalt de onderkant van het rooster: standaard zoals voorheen
+       (24:00 met sluitingsregel, anders 22:00), maar groeit mee wanneer er
+       daadwerkelijk evenementen zijn die tot ná middernacht doorlopen. */
+    function computeGridEndHour(key, events){
+      const base = hasClosingLimit(key) ? 24 : 22;
+      let maxH = base;
+      (events || []).forEach(ev => {
+        const s = (ev.start instanceof Date) ? ev.start : new Date(ev.start);
+        const e = (ev.end   instanceof Date) ? ev.end   : new Date(ev.end);
+        if (isNaN(s.getTime()) || isNaN(e.getTime())) return;
+        const dayStart = new Date(s); dayStart.setHours(0,0,0,0);
+        const h = Math.ceil((e - dayStart) / 3600000);
+        if (h > maxH) maxH = h;
+      });
+      return Math.max(base, Math.min(GRID_MAX_END_HOUR, maxH));
+    }
+
     function closingHour(key){
       const k = (key === undefined) ? currentKey : key;
       return (k && CLOSING_SCHOOLS[k] !== undefined) ? CLOSING_SCHOOLS[k] : null;
@@ -1113,6 +1134,7 @@
     let currentHolds = [];
     let wasSubmitted = false;
     let lateClampNotice = false;
+    let currentGridEndHour = 24;
     const availability = {};
     let CURRENT_PRICE = null;
     let untrap = null;
@@ -1545,6 +1567,8 @@
       if (!sameDay) return true;                                        // over middernacht = altijd te laat
       if ((start.getHours()*60 + start.getMinutes()) >= limitMin) return true;
       if ((end.getHours()*60   + end.getMinutes())   >  limitMin) return true;
+      // nachtelijke uren (vóór 6:00) horen bij het gesloten venster
+      if ((start.getHours()*60 + start.getMinutes()) < 6*60) return true;
       return false;
     }
 
@@ -1578,7 +1602,8 @@
       let guard = 0;
       while(cur < stop && guard++ < 60){
         const s = new Date(cur); s.setHours(ch,0,0,0);
-        const e = new Date(cur); e.setDate(e.getDate()+1); e.setHours(0,0,0,0);
+        // loopt door tot de onderkant van het rooster (bij 24 = middernacht, zoals voorheen)
+        const e = new Date(cur); e.setHours(currentGridEndHour,0,0,0);
         calendar.addEvent({
           start: s,
           end: e,
@@ -2071,14 +2096,17 @@
         }
       } catch(_) {}
 
+      currentGridEndHour = computeGridEndHour(key, busyEvents.concat(holdEvents));
+
       calendar = new FullCalendar.Calendar(calendarEl, {
         initialView: (calendarEl.clientWidth || window.innerWidth) < 700 ? 'timeGridDay' : 'timeGridWeek',
         firstDay: 1,
         locale: langSelect.value === 'en' ? 'en-gb' : 'de',
         timeZone: 'local',
         slotMinTime: '12:00:00',
-        // Weinstraße: raster tot 24:00 zodat het "Geschlossen"-blok zichtbaar is
-        slotMaxTime: hasClosingLimit(key) ? '24:00:00' : '22:00:00',
+        // Weinstraße: raster tot 24:00 zodat het "Geschlossen"-blok zichtbaar is;
+        // groeit automatisch mee als er evenementen tot ná middernacht doorlopen
+        slotMaxTime: String(currentGridEndHour).padStart(2,'0') + ':00:00',
         height: 'auto',
         expandRows: true,
         allDaySlot: false,
