@@ -159,7 +159,7 @@
       color:#fff !important;
     }
 
-    /* Geschlossen-Band (ab 22:00, nur Weinstraße) */
+    /* Geschlossen-Band (ab 01:00 nachts, nur Weinstraße) */
     .fc-bg-event.closed-late{
       background: repeating-linear-gradient(45deg,#e5e7eb 0 8px,#d1d5db 8px 16px) !important;
       opacity: 1 !important;
@@ -796,9 +796,9 @@
         overlapWarning: "In diesem Zeitraum liegt bereits eine Reservierung vor. Eine Buchung ist leider nicht möglich.",
         conflict: "Ungültige Zeit (Ende vor Beginn) oder Zeitraum zu kurz (min. 30 Min).",
         shortTermWarning: "<strong>Kurzfristige Anfrage:</strong> Da Ihr gewünschter Termin in weniger als 7 Tagen liegt, können wir nicht garantieren, dass wir Ihre Anfrage rechtzeitig bearbeiten können.",
-        lateBlocked: "Veranstaltungen an der Verkehrsschule Weinstraße können nur bis 22:00 Uhr stattfinden. Bitte wählen Sie ein Ende spätestens um 22:00 Uhr.",
-        lateClamped: "Hinweis: An der Verkehrsschule Weinstraße enden Veranstaltungen spätestens um 22:00 Uhr. Die gewählte Zeit wurde entsprechend angepasst.",
-        closedLabel: "Ab 22:00 Uhr geschlossen",
+        lateBlocked: "Veranstaltungen an der Verkehrsschule Weinstraße können nur bis 01:00 Uhr nachts stattfinden. Bitte wählen Sie ein Ende spätestens um 01:00 Uhr.",
+        lateClamped: "Hinweis: An der Verkehrsschule Weinstraße enden Veranstaltungen spätestens um 01:00 Uhr nachts. Die gewählte Zeit wurde entsprechend angepasst.",
+        closedLabel: "Ab 01:00 Uhr geschlossen",
         priceTitle: "Vorläufige Preisindikation:",
         priceHint: " (unverbindlich; endgültige Bestätigung und ggf. Anpassungen vorbehalten)",
         termsSummary: "Wesentliche Bedingungen (Kurzfassung)",
@@ -881,9 +881,9 @@
         overlapWarning: "There is already a reservation in this time slot. Booking is not possible.",
         conflict: "Invalid time (end before start) or too short (min. 30 mins).",
         shortTermWarning: "<strong>Short-notice request:</strong> As your requested time is in less than 7 days, we cannot guarantee timely processing.",
-        lateBlocked: "Events at the Weinstraße traffic school can only take place until 22:00. Please choose an end time no later than 22:00.",
-        lateClamped: "Note: At the Weinstraße traffic school events end at 22:00 at the latest. The selected time has been adjusted accordingly.",
-        closedLabel: "Closed from 22:00",
+        lateBlocked: "Events at the Weinstraße traffic school can only take place until 01:00 at night. Please choose an end time no later than 01:00.",
+        lateClamped: "Note: At the Weinstraße traffic school events end at 01:00 at night at the latest. The selected time has been adjusted accordingly.",
+        closedLabel: "Closed from 01:00",
         priceTitle: "Preliminary price indication:",
         priceHint: " (non-binding; subject to confirmation and possible adjustments)",
         termsSummary: "Key conditions (short version)",
@@ -952,17 +952,21 @@
     const FORCE_OFFLINE = {};
 
     /* ===== Sluitingstijd (alleen Weinstraße) ===== */
-    const CLOSING_SCHOOLS = { WE: 22 };  // key -> sluitingsuur
+    /* key -> sluitingsuur, geteld vanaf middernacht van de openingsdag.
+       25 = 01:00 's nachts (de dag erna). De openingsdag loopt van 06:00 tot dit uur. */
+    const CLOSING_SCHOOLS = { WE: 25 };
+    const OPENING_HOUR = 6;
 
     /* Hoe ver het rooster maximaal mag doorlopen ná middernacht (28 = tot 04:00).
        Evenementen die over middernacht heen lopen blijven zo volledig zichtbaar. */
     const GRID_MAX_END_HOUR = 28;
 
-    /* Bepaalt de onderkant van het rooster: standaard zoals voorheen
-       (24:00 met sluitingsregel, anders 22:00), maar groeit mee wanneer er
-       daadwerkelijk evenementen zijn die tot ná middernacht doorlopen. */
+    /* Bepaalt de onderkant van het rooster: met sluitingsregel tot één uur ná
+       de sluitingstijd (26:00 = 02:00) zodat het "Geschlossen"-blok zichtbaar is,
+       anders 22:00. Groeit mee wanneer er daadwerkelijk evenementen zijn die tot
+       ná middernacht doorlopen. */
     function computeGridEndHour(key, events){
-      const base = hasClosingLimit(key) ? 24 : 22;
+      const base = hasClosingLimit(key) ? (closingHour(key) + 1) : 22;
       let maxH = base;
       (events || []).forEach(ev => {
         const s = (ev.start instanceof Date) ? ev.start : new Date(ev.start);
@@ -1025,7 +1029,7 @@
         // - ≤50 pers., volledig binnen 9:00–17:30 op ma–za  -> geen Kaution
         // - >50 pers., binnen 9:00–17:30 op ma–za           -> 200 €
         // - >50 pers. buiten dat venster OF eind later dan 22:00 -> 500 €
-        //   (die laatste tak is sinds de 22:00-sluiting niet meer bereikbaar voor nieuwe boekingen)
+        //   (met de sluiting om 01:00 zijn zulke late boekingen weer mogelijk)
         // - alle overige gevallen                            -> 200 €
         cautionFn(persons, start, end){
           const p = Number(persons || 0);
@@ -1134,7 +1138,7 @@
     let currentHolds = [];
     let wasSubmitted = false;
     let lateClampNotice = false;
-    let currentGridEndHour = 24;
+    let currentGridEndHour = 26;
     const availability = {};
     let CURRENT_PRICE = null;
     let untrap = null;
@@ -1558,17 +1562,26 @@
     function minStartDate(){ const d=new Date(); d.setDate(d.getDate()+7); d.setHours(0,0,0,0); return d; }
     function overlaps(aStart,aEnd,bStart,bEnd){ return (aStart < bEnd) && (aEnd > bStart); }
 
-    /* Sluitingsregel: einde mag niet ná het sluitingsuur liggen, start niet erna/erop */
+    /* Middernacht van de openingsdag waar dit tijdstip bij hoort:
+       alles vóór 06:00 telt nog mee met de vorige kalenderdag. */
+    function openingDayStart(dt){
+      const d = new Date(dt); d.setHours(0,0,0,0);
+      if (dt.getHours() < OPENING_HOUR) d.setDate(d.getDate()-1);
+      return d;
+    }
+
+    /* Sluitingsregel: einde mag niet ná het sluitingsuur liggen, start niet erna/erop.
+       Het sluitingsuur mag over middernacht heen lopen (25 = 01:00 's nachts). */
     function violatesClosing(start, end){
       const ch = closingHour();
       if (ch === null || !start || !end) return false;
       const limitMin = ch * 60;
-      const sameDay = start.toDateString() === end.toDateString();
-      if (!sameDay) return true;                                        // over middernacht = altijd te laat
-      if ((start.getHours()*60 + start.getMinutes()) >= limitMin) return true;
-      if ((end.getHours()*60   + end.getMinutes())   >  limitMin) return true;
-      // nachtelijke uren (vóór 6:00) horen bij het gesloten venster
-      if ((start.getHours()*60 + start.getMinutes()) < 6*60) return true;
+      const dayStart = openingDayStart(start);
+      const sMin = (start - dayStart) / 60000;
+      const eMin = (end   - dayStart) / 60000;
+      if (sMin < OPENING_HOUR*60) return true;   // vóór openingstijd
+      if (sMin >= limitMin)       return true;   // start op/na sluitingstijd
+      if (eMin >  limitMin)       return true;   // eind ná sluitingstijd
       return false;
     }
 
@@ -1577,7 +1590,8 @@
       const ch = closingHour();
       if (ch === null || !start || !end) return { start, end, clamped:false };
       let s = new Date(start), e = new Date(end), clamped = false;
-      const limit = new Date(s); limit.setHours(ch, 0, 0, 0);
+      // setHours vangt uren > 24 op: 25 wordt 01:00 van de volgende dag
+      const limit = openingDayStart(s); limit.setHours(ch, 0, 0, 0);
       if (e > limit){ e = new Date(limit); clamped = true; }
       if ((e - s) < 30*60000){ s = new Date(e.getTime() - DEFAULT_TAP_MINUTES*60000); clamped = true; }
       return { start:s, end:e, clamped };
@@ -1601,8 +1615,8 @@
       const stop = new Date(view.activeEnd);
       let guard = 0;
       while(cur < stop && guard++ < 60){
-        const s = new Date(cur); s.setHours(ch,0,0,0);
-        // loopt door tot de onderkant van het rooster (bij 24 = middernacht, zoals voorheen)
+        const s = new Date(cur); s.setHours(ch,0,0,0);   // 25 -> 01:00 van de volgende dag
+        // loopt door tot de onderkant van het rooster (bij 26 = 02:00 van de volgende dag)
         const e = new Date(cur); e.setHours(currentGridEndHour,0,0,0);
         calendar.addEvent({
           start: s,
@@ -2104,7 +2118,7 @@
         locale: langSelect.value === 'en' ? 'en-gb' : 'de',
         timeZone: 'local',
         slotMinTime: '12:00:00',
-        // Weinstraße: raster tot 24:00 zodat het "Geschlossen"-blok zichtbaar is;
+        // Weinstraße: raster tot 02:00 zodat het "Geschlossen"-blok vanaf 01:00 zichtbaar is;
         // groeit automatisch mee als er evenementen tot ná middernacht doorlopen
         slotMaxTime: String(currentGridEndHour).padStart(2,'0') + ':00:00',
         height: 'auto',
