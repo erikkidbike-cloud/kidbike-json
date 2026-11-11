@@ -280,6 +280,15 @@
     .success-actions{ display:flex; gap:10px; justify-content:flex-end; margin-top:16px; }
     .success-actions .btn{ min-width:160px; }
 
+    /* ==== Umzug: Weinstraße bucht im neuen System (Radar) ==== */
+    .moving-overlay{position:fixed;inset:0;z-index:130;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;padding:20px;}
+    .moving-card{width:min(520px, 96vw);background:#fff;color:#0f172a;border:1px solid var(--border);border-radius:14px;padding:22px;box-shadow:0 24px 80px rgba(0,0,0,0.18);text-align:center;}
+    .moving-card h2{margin:0 0 8px;font-size:20px;}
+    .moving-card p{margin:6px 0;line-height:1.5;color:#374151;}
+    .moving-spinner{width:28px;height:28px;margin:14px auto 6px;border:3px solid #e5e7eb;border-top-color:var(--brand);border-radius:50%;animation:moving-spin .9s linear infinite;}
+    @keyframes moving-spin{to{transform:rotate(360deg);}}
+    @media (prefers-reduced-motion: reduce){.moving-spinner{animation:none;}}
+    .moving-card a{color:var(--brand);font-weight:600;}
     .start-overlay{position:fixed;inset:0;z-index:110;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;padding:20px;}
     .start-card{width:min(1100px, 96vw);background:#fff;border:1px solid var(--border);border-radius:14px;padding:22px;box-shadow:0 24px 80px rgba(0,0,0,0.18); max-height: 96vh; overflow-y: auto;}
     .start-card h2{margin:0 0 8px;font-size:22px;}
@@ -437,6 +446,15 @@
       <div class="success-actions">
         <button class="btn" id="btnBackToCalendar">Zurück zum Kalender</button>
       </div>
+    </div>
+  </div>
+
+  <div id="movingOverlay" class="moving-overlay" role="dialog" aria-modal="true" aria-labelledby="movingTitle">
+    <div class="moving-card">
+      <h2 id="movingTitle"></h2>
+      <p id="movingText"></p>
+      <div class="moving-spinner" aria-hidden="true"></div>
+      <p><a id="movingLink" href="#"></a></p>
     </div>
   </div>
 
@@ -950,6 +968,40 @@
       WI: { name: "Verkehrsschule Wiener Straße",     short:"Wiener Straße",  file: "events-wi.json", address: "Wiener Str. 59c, 10999 Berlin", coords: [52.4967, 13.4363] }
     };
     const FORCE_OFFLINE = {};
+
+    /* ===== Umzug ins neue Buchungssystem (Radar) =====
+       Standorte, die schon im neuen System gebucht werden. Wer einen davon
+       wählt (Karte, Kachel, Auswahlfeld oder ?school= in der Adresse), wird
+       im selben iframe zum Radar-Widget weitergeleitet; die Seite auf
+       kidbike.de passt die Höhe über dieselbe 'embed-size'-Nachricht an.
+       Zurücknehmen (Rückfall): die Liste leeren. Wassertorplatz und Wiener
+       Straße bleiben hier, bis sie selbst umziehen. */
+    const RADAR_WIDGET_URL = 'https://radar.kidbike.de/widget/booking';
+    const MOVED_TO_RADAR = ['WE'];
+    const MOVE_DELAY_MS = 1200;
+
+    function radarUrlFor(key){
+      const lang = (typeof langSelect !== 'undefined' && langSelect.value === 'en') ? 'en' : 'de';
+      return `${RADAR_WIDGET_URL}?school=${encodeURIComponent(key)}${lang === 'en' ? '&lang=en' : ''}`;
+    }
+
+    /* Kurz sagen, was passiert, dann im selben Fenster (dem iframe) weiter. */
+    function goToRadar(key){
+      const en = (typeof langSelect !== 'undefined' && langSelect.value === 'en');
+      const name = SCHOOLS[key]?.name || key;
+      const url = radarUrlFor(key);
+      const overlay = document.getElementById('movingOverlay');
+      document.getElementById('movingTitle').textContent = name;
+      document.getElementById('movingText').textContent = en
+        ? 'This traffic school is now booked in our new booking system. One moment, we are taking you there …'
+        : 'Diese Verkehrsschule reservieren Sie jetzt in unserem neuen Buchungssystem. Einen Moment, wir leiten Sie weiter …';
+      const link = document.getElementById('movingLink');
+      link.href = url;
+      link.textContent = en ? 'Continue now' : 'Gleich weiter';
+      if (startOverlay) startOverlay.style.display = 'none';
+      overlay.style.display = 'flex';
+      setTimeout(() => { window.location.assign(url); }, MOVE_DELAY_MS);
+    }
 
     /* ===== Sluitingstijd (alleen Weinstraße) ===== */
     /* key -> sluitingsuur, geteld vanaf middernacht van de openingsdag.
@@ -1492,9 +1544,17 @@
       
       if (!startMapObj && window.L) {
         startMapObj = window.L.map('startMap').setView([52.505, 13.42], 12);
-        window.L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-          attribution: '&copy; OSM contributors'
+        // OpenStreetMap-Kacheln über den Server des neuen Systems (Radar): die
+        // Carto-Kacheln verlangen inzwischen einen Schlüssel und zeigten nur
+        // noch „API KEY REQUIRED". Der Radar-Server liefert Berlin in den
+        // Zoomstufen 10–17, daher die Grenzen der Karte.
+        window.L.tileLayer('https://radar.kidbike.de/api/map-tile/{z}/{x}/{y}.png', {
+          minZoom: 10,
+          maxZoom: 17,
+          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>'
         }).addTo(startMapObj);
+        startMapObj.setMinZoom(10);
+        startMapObj.setMaxBounds([[52.30, 12.90], [52.70, 13.90]]);
       }
 
       for(const key of Object.keys(SCHOOLS)){
@@ -2074,6 +2134,7 @@
     });
 
     async function loadCalendar(key){
+      if (MOVED_TO_RADAR.includes(key)) { goToRadar(key); return; }
       if(!availability[key]?.ok) return;
       currentKey = key;
       calendarLoading.style.display = 'block';
@@ -2690,8 +2751,25 @@
     (async function init(){
       logoImg.style.display = 'block';
       document.getElementById('calendarLoading').firstChild.nodeValue = (I18N[langSelect.value]||I18N.de).loadingCalendar;
+      // ?lang=en (auch beim Zurückkommen aus dem neuen System)
+      const qs = new URLSearchParams(window.location.search);
+      if (qs.get('lang') === 'en') langSelect.value = 'en';
       await discoverSchools();
       applyI18n();
+      // ?school=WA: direkt diese Schule, ohne Auswahlfenster — so landet, wer
+      // im neuen System Wassertorplatz oder Wiener Straße wählt, gleich hier.
+      const wanted = (qs.get('school') || '').toUpperCase();
+      if (SCHOOLS[wanted]) {
+        if (MOVED_TO_RADAR.includes(wanted)) {
+          goToRadar(wanted);
+        } else if (availability[wanted]?.ok) {
+          currentKey = wanted;
+          startOverlay.style.display = 'none';
+          renderSchoolSelectOptions();
+          schoolSelect.value = wanted;
+          loadCalendar(wanted);
+        }
+      }
       window.addEventListener('resize', () => applyResponsiveView());
       document.body.classList.toggle('touch', isTouchDevice());
     })();
